@@ -1,0 +1,32 @@
+---
+import type { Locale } from '@accessiblewebsite/shared';
+import { routePath } from '../../i18n/routes';
+import { t } from '../../i18n';
+import LanguageSwitcher from './LanguageSwitcher.astro';
+
+interface Props {
+  locale: Locale;
+  currentPath: string;
+}
+
+const { locale, currentPath } = Astro.props;
+const strings = t(locale);
+---
+
+<header class="border-b border-ink-200 bg-white/80 backdrop-blur dark:border-ink-800 dark:bg-ink-900/80">
+  <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
+    <a href={routePath('home', locale)} class="text-lg font-semibold tracking-tight">
+      {strings.meta.siteName}
+    </a>
+    <nav aria-label={strings.nav.home}>
+      <ul class="flex items-center gap-4 text-sm">
+        <li><a href={routePath('pricing', locale)} class="hover:underline">{strings.nav.pricing}</a></li>
+        <li><a href={routePath('methodology', locale)} class="hover:underline">{strings.nav.methodology}</a></li>
+        <li><a href={routePath('remediation', locale)} class="hover:underline">{strings.nav.remediation}</a></li>
+        <li><a href={routePath('verifiedIndex', locale)} class="hover:underline">{strings.nav.directory}</a></li>
+        <li><a href={routePath('login', locale)} class="hover:underline">{strings.nav.login}</a></li>
+        <li><LanguageSwitcher locale={locale} currentPath={currentPath} /></li>
+      </ul>
+    </nav>
+  </div>
+</header>

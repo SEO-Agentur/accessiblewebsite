@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light dark;
+    --focus-ring: 0 0 0 3px rgb(15 139 94 / 0.45);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    font-family: theme('fontFamily.sans');
+    background: theme('colors.ink.50');
+    color: theme('colors.ink.900');
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    body {
+      background: theme('colors.ink.900');
+      color: theme('colors.ink.50');
+    }
+  }
+
+  /* Visible focus indicator on EVERYTHING focusable. WCAG 2.4.7. */
+  *:focus-visible {
+    outline: 3px solid theme('colors.accent.500');
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Skip link — visible only when focused */
+  .skip-link {
+    position: absolute;
+    top: -100px;
+    left: 0;
+    padding: 0.75rem 1rem;
+    background: theme('colors.ink.900');
+    color: theme('colors.ink.50');
+    z-index: 100;
+    text-decoration: underline;
+  }
+  .skip-link:focus {
+    top: 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

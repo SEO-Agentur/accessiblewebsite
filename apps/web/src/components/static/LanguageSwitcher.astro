@@ -1,0 +1,39 @@
+---
+import type { Locale } from '@accessiblewebsite/shared';
+import {
+  alternatePath,
+  domainForLocale,
+} from '../../i18n/routes';
+import { t } from '../../i18n';
+
+interface Props {
+  locale: Locale;
+  currentPath: string;
+}
+
+const { locale, currentPath } = Astro.props;
+const strings = t(locale);
+const alt = alternatePath(currentPath, locale);
+
+// If the current page has no equivalent on the other domain (e.g. a blog post
+// that's EN-only), we still offer the other domain's homepage rather than a
+// dead link. hreflang for THIS specific URL would be omitted by the page itself.
+const otherLocale: Locale = locale === 'en' ? 'de' : 'en';
+const otherDomain = domainForLocale(otherLocale);
+const otherPath = alt !== null ? alt.path : '/';
+const otherUrl = `https://${otherDomain}${otherPath}`;
+---
+
+<a
+  href={otherUrl}
+  hreflang={otherLocale}
+  lang={otherLocale}
+  class="inline-flex items-center gap-1.5 rounded px-2 py-1 text-sm font-medium text-ink-600 hover:text-ink-900 dark:text-ink-200 dark:hover:text-ink-50"
+  aria-label={`${strings.nav.switchLanguage}: ${strings.nav.otherLanguageLabel}`}
+>
+  <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <circle cx="12" cy="12" r="10" />
+    <path d="M2 12h20M12 2a15.3 15.3 0 0 1 0 20M12 2a15.3 15.3 0 0 0 0 20" />
+  </svg>
+  <span>{strings.nav.otherLanguage}</span>
+</a>

@@ -1,0 +1,21 @@
+{
+  "name": "accessiblewebsite",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Bilingual WCAG 2.2 AA accessibility scanning + remediation platform. EN: accessiblewebsite.net / DE: barrierefreiewebseite.net",
+  "packageManager": "pnpm@9.0.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "pnpm -r --filter=./packages/* run build && pnpm -r --filter=./apps/* run build",
+    "dev:web": "pnpm --filter @accessiblewebsite/web dev",
+    "dev:scanner": "pnpm --filter @accessiblewebsite/scanner dev",
+    "typecheck": "pnpm -r run typecheck",
+    "db:generate": "pnpm --filter @accessiblewebsite/db generate",
+    "db:migrate": "pnpm --filter @accessiblewebsite/db migrate"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  }
+}

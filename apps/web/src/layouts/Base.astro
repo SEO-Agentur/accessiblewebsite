@@ -1,0 +1,64 @@
+---
+import type { Locale } from '@accessiblewebsite/shared';
+import { alternatePath, domainForLocale } from '../i18n/routes';
+import { t } from '../i18n';
+import SiteHeader from '../components/static/SiteHeader.astro';
+import SiteFooter from '../components/static/SiteFooter.astro';
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description } = Astro.props;
+const locale: Locale = Astro.locals.locale;
+const strings = t(locale);
+const currentPath = Astro.url.pathname || '/';
+
+const canonicalDomain = domainForLocale(locale);
+const canonicalUrl = `https://${canonicalDomain}${currentPath}`;
+
+const alt = alternatePath(currentPath, locale);
+const enHref =
+  locale === 'en' ? canonicalUrl : alt ? `https://${domainForLocale('en')}${alt.path}` : null;
+const deHref =
+  locale === 'de' ? canonicalUrl : alt ? `https://${domainForLocale('de')}${alt.path}` : null;
+
+const metaDescription = description ?? strings.meta.defaultDescription;
+---
+
+<!doctype html>
+<html lang={locale}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={metaDescription} />
+
+    <link rel="canonical" href={canonicalUrl} />
+    {enHref !== null && <link rel="alternate" hreflang="en" href={enHref} />}
+    {deHref !== null && <link rel="alternate" hreflang="de" href={deHref} />}
+    {enHref !== null && <link rel="alternate" hreflang="x-default" href={enHref} />}
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={metaDescription} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:locale" content={locale === 'en' ? 'en_US' : 'de_DE'} />
+    {locale === 'en' && <meta property="og:locale:alternate" content="de_DE" />}
+    {locale === 'de' && <meta property="og:locale:alternate" content="en_US" />}
+
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <meta name="theme-color" content="#0f8b5e" />
+  </head>
+  <body class="min-h-screen flex flex-col">
+    <a href="#main" class="skip-link">{strings.nav.skipToContent}</a>
+    <SiteHeader locale={locale} currentPath={currentPath} />
+    <main id="main" class="flex-1">
+      <slot />
+    </main>
+    <SiteFooter locale={locale} />
+  </body>
+</html>

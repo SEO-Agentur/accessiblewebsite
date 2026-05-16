@@ -1,0 +1,46 @@
+{
+  "meta": {
+    "siteName": "Barrierefreiewebseite",
+    "tagline": "WCAG 2.2 AA — Prüfung, Siegel und Umsetzung",
+    "defaultDescription": "Prüfen Sie Ihre Webseite auf WCAG 2.2 AA Konformität. Erhalten Sie ein verifizierbares Barrierefreiheits-Siegel. Lassen Sie Ihre Webseite von zertifizierten Fachkräften umsetzen."
+  },
+  "nav": {
+    "skipToContent": "Zum Hauptinhalt springen",
+    "home": "Startseite",
+    "pricing": "Preise",
+    "methodology": "Methodik",
+    "remediation": "Umsetzung",
+    "directory": "Verifizierte Webseiten",
+    "about": "Über uns",
+    "login": "Anmelden",
+    "signup": "Registrieren",
+    "switchLanguage": "Sprache wechseln",
+    "currentLanguage": "DE",
+    "otherLanguage": "EN",
+    "otherLanguageLabel": "English"
+  },
+  "home": {
+    "heroTitleA": "Ist Ihre Webseite",
+    "heroTitleB": "barrierefrei?",
+    "heroSubtitle": "Kostenlose WCAG 2.2 AA Prüfung. Verifizierbares Siegel. Echte Code-Korrekturen, falls Sie durchfallen — keine Overlay-Widgets, keine Abkürzungen.",
+    "scanFormLabel": "Zu prüfende Webseiten-URL",
+    "scanFormPlaceholder": "https://beispiel.de",
+    "scanFormCta": "Webseite prüfen",
+    "scanFormHelp": "Startseiten-Prüfung ist kostenlos. 3 Prüfungen pro Stunde pro IP.",
+    "trustStrip": "WCAG 2.2 AA · EAA · BFSG · ADA · EN 301 549",
+    "noJsBannerTitle": "JavaScript ist deaktiviert",
+    "noJsBannerBody": "Das ist in Ordnung — diese Webseite funktioniert auch ohne. Senden Sie das Formular oben ab und Sie gelangen direkt zu Ihrem Ergebnis."
+  },
+  "footer": {
+    "tagline": "Echte Barrierefreiheit, von Menschen zertifiziert.",
+    "rights": "Alle Rechte vorbehalten.",
+    "privacy": "Datenschutz",
+    "terms": "AGB",
+    "imprint": "Impressum",
+    "accessibilityStatement": "Barrierefreiheitserklärung"
+  },
+  "errors": {
+    "invalidUrl": "Das sieht nicht nach einer gültigen URL aus.",
+    "rateLimited": "Sie haben das Prüflimit erreicht. Versuchen Sie es in einer Stunde erneut, oder erstellen Sie ein kostenloses Konto."
+  }
+}

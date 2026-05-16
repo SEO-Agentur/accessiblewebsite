@@ -1,0 +1,40 @@
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+.astro/
+.turbo/
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# Secrets — TLS material, keys, certs. Never commit.
+.secrets/
+*.pem
+*.key
+*.crt
+*.cer
+*.p12
+*.pfx
+
+# Logs
+*.log
+pnpm-debug.log*
+
+# OS
+.DS_Store
+
+# Editors
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Drizzle
+drizzle/.snapshots/
+
+# Playwright artifacts
+test-results/
+playwright-report/

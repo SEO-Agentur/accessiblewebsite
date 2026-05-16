@@ -1,0 +1,46 @@
+{
+  "meta": {
+    "siteName": "AccessibleWebsite",
+    "tagline": "WCAG 2.2 AA scanning, sealing, and remediation",
+    "defaultDescription": "Scan your website for WCAG 2.2 AA conformance. Earn a verifiable accessibility seal. Get your site fixed by certified specialists."
+  },
+  "nav": {
+    "skipToContent": "Skip to main content",
+    "home": "Home",
+    "pricing": "Pricing",
+    "methodology": "Methodology",
+    "remediation": "Remediation",
+    "directory": "Verified sites",
+    "about": "About",
+    "login": "Log in",
+    "signup": "Sign up",
+    "switchLanguage": "Switch language",
+    "currentLanguage": "EN",
+    "otherLanguage": "DE",
+    "otherLanguageLabel": "Deutsch"
+  },
+  "home": {
+    "heroTitleA": "Is your website",
+    "heroTitleB": "accessible?",
+    "heroSubtitle": "Free WCAG 2.2 AA scan. Verifiable seal. Real code fixes if you fail — no overlay widgets, no shortcuts.",
+    "scanFormLabel": "Website URL to scan",
+    "scanFormPlaceholder": "https://example.com",
+    "scanFormCta": "Scan my site",
+    "scanFormHelp": "Free for a homepage scan. 3 scans per hour per IP.",
+    "trustStrip": "WCAG 2.2 AA · EAA · ADA · Section 508 · EN 301 549",
+    "noJsBannerTitle": "JavaScript is disabled",
+    "noJsBannerBody": "That’s fine — this site works without it. Submit the form above and you’ll be taken to your results."
+  },
+  "footer": {
+    "tagline": "Real accessibility, certified by humans.",
+    "rights": "All rights reserved.",
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "imprint": "Imprint",
+    "accessibilityStatement": "Accessibility statement"
+  },
+  "errors": {
+    "invalidUrl": "That doesn’t look like a valid URL.",
+    "rateLimited": "You’ve hit the scan rate limit. Try again in an hour, or sign up for a free account."
+  }
+}

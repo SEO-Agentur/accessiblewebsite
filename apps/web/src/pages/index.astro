@@ -1,0 +1,83 @@
+---
+import Base from '../layouts/Base.astro';
+import { t } from '../i18n';
+
+// Server-rendered: locale is decided per-request from the Host header by the
+// middleware. Prerendering would freeze a single locale at build time.
+export const prerender = false;
+
+const locale = Astro.locals.locale;
+const strings = t(locale);
+
+// If the form was submitted without JS, the POST handler at /api/v1/scan/initiate
+// redirects back here with ?error=... on validation failure. Surface it inline.
+const error = Astro.url.searchParams.get('error');
+const errorMessage =
+  error === 'invalid_url'
+    ? strings.errors.invalidUrl
+    : error === 'rate_limited'
+      ? strings.errors.rateLimited
+      : null;
+---
+
+<Base title={`${strings.meta.siteName} — ${strings.meta.tagline}`}>
+  <section class="px-4 py-16 sm:py-24">
+    <div class="mx-auto max-w-3xl text-center">
+      <h1 class="text-4xl font-bold tracking-tight sm:text-5xl">
+        {strings.home.heroTitleA}
+        <span class="text-accent-500"> {strings.home.heroTitleB}</span>
+      </h1>
+      <p class="mt-6 text-lg text-ink-600 dark:text-ink-200">
+        {strings.home.heroSubtitle}
+      </p>
+
+      <form
+        method="POST"
+        action="/api/v1/scan/initiate"
+        class="mt-10 mx-auto flex max-w-xl flex-col gap-3 sm:flex-row"
+        aria-describedby="scan-form-help"
+      >
+        <label for="scan-url" class="sr-only">{strings.home.scanFormLabel}</label>
+        <input
+          type="url"
+          id="scan-url"
+          name="url"
+          required
+          inputmode="url"
+          autocomplete="url"
+          placeholder={strings.home.scanFormPlaceholder}
+          class="flex-1 rounded-md border border-ink-200 bg-white px-4 py-3 text-base text-ink-900 placeholder:text-ink-400 focus:border-accent-500 dark:border-ink-600 dark:bg-ink-800 dark:text-ink-50"
+          aria-invalid={errorMessage !== null}
+          aria-describedby={errorMessage !== null ? 'scan-error' : undefined}
+        />
+        <button
+          type="submit"
+          class="rounded-md bg-accent-500 px-6 py-3 text-base font-semibold text-white hover:bg-accent-600 focus:bg-accent-600 sm:min-h-[44px]"
+        >
+          {strings.home.scanFormCta}
+        </button>
+      </form>
+
+      <p id="scan-form-help" class="mt-3 text-sm text-ink-400">
+        {strings.home.scanFormHelp}
+      </p>
+
+      {errorMessage && (
+        <p id="scan-error" role="alert" class="mt-4 text-sm text-red-600 dark:text-red-400">
+          {errorMessage}
+        </p>
+      )}
+
+      <noscript>
+        <div class="mt-8 rounded-md border border-ink-200 bg-ink-50 p-4 text-left text-sm dark:border-ink-600 dark:bg-ink-800">
+          <p class="font-semibold">{strings.home.noJsBannerTitle}</p>
+          <p class="mt-1 text-ink-600 dark:text-ink-200">{strings.home.noJsBannerBody}</p>
+        </div>
+      </noscript>
+
+      <p class="mt-10 text-xs uppercase tracking-wider text-ink-400">
+        {strings.home.trustStrip}
+      </p>
+    </div>
+  </section>
+</Base>

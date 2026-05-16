@@ -1,0 +1,30 @@
+---
+import Base from '../../layouts/Base.astro';
+import { t } from '../../i18n';
+
+export const prerender = false;
+
+const { id } = Astro.params;
+const locale = Astro.locals.locale;
+const strings = t(locale);
+
+// TODO(scanner): fetch real scan record by id, show status + violations.
+// Stub for now to prove the routing flow.
+const isStub = id?.startsWith('stub-') ?? false;
+---
+
+<Base title={`Scan ${id} — ${strings.meta.siteName}`}>
+  <section class="px-4 py-16">
+    <div class="mx-auto max-w-3xl">
+      <h1 class="text-2xl font-semibold">Scan {id}</h1>
+      {isStub ? (
+        <p class="mt-4 text-ink-600 dark:text-ink-200">
+          Scan accepted. The worker pipeline isn't wired yet, but the no-JS form
+          submission and the locale-aware routing both reached this page.
+        </p>
+      ) : (
+        <p class="mt-4 text-ink-600 dark:text-ink-200">Loading…</p>
+      )}
+    </div>
+  </section>
+</Base>
