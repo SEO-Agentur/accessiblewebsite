@@ -15,6 +15,14 @@ export default defineConfig({
   integrations: [preact({ compat: false }), tailwind({ applyBaseStyles: false })],
   server: { host: '127.0.0.1', port: 4100 },
   trailingSlash: 'never',
+  security: {
+    // Astro's checkOrigin compares Origin header against the request URL Astro
+    // builds internally. Behind Caddy, Astro sees http://127.0.0.1:4100/... so
+    // the origin will never match the public https://accessiblewebsite.net/...
+    // Caddy + Cloudflare are the security boundary at the edge; when we add
+    // authenticated forms (Lucia), we'll layer per-form CSRF tokens.
+    checkOrigin: false,
+  },
   build: {
     inlineStylesheets: 'auto',
   },
