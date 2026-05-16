@@ -121,7 +121,9 @@ export const ScanJobPayload = z.object({
 });
 export type ScanJobPayload = z.infer<typeof ScanJobPayload>;
 
+// BullMQ v5 disallows ':' in queue names (it's their internal Redis key
+// delimiter). Use '-' as the brand-prefix separator instead.
 export const QUEUE_NAMES = {
-  scan: 'accessiblewebsite:scan',
-  email: 'accessiblewebsite:email',
+  scan: 'accessiblewebsite-scan',
+  email: 'accessiblewebsite-email',
 } as const;
