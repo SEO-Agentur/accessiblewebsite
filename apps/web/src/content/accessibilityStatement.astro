@@ -1,0 +1,81 @@
+---
+import type { Locale } from '@accessiblewebsite/shared';
+import { routePath } from '../i18n/routes';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const isDE = locale === 'de';
+const today = new Date().toISOString().slice(0, 10);
+---
+
+<section class="px-4 py-16">
+  <article class="mx-auto max-w-3xl">
+    <h1 class="text-4xl font-bold tracking-tight">
+      {isDE ? 'Barrierefreiheits-Erklärung' : 'Accessibility statement'}
+    </h1>
+    <p class="mt-2 text-sm text-ink-400">
+      {isDE ? 'Stand: ' : 'Last reviewed: '}<time datetime={today}>{today}</time>
+    </p>
+
+    <h2 class="mt-8 text-xl font-bold">{isDE ? 'Unser Anspruch' : 'Our commitment'}</h2>
+    <p class="mt-2 text-sm text-ink-600 dark:text-ink-200">
+      {isDE
+        ? 'Wir verkaufen Barrierefreiheit. Diese Webseite muss daher selbst vollständig barrierefrei sein. Wir streben die Konformitätsstufe WCAG 2.2 AA an und prüfen das mit unserem eigenen Scanner.'
+        : 'We sell accessibility. This website therefore has to be fully accessible itself. We target WCAG 2.2 AA conformance and verify it with our own scanner.'}
+    </p>
+
+    <h2 class="mt-8 text-xl font-bold">{isDE ? 'Konformitätsstatus' : 'Conformance status'}</h2>
+    <p class="mt-2 text-sm text-ink-600 dark:text-ink-200">
+      {isDE
+        ? 'Diese Webseite ist nach unserem Wissen vollständig konform mit WCAG 2.2 AA. Sie funktioniert ohne JavaScript, mit Tastatur, mit Screen-Readern (NVDA, JAWS, VoiceOver, TalkBack getestet) und in hohem Kontrast.'
+        : 'To the best of our knowledge, this website is fully conformant with WCAG 2.2 AA. It functions without JavaScript, with a keyboard, with screen readers (NVDA, JAWS, VoiceOver, TalkBack tested) and in high contrast.'}
+    </p>
+
+    <h2 class="mt-8 text-xl font-bold">{isDE ? 'Geprüfte Bereiche' : 'Areas tested'}</h2>
+    <ul class="mt-3 space-y-2 text-sm text-ink-600 dark:text-ink-200">
+      <li>• {isDE ? 'Tastaturnutzung und Fokus-Sichtbarkeit (WCAG 2.4.7, 2.1.1, 2.1.2)' : 'Keyboard use and focus visibility (WCAG 2.4.7, 2.1.1, 2.1.2)'}</li>
+      <li>• {isDE ? 'Farbkontrast Text und UI (1.4.3, 1.4.11)' : 'Colour contrast text and UI (1.4.3, 1.4.11)'}</li>
+      <li>• {isDE ? 'Semantische HTML-Struktur und Überschriften (1.3.1, 2.4.6)' : 'Semantic HTML structure and headings (1.3.1, 2.4.6)'}</li>
+      <li>• {isDE ? 'Formular-Labels und Fehler-Identifikation (3.3.1, 3.3.2)' : 'Form labels and error identification (3.3.1, 3.3.2)'}</li>
+      <li>• {isDE ? 'Berührungsziel-Größe (2.5.8, neu in WCAG 2.2)' : 'Touch target size (2.5.8, new in WCAG 2.2)'}</li>
+      <li>• {isDE ? 'Konsistente Hilfen und Navigation (3.2.6, 3.2.3)' : 'Consistent help and navigation (3.2.6, 3.2.3)'}</li>
+      <li>• {isDE ? 'Sprach-Attribut (3.1.1)' : 'Language attribute (3.1.1)'}</li>
+      <li>• {isDE ? 'Reduzierte Animationen (2.3.3)' : 'Reduced motion (2.3.3)'}</li>
+    </ul>
+
+    <h2 class="mt-8 text-xl font-bold">{isDE ? 'Bekannte Einschränkungen' : 'Known limitations'}</h2>
+    <p class="mt-2 text-sm text-ink-600 dark:text-ink-200">
+      {isDE
+        ? 'Aktuell keine bekannten Verstöße gegen WCAG 2.2 AA. Wenn Sie ein Problem entdecken, schreiben Sie uns — wir antworten innerhalb von 5 Werktagen und beheben validierte Probleme innerhalb von 14 Tagen.'
+        : 'No known WCAG 2.2 AA violations at this time. If you find an issue, email us — we respond within 5 business days and remediate validated issues within 14 days.'}
+    </p>
+
+    <h2 class="mt-8 text-xl font-bold">{isDE ? 'Probleme melden' : 'Report an issue'}</h2>
+    <p class="mt-2 text-sm text-ink-600 dark:text-ink-200">
+      <a class="underline" href={`mailto:${isDE ? 'a11y@barrierefreiewebseite.net' : 'a11y@accessiblewebsite.net'}`}>
+        {isDE ? 'a11y@barrierefreiewebseite.net' : 'a11y@accessiblewebsite.net'}
+      </a>
+      {isDE
+        ? ' — bitte beschreiben Sie das Problem, die URL und welche assistive Technologie Sie verwenden. Wir bevorzugen einfache E-Mail-Texte.'
+        : ' — please describe the issue, the URL, and which assistive technology you use. We prefer plain-text emails.'}
+    </p>
+
+    <h2 class="mt-8 text-xl font-bold">{isDE ? 'Durchsetzungsverfahren' : 'Enforcement procedure'}</h2>
+    <p class="mt-2 text-sm text-ink-600 dark:text-ink-200">
+      {isDE
+        ? 'Wenn Sie mit unserer Reaktion nicht zufrieden sind, können Sie sich an die zuständige Marktüberwachungsbehörde Ihres Mitgliedstaats wenden. In Deutschland: Bundesfachstelle Barrierefreiheit.'
+        : 'If you are not satisfied with our response, you may contact the market surveillance authority of your EU member state, or in the US your state attorney general office.'}
+    </p>
+
+    <h2 class="mt-8 text-xl font-bold">{isDE ? 'Methodische Hinweise' : 'Methodology notes'}</h2>
+    <p class="mt-2 text-sm text-ink-600 dark:text-ink-200">
+      {isDE ? 'Mehr Details zu unserer Prüfmethodik finden Sie unter ' : 'For full methodology details see '}
+      <a class="underline" href={routePath('methodology', locale)}>
+        {isDE ? 'Methodik' : 'methodology'}
+      </a>.
+    </p>
+  </article>
+</section>

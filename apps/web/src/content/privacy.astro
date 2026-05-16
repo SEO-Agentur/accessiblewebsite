@@ -1,0 +1,108 @@
+---
+import type { Locale } from '@accessiblewebsite/shared';
+import { routePath } from '../i18n/routes';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const isDE = locale === 'de';
+const today = new Date().toISOString().slice(0, 10);
+---
+
+<section class="px-4 py-16">
+  <article class="prose-like mx-auto max-w-3xl">
+    <h1 class="text-4xl font-bold tracking-tight">
+      {isDE ? 'Datenschutzerklärung' : 'Privacy policy'}
+    </h1>
+    <p class="mt-2 text-sm text-ink-400">
+      {isDE ? 'Stand: ' : 'Effective: '}<time datetime={today}>{today}</time>
+    </p>
+
+    <h2 class="mt-8 text-xl font-bold">{isDE ? '1. Verantwortliche Stelle' : '1. Data controller'}</h2>
+    <p class="mt-2 text-ink-600 dark:text-ink-200">
+      {isDE
+        ? 'Verantwortlich für die Datenverarbeitung im Sinne der DSGVO ist der Betreiber dieser Webseite. Kontaktdaten und Anschrift finden Sie im '
+        : 'The data controller within the meaning of the GDPR is the operator of this website. Contact details and address are in the '}
+      <a class="underline" href={routePath('imprint', locale)}>{isDE ? 'Impressum' : 'imprint'}</a>.
+    </p>
+
+    <h2 class="mt-8 text-xl font-bold">{isDE ? '2. Welche Daten wir erheben' : '2. What data we collect'}</h2>
+    <ul class="mt-3 space-y-3 text-sm text-ink-600 dark:text-ink-200">
+      <li>
+        <strong>{isDE ? 'Konto-Daten:' : 'Account data:'}</strong> {isDE
+          ? 'E-Mail, Name, optional Firmenname, gespeichertes Passwort als bcrypt-Hash. Aufbewahrung: solange das Konto existiert + 30 Tage.'
+          : 'Email, name, optional company name, password stored as bcrypt hash. Retention: while the account exists + 30 days.'}
+      </li>
+      <li>
+        <strong>{isDE ? 'Scan-Daten:' : 'Scan data:'}</strong> {isDE
+          ? 'Die URL, die Sie zum Scan eingeben, die WCAG-Ergebnisse, ein PDF-Bericht. Aufbewahrung: 24 Monate, danach automatisch gelöscht.'
+          : 'The URL you submit, the WCAG results, a PDF report. Retention: 24 months, automatically deleted thereafter.'}
+      </li>
+      <li>
+        <strong>{isDE ? 'Server-Logs:' : 'Server logs:'}</strong> {isDE
+          ? 'IP-Adresse (gehasht nach 7 Tagen), User-Agent, Anfrage-URL, Status-Code. Aufbewahrung: 30 Tage zur Missbrauchs-Abwehr.'
+          : 'IP address (hashed after 7 days), user agent, request URL, status code. Retention: 30 days for abuse prevention.'}
+      </li>
+      <li>
+        <strong>{isDE ? 'Zahlungsdaten:' : 'Payment data:'}</strong> {isDE
+          ? 'Werden ausschließlich von Stripe verarbeitet, nicht auf unseren Servern gespeichert. Stripe ist DSGVO-konform und PCI-DSS Level 1 zertifiziert.'
+          : 'Processed exclusively by Stripe, not stored on our servers. Stripe is GDPR-compliant and PCI-DSS Level 1 certified.'}
+      </li>
+      <li>
+        <strong>{isDE ? 'Analytics:' : 'Analytics:'}</strong> {isDE
+          ? 'Plausible Analytics ohne Cookies, ohne persönliche Identifikatoren. Server-Standort EU.'
+          : 'Plausible Analytics without cookies, without personal identifiers. EU server location.'}
+      </li>
+    </ul>
+
+    <h2 class="mt-8 text-xl font-bold">{isDE ? '3. Rechtsgrundlagen' : '3. Legal bases'}</h2>
+    <ul class="mt-3 space-y-2 text-sm text-ink-600 dark:text-ink-200">
+      <li>• {isDE ? 'Vertragsdurchführung (Art. 6 (1) b DSGVO) — Konto, Scans, Abos.' : 'Contract performance (Art. 6(1)(b) GDPR) — account, scans, subscriptions.'}</li>
+      <li>• {isDE ? 'Berechtigtes Interesse (Art. 6 (1) f DSGVO) — Server-Logs, Missbrauchs-Abwehr.' : 'Legitimate interest (Art. 6(1)(f) GDPR) — server logs, abuse prevention.'}</li>
+      <li>• {isDE ? 'Einwilligung (Art. 6 (1) a DSGVO) — Marketing-E-Mails, optional und jederzeit widerrufbar.' : 'Consent (Art. 6(1)(a) GDPR) — marketing emails, optional and revocable at any time.'}</li>
+    </ul>
+
+    <h2 class="mt-8 text-xl font-bold">{isDE ? '4. Auftragsverarbeiter' : '4. Processors'}</h2>
+    <ul class="mt-3 space-y-2 text-sm text-ink-600 dark:text-ink-200">
+      <li>• <strong>Hostinger</strong> — Hosting (EU). Datenverarbeitungsvertrag liegt vor.</li>
+      <li>• <strong>Stripe</strong> — Zahlungsabwicklung (US, Standardvertragsklauseln nach Schrems II).</li>
+      <li>• <strong>Resend</strong> — Transaktionale E-Mails (EU/US).</li>
+      <li>• <strong>Plausible Analytics</strong> — Cookie-lose Analytics (EU).</li>
+      <li>• <strong>Sentry</strong> — Fehler-Monitoring (EU).</li>
+    </ul>
+
+    <h2 class="mt-8 text-xl font-bold">{isDE ? '5. Ihre Rechte (DSGVO)' : '5. Your rights (GDPR)'}</h2>
+    <ul class="mt-3 space-y-2 text-sm text-ink-600 dark:text-ink-200">
+      <li>• {isDE ? 'Auskunft (Art. 15)' : 'Access (Art. 15)'}</li>
+      <li>• {isDE ? 'Berichtigung (Art. 16)' : 'Rectification (Art. 16)'}</li>
+      <li>• {isDE ? 'Löschung (Art. 17)' : 'Erasure (Art. 17)'}</li>
+      <li>• {isDE ? 'Datenübertragbarkeit (Art. 20)' : 'Portability (Art. 20)'}</li>
+      <li>• {isDE ? 'Widerspruch (Art. 21)' : 'Objection (Art. 21)'}</li>
+      <li>• {isDE ? 'Beschwerde bei einer Aufsichtsbehörde (Art. 77)' : 'Complaint to a supervisory authority (Art. 77)'}</li>
+    </ul>
+    <p class="mt-4 text-sm text-ink-600 dark:text-ink-200">
+      {isDE
+        ? 'Anfragen richten Sie bitte an '
+        : 'Send requests to '}
+      <a class="underline" href={`mailto:${isDE ? 'privacy@barrierefreiewebseite.net' : 'privacy@accessiblewebsite.net'}`}>
+        {isDE ? 'privacy@barrierefreiewebseite.net' : 'privacy@accessiblewebsite.net'}
+      </a>. {isDE ? 'Wir antworten innerhalb von 30 Tagen.' : 'We respond within 30 days.'}
+    </p>
+
+    <h2 class="mt-8 text-xl font-bold">{isDE ? '6. Cookies' : '6. Cookies'}</h2>
+    <p class="mt-2 text-sm text-ink-600 dark:text-ink-200">
+      {isDE
+        ? 'Wir verwenden keine Tracking-Cookies. Funktionale Cookies entstehen nur bei Stripe-Checkout und beim Login (Session-Cookie, technisch notwendig, kein Banner erforderlich).'
+        : 'We do not use tracking cookies. Functional cookies are only set during Stripe checkout and login (session cookie, strictly necessary, no banner required).'}
+    </p>
+
+    <h2 class="mt-8 text-xl font-bold">{isDE ? '7. Änderungen dieser Erklärung' : '7. Changes to this policy'}</h2>
+    <p class="mt-2 text-sm text-ink-600 dark:text-ink-200">
+      {isDE
+        ? 'Wir aktualisieren diese Erklärung, wenn sich unsere Datenverarbeitung wesentlich ändert. Eingeloggte Nutzer werden per E-Mail informiert.'
+        : 'We update this policy when our data processing materially changes. Logged-in users are notified by email.'}
+    </p>
+  </article>
+</section>

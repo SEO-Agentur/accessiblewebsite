@@ -1,0 +1,221 @@
+---
+import Base from '../layouts/Base.astro';
+import { keyForPath, type RouteKey } from '../i18n/routes';
+import { t } from '../i18n';
+
+import PricingPage from '../content/pricing.astro';
+import MethodologyPage from '../content/methodology.astro';
+import RemediationPage from '../content/remediation.astro';
+import AboutPage from '../content/about.astro';
+import TeamPage from '../content/team.astro';
+import ResourcesPage from '../content/resources.astro';
+import CaseStudiesPage from '../content/caseStudies.astro';
+import LegalLandscapePage from '../content/legalLandscape.astro';
+import BlogPage from '../content/blog.astro';
+import VerifiedIndexPage from '../content/verifiedIndex.astro';
+import DashboardPage from '../content/dashboard.astro';
+import LoginPage from '../content/login.astro';
+import SignupPage from '../content/signup.astro';
+import PrivacyPage from '../content/privacy.astro';
+import TermsPage from '../content/terms.astro';
+import ImprintPage from '../content/imprint.astro';
+import AccessibilityStatementPage from '../content/accessibilityStatement.astro';
+import QuoteConfirmationPage from '../content/quoteConfirmation.astro';
+
+// All non-index pages are server-rendered so middleware can set the locale
+// from the Host header. Prerendering would freeze each path to a single
+// locale at build time.
+export const prerender = false;
+
+const locale = Astro.locals.locale;
+const strings = t(locale);
+
+const rawSlug = Astro.params.slug ?? '';
+const pathname = '/' + rawSlug;
+const routeKey: RouteKey | null = keyForPath(pathname, locale);
+
+if (routeKey === null) {
+  return new Response(
+    locale === 'de'
+      ? 'Seite nicht gefunden — Page not found'
+      : 'Page not found — Seite nicht gefunden',
+    { status: 404, headers: { 'content-type': 'text/plain; charset=utf-8' } },
+  );
+}
+
+// Each page component renders its own <main> body inside the shared Base layout.
+// Titles and descriptions are page-specific (each component sets them via slot
+// or props), but we provide a sensible fallback per route key.
+const titles: Record<RouteKey, { en: string; de: string }> = {
+  home: { en: strings.meta.siteName, de: strings.meta.siteName },
+  pricing: {
+    en: 'Pricing — AccessibleWebsite',
+    de: 'Preise — Barrierefreiewebseite',
+  },
+  methodology: {
+    en: 'How we audit — Methodology — AccessibleWebsite',
+    de: 'So prüfen wir — Methodik — Barrierefreiewebseite',
+  },
+  remediation: {
+    en: 'Failed the scan? We fix it. — AccessibleWebsite',
+    de: 'Beim Scan durchgefallen? Wir machen es. — Barrierefreiewebseite',
+  },
+  blog: { en: 'Blog — AccessibleWebsite', de: 'Blog — Barrierefreiewebseite' },
+  about: {
+    en: 'About — AccessibleWebsite',
+    de: 'Über uns — Barrierefreiewebseite',
+  },
+  team: { en: 'Team — AccessibleWebsite', de: 'Team — Barrierefreiewebseite' },
+  resources: {
+    en: 'Free resources — AccessibleWebsite',
+    de: 'Kostenlose Ressourcen — Barrierefreiewebseite',
+  },
+  caseStudies: {
+    en: 'Case studies — AccessibleWebsite',
+    de: 'Fallstudien — Barrierefreiewebseite',
+  },
+  legalLandscape: {
+    en: 'The 2026 legal landscape — AccessibleWebsite',
+    de: 'Rechtslage 2026 — Barrierefreiewebseite',
+  },
+  dashboard: {
+    en: 'Dashboard — AccessibleWebsite',
+    de: 'Dashboard — Barrierefreiewebseite',
+  },
+  login: {
+    en: 'Log in — AccessibleWebsite',
+    de: 'Anmelden — Barrierefreiewebseite',
+  },
+  signup: {
+    en: 'Create an account — AccessibleWebsite',
+    de: 'Konto erstellen — Barrierefreiewebseite',
+  },
+  verifiedIndex: {
+    en: 'Verified accessible websites — Directory',
+    de: 'Verifizierte barrierefreie Webseiten — Verzeichnis',
+  },
+  privacy: {
+    en: 'Privacy policy — AccessibleWebsite',
+    de: 'Datenschutzerklärung — Barrierefreiewebseite',
+  },
+  terms: {
+    en: 'Terms of service — AccessibleWebsite',
+    de: 'Allgemeine Geschäftsbedingungen — Barrierefreiewebseite',
+  },
+  imprint: {
+    en: 'Imprint — AccessibleWebsite',
+    de: 'Impressum — Barrierefreiewebseite',
+  },
+  accessibilityStatement: {
+    en: 'Accessibility statement — AccessibleWebsite',
+    de: 'Barrierefreiheitserklärung — Barrierefreiewebseite',
+  },
+  quoteConfirmation: {
+    en: "Thank you — We'll be in touch within 48 hours",
+    de: 'Vielen Dank — Wir melden uns innerhalb von 48 Stunden',
+  },
+};
+
+const descriptions: Record<RouteKey, { en: string; de: string }> = {
+  home: {
+    en: strings.meta.defaultDescription,
+    de: strings.meta.defaultDescription,
+  },
+  pricing: {
+    en: 'Transparent pricing for WCAG 2.2 AA monitoring and remediation. Silver Seal is free. Gold from €19/mo. Remediation from €499 one-time.',
+    de: 'Transparente Preise für WCAG 2.2 AA Monitoring und Umsetzung. Silber-Siegel kostenlos. Gold ab 19 €/Monat. Umsetzung ab 499 € einmalig.',
+  },
+  methodology: {
+    en: 'How our scanner works: WCAG 2.2 AA criteria, axe-core, real browser context, color contrast, keyboard testing, manual review for Gold tier.',
+    de: 'So funktioniert unser Scanner: WCAG 2.2 AA Kriterien, axe-core, echter Browser-Kontext, Farbkontrast, Tastaturprüfung, manuelle Prüfung für Gold-Stufe.',
+  },
+  remediation: {
+    en: 'Human accessibility experts fix your code. No overlay widgets. Fixed-price packages from €499. 48-hour quotes. Gold Seal guarantee.',
+    de: 'Menschliche Fachkräfte machen Ihren Code barrierefrei. Keine Overlay-Widgets. Festpreis-Pakete ab 499 €. Angebote in 48 Stunden. Gold-Siegel-Garantie.',
+  },
+  blog: {
+    en: 'Original research and practical guides on web accessibility, WCAG 2.2 AA, the European Accessibility Act, and remediation.',
+    de: 'Originalforschung und praktische Leitfäden zu Barrierefreiheit im Web, WCAG 2.2 AA, dem European Accessibility Act und der Umsetzung.',
+  },
+  about: {
+    en: 'Founded by accessibility specialists with IAAP credentials. Independent, vendor-neutral, code-first.',
+    de: 'Gegründet von Barrierefreiheits-Fachkräften mit IAAP-Zertifizierungen. Unabhängig, anbieterneutral, code-first.',
+  },
+  team: {
+    en: 'Meet the IAAP-certified specialists who audit and remediate your site.',
+    de: 'Lernen Sie die IAAP-zertifizierten Fachkräfte kennen, die Ihre Webseite prüfen und umsetzen.',
+  },
+  resources: {
+    en: 'Free downloadable checklists, screen reader testing guides, and platform-specific remediation playbooks.',
+    de: 'Kostenlose Checklisten, Screenreader-Testanleitungen und plattformspezifische Umsetzungsanleitungen.',
+  },
+  caseStudies: {
+    en: 'Real before/after stories: scores, screenshots, named clients, measurable outcomes.',
+    de: 'Echte Vorher/Nachher-Geschichten: Bewertungen, Screenshots, namhafte Kunden, messbare Ergebnisse.',
+  },
+  legalLandscape: {
+    en: 'The EAA, BFSG, ADA Title III, Section 508 and EN 301 549 — what they require, who they cover, and what fines look like.',
+    de: 'EAA, BFSG, ADA Title III, Section 508 und EN 301 549 — was sie verlangen, wen sie betreffen und welche Bußgelder drohen.',
+  },
+  dashboard: {
+    en: 'Manage your monitored sites, scan history, and remediation projects.',
+    de: 'Verwalten Sie Ihre überwachten Webseiten, den Prüfverlauf und Umsetzungsprojekte.',
+  },
+  login: {
+    en: 'Log in to your AccessibleWebsite dashboard.',
+    de: 'Melden Sie sich bei Ihrem Dashboard an.',
+  },
+  signup: {
+    en: 'Create a free account to track scans and embed your Silver Seal.',
+    de: 'Erstellen Sie ein kostenloses Konto, um Prüfungen zu verfolgen und Ihr Silber-Siegel einzubetten.',
+  },
+  verifiedIndex: {
+    en: 'Browse websites independently verified for WCAG 2.2 AA accessibility conformance.',
+    de: 'Durchsuchen Sie Webseiten, die unabhängig auf WCAG 2.2 AA Konformität geprüft wurden.',
+  },
+  privacy: {
+    en: 'How we handle your data, your rights under GDPR, and our retention periods.',
+    de: 'Wie wir mit Ihren Daten umgehen, Ihre Rechte gemäß DSGVO und unsere Aufbewahrungsfristen.',
+  },
+  terms: {
+    en: 'Terms of service governing the use of AccessibleWebsite.',
+    de: 'Allgemeine Geschäftsbedingungen für die Nutzung von Barrierefreiewebseite.',
+  },
+  imprint: {
+    en: 'Legal information about the operator of this website.',
+    de: 'Rechtliche Informationen zum Betreiber dieser Webseite.',
+  },
+  accessibilityStatement: {
+    en: "This website's own WCAG 2.2 AA conformance status and contact for accessibility issues.",
+    de: 'WCAG 2.2 AA Konformitätsstatus dieser Webseite und Kontakt bei Barrierefreiheitsproblemen.',
+  },
+  quoteConfirmation: {
+    en: 'Your remediation quote request has been received. A specialist will reply within 48 hours.',
+    de: 'Ihre Anfrage wurde empfangen. Eine Fachkraft meldet sich innerhalb von 48 Stunden.',
+  },
+};
+
+const title = titles[routeKey][locale];
+const description = descriptions[routeKey][locale];
+---
+
+<Base title={title} description={description}>
+  {routeKey === 'pricing' && <PricingPage locale={locale} />}
+  {routeKey === 'methodology' && <MethodologyPage locale={locale} />}
+  {routeKey === 'remediation' && <RemediationPage locale={locale} />}
+  {routeKey === 'about' && <AboutPage locale={locale} />}
+  {routeKey === 'team' && <TeamPage locale={locale} />}
+  {routeKey === 'resources' && <ResourcesPage locale={locale} />}
+  {routeKey === 'caseStudies' && <CaseStudiesPage locale={locale} />}
+  {routeKey === 'legalLandscape' && <LegalLandscapePage locale={locale} />}
+  {routeKey === 'blog' && <BlogPage locale={locale} />}
+  {routeKey === 'verifiedIndex' && <VerifiedIndexPage locale={locale} />}
+  {routeKey === 'dashboard' && <DashboardPage locale={locale} />}
+  {routeKey === 'login' && <LoginPage locale={locale} />}
+  {routeKey === 'signup' && <SignupPage locale={locale} />}
+  {routeKey === 'privacy' && <PrivacyPage locale={locale} />}
+  {routeKey === 'terms' && <TermsPage locale={locale} />}
+  {routeKey === 'imprint' && <ImprintPage locale={locale} />}
+  {routeKey === 'accessibilityStatement' && <AccessibilityStatementPage locale={locale} />}
+  {routeKey === 'quoteConfirmation' && <QuoteConfirmationPage locale={locale} />}
+</Base>

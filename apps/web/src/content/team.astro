@@ -1,0 +1,107 @@
+---
+import type { Locale } from '@accessiblewebsite/shared';
+import { routePath } from '../i18n/routes';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const isDE = locale === 'de';
+
+// Placeholder roster — replace with real staff from the DB once it exists.
+const team = [
+  {
+    name: 'Anna Brandt',
+    role: isDE ? 'Gründerin, Leitung Audit' : 'Founder, Head of Audit',
+    bio: isDE
+      ? 'IAAP CPACC + WAS. 9 Jahre Front-End, 5 Jahre fokussiert auf Barrierefreiheit. Hat zuvor das Accessibility-Programm einer börsennotierten SaaS-Firma aufgebaut.'
+      : 'IAAP CPACC + WAS. 9 years front-end engineering, 5 of them focused on accessibility. Previously built the accessibility programme at a publicly-traded SaaS firm.',
+    certifications: ['IAAP CPACC', 'IAAP WAS'],
+  },
+  {
+    name: 'Tom Reuter',
+    role: isDE ? 'Senior Accessibility Engineer' : 'Senior Accessibility Engineer',
+    bio: isDE
+      ? 'IAAP WAS. Spezialisiert auf ARIA-Pattern, Screen-Reader-Verhalten, und komplexe React/Vue/Svelte-Komponenten.'
+      : 'IAAP WAS. Specialises in ARIA patterns, screen reader behaviour, and complex React/Vue/Svelte components.',
+    certifications: ['IAAP WAS'],
+  },
+  {
+    name: 'Lea Hoffmann',
+    role: isDE ? 'Beraterin Recht & Compliance' : 'Legal & Compliance Specialist',
+    bio: isDE
+      ? 'Hintergrund in IT-Recht. Erstellt VPATs, Barrierefreiheits-Erklärungen, und arbeitet eng mit Rechtsabteilungen der Kunden zusammen. Keine Anwältin — wir empfehlen immer, das Endprodukt mit Ihrer eigenen Kanzlei zu prüfen.'
+      : 'Background in IT law. Drafts VPATs, accessibility statements, and works closely with clients’ legal teams. Not an attorney — we always recommend reviewing the final product with your own counsel.',
+    certifications: ['IAAP CPACC'],
+  },
+  {
+    name: 'Marcus Pelletier',
+    role: isDE ? 'QA & Manuelle Prüfung' : 'QA & Manual Testing',
+    bio: isDE
+      ? 'Ist als blinder Tester und Vollzeit-NVDA-Nutzer der Vor-Ort-Realitäts-Check. Alle Business- und Enterprise-Projekte durchlaufen seine manuelle Prüfung, bevor wir sie abliefern.'
+      : 'A blind tester and full-time NVDA user, Marcus is our on-team reality check. Every Business and Enterprise project passes through his manual review before we ship.',
+    certifications: [],
+  },
+];
+---
+
+<section class="px-4 py-16">
+  <div class="mx-auto max-w-5xl">
+    <h1 class="text-4xl font-bold tracking-tight">{isDE ? 'Das Team' : 'The team'}</h1>
+    <p class="mt-4 text-lg text-ink-600 dark:text-ink-200">
+      {isDE
+        ? 'Vier Menschen mit zertifizierter Erfahrung. Keine Outsourcer, keine Junior-Wechsel, keine versteckten Subunternehmer.'
+        : 'Four people with certified experience. No outsourcers, no junior bait-and-switch, no hidden subcontractors.'}
+    </p>
+
+    <div class="mt-12 grid gap-6 sm:grid-cols-2">
+      {team.map((person) => (
+        <article class="rounded-xl border border-ink-200 bg-white p-6 dark:border-ink-600 dark:bg-ink-800">
+          <h2 class="text-xl font-semibold">{person.name}</h2>
+          <p class="text-sm text-accent-600 dark:text-accent-50">{person.role}</p>
+          <p class="mt-3 text-sm text-ink-600 dark:text-ink-200">{person.bio}</p>
+          {person.certifications.length > 0 && (
+            <ul class="mt-4 flex flex-wrap gap-2 text-xs">
+              {person.certifications.map((cert) => (
+                <li class="rounded-full bg-ink-100 px-2 py-1 dark:bg-ink-700">{cert}</li>
+              ))}
+            </ul>
+          )}
+        </article>
+      ))}
+    </div>
+
+    <div class="mt-12 rounded-xl border border-ink-200 p-6 dark:border-ink-600">
+      <h2 class="text-xl font-bold">{isDE ? 'Was die Zertifizierungen bedeuten' : 'What the certifications mean'}</h2>
+      <dl class="mt-4 space-y-3 text-sm">
+        <div>
+          <dt class="font-semibold">IAAP CPACC — Certified Professional in Accessibility Core Competencies</dt>
+          <dd class="text-ink-600 dark:text-ink-200">
+            {isDE
+              ? 'Breite Prüfung der Grundlagen: Behinderungen, Standards, Recht, Geschäftsstrategien. Verliehen von der International Association of Accessibility Professionals.'
+              : 'Broad exam of fundamentals: disabilities, standards, law, business strategy. Awarded by the International Association of Accessibility Professionals.'}
+          </dd>
+        </div>
+        <div>
+          <dt class="font-semibold">IAAP WAS — Web Accessibility Specialist</dt>
+          <dd class="text-ink-600 dark:text-ink-200">
+            {isDE
+              ? 'Technisches Spezialisten-Examen: WCAG-Erfolgskriterien im Detail, ARIA, Assistive Technology, Test-Methodik.'
+              : 'Technical specialist exam: WCAG success criteria in depth, ARIA, assistive technology, test methodology.'}
+          </dd>
+        </div>
+      </dl>
+      <p class="mt-4 text-xs text-ink-400">
+        {isDE ? 'Quelle: ' : 'Source: '}
+        <a class="underline" rel="noopener" href="https://www.accessibilityassociation.org/s/certification">IAAP Certification</a>
+      </p>
+    </div>
+
+    <div class="mt-16 text-center">
+      <a href={routePath('remediation', locale)} class="inline-block rounded-md bg-accent-500 px-6 py-3 text-base font-semibold text-white hover:bg-accent-600">
+        {isDE ? 'Mit dem Team arbeiten' : 'Work with the team'}
+      </a>
+    </div>
+  </div>
+</section>

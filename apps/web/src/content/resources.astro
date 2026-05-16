@@ -1,0 +1,98 @@
+---
+import type { Locale } from '@accessiblewebsite/shared';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const isDE = locale === 'de';
+
+const resources = [
+  {
+    title: isDE ? 'WCAG 2.2 AA Umsetzungs-Checkliste' : 'WCAG 2.2 AA Implementation Checklist',
+    description: isDE
+      ? 'Alle 50 Erfolgskriterien als Checkliste, plus die neun neuen Kriterien in WCAG 2.2, mit praktischen Code-Beispielen.'
+      : 'All 50 success criteria as a checklist, including the nine new criteria in WCAG 2.2, with practical code examples.',
+    href: '#',
+    cta: isDE ? 'Herunterladen (PDF, 1,2 MB)' : 'Download (PDF, 1.2 MB)',
+  },
+  {
+    title: isDE ? 'EAA / BFSG Konformitäts-Leitfaden' : 'EAA / BFSG Compliance Playbook',
+    description: isDE
+      ? 'Schritt-für-Schritt durch die EAA-Pflichten: Wer betroffen ist, was dokumentiert sein muss, wie ein VPAT auszusehen hat. Stand: Mai 2026.'
+      : 'Step-by-step through EAA obligations: who is covered, what must be documented, what a VPAT should contain. Last updated: May 2026.',
+    href: '#',
+    cta: isDE ? 'Herunterladen (PDF, 800 KB)' : 'Download (PDF, 800 KB)',
+  },
+  {
+    title: isDE ? 'NVDA Screen-Reader Test-Anleitung' : 'NVDA Screen Reader Testing Guide',
+    description: isDE
+      ? 'NVDA installieren, sinnvoll konfigurieren, eine Webseite systematisch durchtesten. Tastenkürzel-Cheatsheet inklusive.'
+      : 'Install NVDA, configure it sensibly, systematically test a website. Keyboard shortcut cheat sheet included.',
+    href: '#',
+    cta: isDE ? 'Anleitung lesen' : 'Read the guide',
+  },
+  {
+    title: isDE ? 'WordPress Barrierefreiheits-Audit (Skript)' : 'WordPress Accessibility Audit Playbook',
+    description: isDE
+      ? 'Konkrete Schritte für WordPress-Webseiten: Theme, Plugins, Editor, Gutenberg-Blöcke. Die häufigsten 12 Probleme und ihre Lösungen.'
+      : 'Concrete steps for WordPress sites: theme, plugins, editor, Gutenberg blocks. The 12 most common issues and their fixes.',
+    href: '#',
+    cta: isDE ? 'Skript öffnen' : 'Open playbook',
+  },
+  {
+    title: isDE ? 'Farbkontrast-Spickzettel' : 'Colour Contrast Cheat Sheet',
+    description: isDE
+      ? 'Eine kompakte Karte mit den 1.4.3 und 1.4.11 Schwellwerten plus Beispielen, was passt und was nicht. Drucken und an die Pinnwand.'
+      : 'A compact card with the 1.4.3 and 1.4.11 thresholds plus what passes and what fails. Print it and pin it.',
+    href: '#',
+    cta: isDE ? 'Herunterladen (PDF, 200 KB)' : 'Download (PDF, 200 KB)',
+  },
+  {
+    title: isDE ? 'Tastatur-Navigation Audit-Skript' : 'Keyboard Navigation Audit Script',
+    description: isDE
+      ? 'Eine 15-Schritte-Anleitung, die Sie mit Tab-Taste und ohne Maus durchgehen können. Findet zuverlässig Fokus-Fallen und unsichtbare Fokus-Zustände.'
+      : 'A 15-step protocol you can run with the Tab key and no mouse. Reliably finds focus traps and invisible focus states.',
+    href: '#',
+    cta: isDE ? 'Skript öffnen' : 'Open the script',
+  },
+];
+---
+
+<section class="px-4 py-16">
+  <div class="mx-auto max-w-5xl">
+    <h1 class="text-4xl font-bold tracking-tight">
+      {isDE ? 'Kostenlose Ressourcen' : 'Free resources'}
+    </h1>
+    <p class="mt-4 text-lg text-ink-600 dark:text-ink-200">
+      {isDE
+        ? 'Wir verkaufen Umsetzungs-Dienstleistungen, aber das Wissen sollte frei sein. Diese Materialien sind kostenlos, ohne Konto, ohne E-Mail-Eintrag.'
+        : 'We sell remediation services, but the knowledge should be free. These materials are free, no account, no email wall.'}
+    </p>
+
+    <div class="mt-12 grid gap-6 sm:grid-cols-2">
+      {resources.map((r) => (
+        <article class="rounded-xl border border-ink-200 bg-white p-6 dark:border-ink-600 dark:bg-ink-800">
+          <h2 class="text-lg font-semibold">{r.title}</h2>
+          <p class="mt-2 text-sm text-ink-600 dark:text-ink-200">{r.description}</p>
+          <a href={r.href} class="mt-4 inline-block text-sm font-semibold text-accent-600 hover:underline dark:text-accent-50">
+            {r.cta} →
+          </a>
+        </article>
+      ))}
+    </div>
+
+    <div class="mt-16 rounded-xl bg-ink-50 p-6 dark:bg-ink-800/50">
+      <h2 class="text-xl font-bold">{isDE ? 'Fehlt eine Ressource?' : 'Missing a resource?'}</h2>
+      <p class="mt-2 text-sm text-ink-600 dark:text-ink-200">
+        {isDE
+          ? 'Wenn Sie ein Thema vermissen, das wir abdecken sollten, schreiben Sie uns. Wir veröffentlichen regelmäßig neues Material.'
+          : 'If there is a topic we should cover, email us. We publish new material regularly.'}
+      </p>
+      <a href={`mailto:${isDE ? 'team@barrierefreiewebseite.net' : 'team@accessiblewebsite.net'}`} class="mt-4 inline-block text-sm font-semibold text-accent-600 hover:underline dark:text-accent-50">
+        {isDE ? 'E-Mail schreiben' : 'Send us an email'} →
+      </a>
+    </div>
+  </div>
+</section>

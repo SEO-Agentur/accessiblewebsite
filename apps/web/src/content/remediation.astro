@@ -1,0 +1,491 @@
+---
+import type { Locale } from '@accessiblewebsite/shared';
+import { routePath } from '../i18n/routes';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const isDE = locale === 'de';
+
+const prefilledUrl = Astro.url.searchParams.get('url') ?? '';
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: isDE
+        ? 'Verwenden Sie Overlay-Widgets für Barrierefreiheit?'
+        : 'Do you use accessibility overlay widgets?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: isDE
+          ? 'Nein, niemals. Overlays werden von der Behindertencommunity breit kritisiert und wurden in über 400 ADA-Klagen genannt. Wir korrigieren den zugrunde liegenden Code — der einzige Ansatz, der echte Konformität erreicht.'
+          : 'No, never. Overlays are widely criticized by the disability community and have been cited in over 400 ADA lawsuits. We remediate the underlying code, the only approach that achieves real conformance.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: isDE
+        ? 'Garantieren Sie, dass wir nicht verklagt werden?'
+        : 'Do you guarantee no lawsuit?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: isDE
+          ? 'Kein seriöser Anbieter kann das garantieren. Was wir liefern, ist dokumentierte WCAG 2.2 AA Konformität plus laufendes Monitoring — genau das, was Klägeranwälte und Aufsichtsbehörden prüfen.'
+          : 'No honest provider can guarantee that. What we provide is documented WCAG 2.2 AA conformance plus ongoing monitoring — which is what plaintiffs’ attorneys and regulators actually look for.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: isDE ? 'Wie schnell können Sie beginnen?' : 'How quickly can you start?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: isDE
+          ? 'Standardprojekte starten innerhalb von 5 Werktagen nach Auftragserteilung. Express (+40 %) startet in 48 Stunden.'
+          : 'Standard projects begin within 5 business days of accepted quote. Rush delivery (+40%) starts within 48 hours.',
+      },
+    },
+  ],
+};
+---
+
+<script is:inline type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+
+<!-- HERO -->
+<section class="px-4 py-16 sm:py-24">
+  <div class="mx-auto max-w-4xl text-center">
+    <h1 class="text-4xl font-bold tracking-tight sm:text-5xl">
+      {isDE
+        ? 'Beim Scan durchgefallen? Wir machen Ihre Webseite barrierefrei — mit Siegel-Garantie.'
+        : "Failed the scan? We'll fix your website — and guarantee your accessibility seal."}
+    </h1>
+    <p class="mt-6 text-lg text-ink-600 dark:text-ink-200">
+      {isDE
+        ? 'Menschliche Fachkräfte. Echte Code-Korrekturen. Keine Overlay-Widgets, keine Abkürzungen, keine falschen Versprechen.'
+        : 'Human accessibility experts. Real code fixes. No overlay widgets, no shortcuts, no false promises.'}
+    </p>
+    <div class="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+      <a href="#quote-form" class="rounded-md bg-accent-500 px-6 py-3 text-base font-semibold text-white hover:bg-accent-600">
+        {isDE ? 'Kostenloses Angebot in 48 Stunden' : 'Get a free quote in 48 hours'}
+      </a>
+      <a href="#how-it-works" class="rounded-md border border-ink-200 px-6 py-3 text-base font-semibold hover:bg-ink-50 dark:border-ink-600 dark:hover:bg-ink-800">
+        {isDE ? 'So funktioniert es' : 'See how it works'}
+      </a>
+    </div>
+    <p class="mt-8 text-xs uppercase tracking-wider text-ink-400">
+      WCAG 2.2 AA · ADA · EAA · BFSG · Section 508 · EN 301 549
+    </p>
+  </div>
+</section>
+
+<!-- OVERLAY PROBLEM -->
+<section class="bg-ink-50 px-4 py-16 dark:bg-ink-800/50">
+  <div class="mx-auto max-w-5xl">
+    <h2 class="text-3xl font-bold">
+      {isDE
+        ? 'Warum Overlay-Widgets nicht funktionieren — und wir keine verwenden'
+        : "Why overlay widgets don't work — and we don't use them"}
+    </h2>
+    <div class="mt-8 grid gap-6 md:grid-cols-3">
+      <div class="rounded-xl border border-red-200 bg-white p-6 dark:border-red-700 dark:bg-ink-900">
+        <h3 class="font-semibold text-red-700 dark:text-red-300">{isDE ? 'Overlay-Widgets' : 'Overlay widgets'}</h3>
+        <ul class="mt-3 space-y-2 text-sm text-ink-600 dark:text-ink-200">
+          <li>✗ {isDE ? 'Oberflächliches Pflaster' : 'Surface-level patch'}</li>
+          <li>✗ {isDE ? 'Von der Community abgelehnt' : 'Rejected by the community'}</li>
+          <li>✗ {isDE ? 'In Klagen zitiert' : 'Cited in lawsuits'}</li>
+          <li>✗ {isDE ? 'Performance-Belastung' : 'Performance overhead'}</li>
+          <li>✗ {isDE ? 'Monatliche Gebühr für immer' : 'Monthly fee forever'}</li>
+        </ul>
+      </div>
+      <div class="rounded-xl border border-amber-200 bg-white p-6 dark:border-amber-700 dark:bg-ink-900">
+        <h3 class="font-semibold text-amber-700 dark:text-amber-300">{isDE ? 'DIY' : 'DIY accessibility'}</h3>
+        <ul class="mt-3 space-y-2 text-sm text-ink-600 dark:text-ink-200">
+          <li>○ {isDE ? 'Zeitaufwändig' : 'Time-intensive'}</li>
+          <li>○ {isDE ? 'Kriterien leicht übersehen' : 'Easy to miss criteria'}</li>
+          <li>○ {isDE ? 'Keine Dokumentation' : 'No documentation'}</li>
+          <li>○ {isDE ? 'Keine Expertenprüfung' : 'No expert review'}</li>
+          <li>○ {isDE ? 'Kostenlos, aber riskant' : 'Free but risky'}</li>
+        </ul>
+      </div>
+      <div class="rounded-xl border-2 border-accent-500 bg-white p-6 dark:bg-ink-900">
+        <h3 class="font-semibold text-accent-600 dark:text-accent-50">{isDE ? 'Menschliche Umsetzung' : 'Human remediation'}</h3>
+        <ul class="mt-3 space-y-2 text-sm text-ink-600 dark:text-ink-200">
+          <li>✓ {isDE ? 'Echte Code-Korrekturen' : 'Real code fixes'}</li>
+          <li>✓ {isDE ? 'WCAG 2.2 AA zertifiziert' : 'WCAG 2.2 AA certified'}</li>
+          <li>✓ {isDE ? 'Juristisch verwertbare Dokumentation' : 'Legal-ready documentation'}</li>
+          <li>✓ {isDE ? 'IAAP-zertifiziertes Team' : 'IAAP-certified team'}</li>
+          <li>✓ {isDE ? 'Einmalige Investition' : 'One-time investment'}</li>
+        </ul>
+      </div>
+    </div>
+    <p class="mt-6 text-xs text-ink-400">
+      {isDE ? 'Quellen: ' : 'Sources: '}
+      <a class="underline" rel="noopener" href="https://overlayfactsheet.com/">WebAIM Overlay Factsheet</a>,
+      <a class="underline" rel="noopener" href="https://www.seyfarth.com/news-insights/ada-title-iii-website-accessibility-lawsuits.html">Seyfarth Shaw ADA Report 2024</a>.
+    </p>
+  </div>
+</section>
+
+<!-- PACKAGES -->
+<section class="px-4 py-16">
+  <div class="mx-auto max-w-6xl">
+    <h2 class="text-3xl font-bold">{isDE ? 'Drei Pakete. Festpreise. Keine Überraschungen.' : 'Three packages. Fixed prices. No surprises.'}</h2>
+    <div class="mt-8 grid gap-6 md:grid-cols-3">
+      <article class="rounded-xl border border-ink-200 bg-white p-6 dark:border-ink-600 dark:bg-ink-800">
+        <h3 class="text-xl font-semibold">Starter Fix</h3>
+        <p class="mt-1 text-3xl font-bold">€499</p>
+        <p class="text-sm text-ink-400">
+          {isDE ? 'Für Landingpages, Portfolios, kleine Webseiten' : 'For landing pages, portfolios, and small sites'}
+        </p>
+        <ul class="mt-4 space-y-2 text-sm">
+          <li>✓ {isDE ? 'Bis 10 Seiten' : 'Up to 10 pages'}</li>
+          <li>✓ {isDE ? 'Manuelle Prüfung durch zertifizierte Fachkraft' : 'Manual audit by certified specialist'}</li>
+          <li>✓ {isDE ? 'Code-Korrekturen als PR oder Umsetzungs-Anleitung' : 'Code fixes as PR or implementation guide'}</li>
+          <li>✓ {isDE ? 'Verifizierung nach Umsetzung + Silber-Siegel' : 'Post-fix verification + Silver Seal'}</li>
+          <li>✓ {isDE ? '30 Tage Nachsorge' : '30-day follow-up'}</li>
+        </ul>
+        <p class="mt-4 text-sm text-ink-400">{isDE ? 'Lieferung: 7–10 Werktage' : 'Delivery: 7–10 business days'}</p>
+        <a href="#quote-form" class="mt-6 block rounded-md border border-ink-200 px-4 py-2.5 text-center text-sm font-semibold hover:bg-ink-50 dark:border-ink-600 dark:hover:bg-ink-800">
+          {isDE ? 'Starter anfragen' : 'Get Starter quote'}
+        </a>
+      </article>
+
+      <article class="relative rounded-xl border-2 border-accent-500 bg-white p-6 shadow-xl dark:bg-ink-800">
+        <span class="absolute -top-3 left-6 rounded-full bg-accent-500 px-3 py-1 text-xs font-bold text-white">
+          {isDE ? 'BELIEBT' : 'MOST POPULAR'}
+        </span>
+        <h3 class="text-xl font-semibold">Business Fix</h3>
+        <p class="mt-1 text-3xl font-bold">€2,499</p>
+        <p class="text-sm text-ink-400">
+          {isDE ? 'Für Unternehmenswebseiten, E-Commerce, SaaS' : 'For business websites, e-commerce, and SaaS'}
+        </p>
+        <ul class="mt-4 space-y-2 text-sm">
+          <li>✓ {isDE ? 'Bis 100 Seiten' : 'Up to 100 pages'}</li>
+          <li>✓ {isDE ? 'Vollständige WCAG 2.2 AA Konformität' : 'Full WCAG 2.2 AA conformance'}</li>
+          <li>✓ {isDE ? 'Manuelle NVDA + VoiceOver Tests' : 'Manual NVDA + VoiceOver testing'}</li>
+          <li>✓ {isDE ? 'Tastatur-Navigations-Audit' : 'Keyboard navigation audit'}</li>
+          <li>✓ {isDE ? '12 Monate Gold-Siegel (Wert 228 €)' : '12 months Gold Seal included (worth €228)'}</li>
+          <li>✓ {isDE ? 'ADA/EAA Konformitäts-Dokumentation' : 'ADA/EAA compliance documentation pack'}</li>
+        </ul>
+        <p class="mt-4 text-sm text-ink-400">{isDE ? 'Lieferung: 3–4 Wochen' : 'Delivery: 3–4 weeks'}</p>
+        <a href="#quote-form" class="mt-6 block rounded-md bg-accent-500 px-4 py-2.5 text-center text-sm font-semibold text-white hover:bg-accent-600">
+          {isDE ? 'Business anfragen' : 'Get Business quote'}
+        </a>
+      </article>
+
+      <article class="rounded-xl border border-ink-200 bg-white p-6 dark:border-ink-600 dark:bg-ink-800">
+        <h3 class="text-xl font-semibold">Enterprise Fix</h3>
+        <p class="mt-1 text-3xl font-bold">{isDE ? 'ab €7.500' : 'From €7,500'}</p>
+        <p class="text-sm text-ink-400">
+          {isDE ? 'Plattformen, Multi-Domain, öffentlicher Sektor' : 'Large platforms, multi-domain, public sector'}
+        </p>
+        <ul class="mt-4 space-y-2 text-sm">
+          <li>✓ {isDE ? 'Unbegrenzte Seiten, Multi-Domain' : 'Unlimited pages, multi-domain'}</li>
+          <li>✓ {isDE ? 'Dedizierte Beratung' : 'Dedicated accessibility consultant'}</li>
+          <li>✓ {isDE ? 'VPAT (Voluntary Product Accessibility Template)' : 'VPAT (Voluntary Product Accessibility Template)'}</li>
+          <li>✓ {isDE ? 'Juristische Dokumentationsprüfung' : 'Legal documentation review'}</li>
+          <li>✓ {isDE ? 'Quartalsweise Re-Audits, 12 Monate' : 'Quarterly re-audits for 12 months'}</li>
+          <li>✓ {isDE ? 'Entwickler-Schulung inklusive' : 'Developer training session included'}</li>
+        </ul>
+        <p class="mt-4 text-sm text-ink-400">{isDE ? 'Lieferung: individuell' : 'Delivery: custom timeline'}</p>
+        <a href="#quote-form" class="mt-6 block rounded-md border border-ink-200 px-4 py-2.5 text-center text-sm font-semibold hover:bg-ink-50 dark:border-ink-600 dark:hover:bg-ink-800">
+          {isDE ? 'Enterprise-Beratung' : 'Request Enterprise consultation'}
+        </a>
+      </article>
+    </div>
+    <p class="mt-8 rounded-lg bg-accent-50 p-4 text-center text-sm text-accent-700 dark:bg-accent-700/10 dark:text-accent-50">
+      {isDE
+        ? 'Alle Pakete: 100 %-Garantie. Besteht Ihre Webseite den Nachscan nicht, erstatten wir vollständig.'
+        : "All packages: 100% guarantee. If your site doesn't pass the post-remediation scan, we refund in full."}
+    </p>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how-it-works" class="bg-ink-50 px-4 py-16 dark:bg-ink-800/50">
+  <div class="mx-auto max-w-5xl">
+    <h2 class="text-3xl font-bold">{isDE ? 'So funktioniert es' : 'How it works'}</h2>
+    <ol class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <li class="rounded-xl bg-white p-6 dark:bg-ink-900">
+        <p class="text-3xl font-bold text-accent-500">1</p>
+        <h3 class="mt-2 font-semibold">{isDE ? 'PRÜFEN' : 'SCAN'}</h3>
+        <p class="mt-1 text-sm text-ink-600 dark:text-ink-200">
+          {isDE
+            ? 'Kostenloser Scan identifiziert Probleme nach WCAG 2.2 AA.'
+            : 'Run our free scan to identify issues against WCAG 2.2 AA.'}
+        </p>
+      </li>
+      <li class="rounded-xl bg-white p-6 dark:bg-ink-900">
+        <p class="text-3xl font-bold text-accent-500">2</p>
+        <h3 class="mt-2 font-semibold">{isDE ? 'ANGEBOT' : 'QUOTE'}</h3>
+        <p class="mt-1 text-sm text-ink-600 dark:text-ink-200">
+          {isDE
+            ? 'Festpreis-Angebot innerhalb von 48 Stunden. Keine Überraschungen.'
+            : 'Receive a fixed-price quote within 48 hours. No surprises.'}
+        </p>
+      </li>
+      <li class="rounded-xl bg-white p-6 dark:bg-ink-900">
+        <p class="text-3xl font-bold text-accent-500">3</p>
+        <h3 class="mt-2 font-semibold">{isDE ? 'UMSETZEN' : 'REMEDIATE'}</h3>
+        <p class="mt-1 text-sm text-ink-600 dark:text-ink-200">
+          {isDE
+            ? 'Wir korrigieren den Code, geliefert als PR oder direkte Umsetzung.'
+            : 'We fix the code, delivered as PR or direct implementation.'}
+        </p>
+      </li>
+      <li class="rounded-xl bg-white p-6 dark:bg-ink-900">
+        <p class="text-3xl font-bold text-accent-500">4</p>
+        <h3 class="mt-2 font-semibold">{isDE ? 'ZERTIFIZIEREN' : 'CERTIFY'}</h3>
+        <p class="mt-1 text-sm text-ink-600 dark:text-ink-200">
+          {isDE
+            ? 'Sie erhalten Gold-Siegel + Konformitäts-Dokumentation.'
+            : 'Receive your Gold Seal + compliance documentation.'}
+        </p>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- LEGAL URGENCY -->
+<section class="px-4 py-16">
+  <div class="mx-auto max-w-5xl grid gap-8 md:grid-cols-2">
+    <div>
+      <h2 class="text-2xl font-bold">{isDE ? 'Die Rechtslage hat sich 2025 geändert' : 'The legal landscape changed in 2025'}</h2>
+      <ul class="mt-4 space-y-3 text-sm text-ink-600 dark:text-ink-200">
+        <li>{isDE
+          ? 'Der European Accessibility Act ist seit dem 28. Juni 2025 durchsetzbar.'
+          : 'European Accessibility Act enforcement began June 28, 2025.'}</li>
+        <li>{isDE
+          ? 'Betrifft alle Unternehmen mit >10 Mitarbeitenden oder >2 Mio. € Umsatz, die EU-Verbraucher bedienen.'
+          : 'Affects all businesses with >10 employees or >€2M turnover serving EU consumers.'}</li>
+        <li>{isDE
+          ? 'Bußgelder bis 100.000–1.000.000 € je nach Mitgliedstaat.'
+          : 'Fines up to €100,000–€1,000,000 depending on member state.'}</li>
+        <li>{isDE
+          ? 'US-ADA-Title-III-Klagen überschritten 2024 die Marke von 4.000 (Seyfarth-Shaw-Bericht).'
+          : 'US ADA Title III digital lawsuits exceeded 4,000 in 2024 (Seyfarth Shaw report).'}</li>
+      </ul>
+    </div>
+    <div>
+      <h2 class="text-2xl font-bold">{isDE ? 'Was "Good-Faith"-Compliance bedeutet' : 'What good-faith compliance looks like'}</h2>
+      <ul class="mt-4 space-y-3 text-sm text-ink-600 dark:text-ink-200">
+        <li>{isDE ? 'Dokumentierter Audit durch qualifizierte Fachkräfte' : 'Documented audit by qualified specialists'}</li>
+        <li>{isDE ? 'Behebung identifizierter Probleme' : 'Remediation of identified issues'}</li>
+        <li>{isDE ? 'Laufendes Monitoring (Gold-Siegel)' : 'Ongoing monitoring (Gold Seal)'}</li>
+        <li>{isDE ? 'Öffentliche Barrierefreiheits-Erklärung' : 'Public accessibility statement'}</li>
+        <li>{isDE ? 'Gepflegter VPAT für B2B-Vertrieb' : 'Maintained VPAT for B2B sales'}</li>
+      </ul>
+      <p class="mt-4 text-xs text-ink-400">
+        {isDE
+          ? 'Wir sind keine Anwälte, aber unsere Dokumentation liefert Ihrem Rechtsteam, was es braucht.'
+          : 'We are not lawyers, but our documentation gives your legal team what they need.'}
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- QUOTE REQUEST FORM -->
+<section id="quote-form" class="bg-ink-50 px-4 py-16 dark:bg-ink-800/50">
+  <div class="mx-auto max-w-2xl">
+    <h2 class="text-3xl font-bold">{isDE ? 'Angebot anfordern' : 'Request a quote'}</h2>
+    <p class="mt-2 text-ink-600 dark:text-ink-200">
+      {isDE
+        ? 'Antwort innerhalb von 48 Stunden, garantiert. Keine Kreditkarte erforderlich.'
+        : '48-hour response, guaranteed. No credit card required.'}
+    </p>
+
+    <form
+      method="POST"
+      action="/api/v1/quote-request"
+      class="mt-8 grid gap-4 rounded-xl bg-white p-6 shadow-sm dark:bg-ink-900"
+    >
+      <input type="hidden" name="language" value={locale} />
+      <input type="hidden" name="sourceUrl" value={Astro.url.pathname} />
+
+      <div>
+        <label for="fullName" class="block text-sm font-medium">{isDE ? 'Vor- und Nachname' : 'Full name'} *</label>
+        <input
+          id="fullName"
+          type="text"
+          name="fullName"
+          required
+          autocomplete="name"
+          class="mt-1 block w-full rounded-md border border-ink-200 bg-white px-3 py-2 dark:border-ink-600 dark:bg-ink-800"
+        />
+      </div>
+
+      <div class="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label for="email" class="block text-sm font-medium">{isDE ? 'E-Mail' : 'Email'} *</label>
+          <input
+            id="email"
+            type="email"
+            name="email"
+            required
+            autocomplete="email"
+            class="mt-1 block w-full rounded-md border border-ink-200 bg-white px-3 py-2 dark:border-ink-600 dark:bg-ink-800"
+          />
+        </div>
+        <div>
+          <label for="companyName" class="block text-sm font-medium">{isDE ? 'Firma / Organisation' : 'Company / organisation'}</label>
+          <input
+            id="companyName"
+            type="text"
+            name="companyName"
+            autocomplete="organization"
+            class="mt-1 block w-full rounded-md border border-ink-200 bg-white px-3 py-2 dark:border-ink-600 dark:bg-ink-800"
+          />
+        </div>
+      </div>
+
+      <div>
+        <label for="websiteUrl" class="block text-sm font-medium">{isDE ? 'Webseiten-URL' : 'Website URL'} *</label>
+        <input
+          id="websiteUrl"
+          type="url"
+          name="websiteUrl"
+          required
+          autocomplete="url"
+          value={prefilledUrl}
+          placeholder={isDE ? 'https://ihre-firma.de' : 'https://yourcompany.com'}
+          class="mt-1 block w-full rounded-md border border-ink-200 bg-white px-3 py-2 dark:border-ink-600 dark:bg-ink-800"
+        />
+      </div>
+
+      <div class="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label for="platformCms" class="block text-sm font-medium">{isDE ? 'Plattform / CMS' : 'Platform / CMS'} *</label>
+          <select id="platformCms" name="platformCms" required class="mt-1 block w-full rounded-md border border-ink-200 bg-white px-3 py-2 dark:border-ink-600 dark:bg-ink-800">
+            <option value="wordpress">WordPress</option>
+            <option value="shopify">Shopify</option>
+            <option value="webflow">Webflow</option>
+            <option value="custom">{isDE ? 'Eigenentwicklung' : 'Custom build'}</option>
+            <option value="other">{isDE ? 'Andere' : 'Other'}</option>
+          </select>
+        </div>
+        <div>
+          <label for="estimatedPages" class="block text-sm font-medium">{isDE ? 'Ungefähre Seitenzahl' : 'Approximate pages'} *</label>
+          <select id="estimatedPages" name="estimatedPages" required class="mt-1 block w-full rounded-md border border-ink-200 bg-white px-3 py-2 dark:border-ink-600 dark:bg-ink-800">
+            <option value="lt10">&lt; 10</option>
+            <option value="10_50">10–50</option>
+            <option value="50_250" selected>50–250</option>
+            <option value="gt250">250+</option>
+          </select>
+        </div>
+      </div>
+
+      <fieldset>
+        <legend class="block text-sm font-medium">{isDE ? 'Dringlichkeit' : 'Urgency'} *</legend>
+        <div class="mt-2 flex gap-4">
+          <label class="flex items-center gap-2 text-sm">
+            <input type="radio" name="urgency" value="standard" checked />
+            {isDE ? 'Standard' : 'Standard'}
+          </label>
+          <label class="flex items-center gap-2 text-sm">
+            <input type="radio" name="urgency" value="rush" />
+            {isDE ? 'Express (+40 %)' : 'Rush (+40%)'}
+          </label>
+        </div>
+      </fieldset>
+
+      <div>
+        <label for="message" class="block text-sm font-medium">{isDE ? 'Was sollten wir noch wissen?' : 'Anything else we should know?'}</label>
+        <textarea
+          id="message"
+          name="message"
+          rows="4"
+          class="mt-1 block w-full rounded-md border border-ink-200 bg-white px-3 py-2 dark:border-ink-600 dark:bg-ink-800"
+        ></textarea>
+      </div>
+
+      <label class="flex items-start gap-2 text-sm">
+        <input type="checkbox" name="gdprConsent" value="true" required class="mt-0.5" />
+        <span>
+          {isDE
+            ? 'Ich stimme der Verarbeitung meiner Daten gemäß der '
+            : 'I consent to the processing of my data per the '}
+          <a href={routePath('privacy', locale)} class="underline">{isDE ? 'Datenschutzerklärung' : 'privacy policy'}</a>{isDE ? ' zu.' : '.'}
+        </span>
+      </label>
+
+      <button type="submit" class="rounded-md bg-accent-500 px-6 py-3 text-base font-semibold text-white hover:bg-accent-600">
+        {isDE ? 'Angebot anfordern' : 'Send my quote request'}
+      </button>
+
+      <noscript>
+        <p class="text-xs text-ink-400">
+          {isDE
+            ? 'Dieses Formular funktioniert auch ohne JavaScript. Sie werden nach dem Absenden zur Bestätigungsseite weitergeleitet.'
+            : 'This form works without JavaScript. You will be redirected to a confirmation page after submission.'}
+        </p>
+      </noscript>
+    </form>
+  </div>
+</section>
+
+<!-- FAQ ACCORDION (native <details>) -->
+<section class="px-4 py-16">
+  <div class="mx-auto max-w-3xl">
+    <h2 class="text-3xl font-bold">{isDE ? 'Häufige Fragen' : 'Frequently asked'}</h2>
+
+    <details class="mt-6 rounded-lg border border-ink-200 p-4 dark:border-ink-600">
+      <summary class="cursor-pointer font-semibold">{isDE ? 'Verwenden Sie Overlay-Widgets?' : 'Do you use overlay widgets?'}</summary>
+      <p class="mt-2 text-sm text-ink-600 dark:text-ink-200">{isDE
+        ? 'Nein, niemals. Overlays werden von der Behinderten-Community breit kritisiert und in über 400 ADA-Klagen genannt. Wir korrigieren den zugrunde liegenden Code.'
+        : 'No, never. Overlays are widely criticised by the disability community and cited in over 400 ADA lawsuits. We remediate the underlying code.'}</p>
+    </details>
+
+    <details class="mt-3 rounded-lg border border-ink-200 p-4 dark:border-ink-600">
+      <summary class="cursor-pointer font-semibold">{isDE ? 'Muss meine Webseite optisch verändert werden?' : 'Will my site need to change visually?'}</summary>
+      <p class="mt-2 text-sm text-ink-600 dark:text-ink-200">{isDE
+        ? 'Für die meisten Kunden nicht. Die häufigsten optischen Änderungen sind Farbkontrast-Anpassungen und sichtbare Fokus-Indikatoren für Tastatur-Nutzende. Wir zeigen Änderungen immer vorher.'
+        : 'For most clients, no. The most common visual changes are colour contrast adjustments and visible focus indicators for keyboard users. We always preview changes before applying.'}</p>
+    </details>
+
+    <details class="mt-3 rounded-lg border border-ink-200 p-4 dark:border-ink-600">
+      <summary class="cursor-pointer font-semibold">{isDE ? 'Was, wenn unsere Entwickler die Korrekturen selbst machen wollen?' : 'What if our developers want to do the fixes themselves?'}</summary>
+      <p class="mt-2 text-sm text-ink-600 dark:text-ink-200">{isDE
+        ? 'Wir bieten ein Umsetzungs-Anleitungs-Produkt (349 €), das einen detaillierten Audit mit codespezifischen Anweisungen liefert.'
+        : 'We offer a Remediation Guide product (€349) that delivers a detailed audit with specific code-level instructions.'}</p>
+    </details>
+
+    <details class="mt-3 rounded-lg border border-ink-200 p-4 dark:border-ink-600">
+      <summary class="cursor-pointer font-semibold">{isDE ? 'Garantieren Sie keine Klage?' : 'Do you guarantee no lawsuit?'}</summary>
+      <p class="mt-2 text-sm text-ink-600 dark:text-ink-200">{isDE
+        ? 'Kein seriöser Anbieter kann das garantieren. Was wir liefern, ist dokumentierte WCAG 2.2 AA Konformität plus laufendes Monitoring — genau das, was Klägeranwälte und Aufsichtsbehörden prüfen.'
+        : 'No honest provider can guarantee that. What we provide is documented WCAG 2.2 AA conformance plus ongoing monitoring — which is what plaintiffs’ attorneys and regulators actually look for.'}</p>
+    </details>
+
+    <details class="mt-3 rounded-lg border border-ink-200 p-4 dark:border-ink-600">
+      <summary class="cursor-pointer font-semibold">{isDE ? 'In welchen Sprachen arbeiten Sie?' : 'What languages do you support?'}</summary>
+      <p class="mt-2 text-sm text-ink-600 dark:text-ink-200">{isDE
+        ? 'Wir arbeiten in Englisch und Deutsch. Alle Lieferungen, Dokumentation und Kommunikation in der Sprache Ihrer Wahl.'
+        : 'We work in English and German. All deliverables, documentation, and communication can be in either language.'}</p>
+    </details>
+
+    <details class="mt-3 rounded-lg border border-ink-200 p-4 dark:border-ink-600">
+      <summary class="cursor-pointer font-semibold">{isDE ? 'Wie schnell können Sie beginnen?' : 'How quickly can you start?'}</summary>
+      <p class="mt-2 text-sm text-ink-600 dark:text-ink-200">{isDE
+        ? 'Standard-Projekte starten innerhalb von 5 Werktagen nach Auftragserteilung. Express (+40 %) startet in 48 Stunden.'
+        : 'Standard projects begin within 5 business days of accepted quote. Rush delivery (+40%) starts within 48 hours.'}</p>
+    </details>
+
+    <details class="mt-3 rounded-lg border border-ink-200 p-4 dark:border-ink-600">
+      <summary class="cursor-pointer font-semibold">{isDE ? 'Unterzeichnen Sie NDAs?' : 'Do you sign NDAs?'}</summary>
+      <p class="mt-2 text-sm text-ink-600 dark:text-ink-200">{isDE
+        ? 'Ja, gegenseitige NDA auf Anfrage vor jeder Code-Prüfung.'
+        : 'Yes, mutual NDA available on request before any code review.'}</p>
+    </details>
+
+    <details class="mt-3 rounded-lg border border-ink-200 p-4 dark:border-ink-600">
+      <summary class="cursor-pointer font-semibold">{isDE ? 'Können wir die Umsetzung privat halten?' : 'Can we keep our remediation private?'}</summary>
+      <p class="mt-2 text-sm text-ink-600 dark:text-ink-200">{isDE
+        ? 'Ja. Enterprise-Kunden können sich vom öffentlichen Verzeichnis ausschließen. Business-Kunden können anonyme Fallstudien wünschen.'
+        : 'Yes. Enterprise clients can opt out of the public directory. Business clients can request anonymous case studies.'}</p>
+    </details>
+  </div>
+</section>

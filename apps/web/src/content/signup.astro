@@ -1,0 +1,103 @@
+---
+import type { Locale } from '@accessiblewebsite/shared';
+import { routePath } from '../i18n/routes';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const isDE = locale === 'de';
+---
+
+<section class="px-4 py-20">
+  <div class="mx-auto max-w-md">
+    <h1 class="text-3xl font-bold tracking-tight">{isDE ? 'Kostenlos registrieren' : 'Create your free account'}</h1>
+    <p class="mt-2 text-sm text-ink-600 dark:text-ink-200">
+      {isDE
+        ? '10 Prüfungen pro Tag, Silber-Siegel, Listung im Verzeichnis. Keine Kreditkarte.'
+        : '10 scans per day, Silver Seal, directory listing. No credit card.'}
+    </p>
+
+    <form
+      method="POST"
+      action="/api/v1/auth/signup"
+      class="mt-8 grid gap-4 rounded-xl border border-ink-200 bg-white p-6 dark:border-ink-600 dark:bg-ink-800"
+    >
+      <input type="hidden" name="language" value={locale} />
+
+      <div>
+        <label for="fullName" class="block text-sm font-medium">{isDE ? 'Vor- und Nachname' : 'Full name'}</label>
+        <input
+          id="fullName"
+          type="text"
+          name="fullName"
+          required
+          autocomplete="name"
+          class="mt-1 block w-full rounded-md border border-ink-200 bg-white px-3 py-2 dark:border-ink-600 dark:bg-ink-900"
+        />
+      </div>
+
+      <div>
+        <label for="email" class="block text-sm font-medium">{isDE ? 'E-Mail' : 'Email'}</label>
+        <input
+          id="email"
+          type="email"
+          name="email"
+          required
+          autocomplete="email"
+          class="mt-1 block w-full rounded-md border border-ink-200 bg-white px-3 py-2 dark:border-ink-600 dark:bg-ink-900"
+        />
+      </div>
+
+      <div>
+        <label for="password" class="block text-sm font-medium">{isDE ? 'Passwort (mind. 12 Zeichen)' : 'Password (min. 12 chars)'}</label>
+        <input
+          id="password"
+          type="password"
+          name="password"
+          required
+          minlength="12"
+          autocomplete="new-password"
+          class="mt-1 block w-full rounded-md border border-ink-200 bg-white px-3 py-2 dark:border-ink-600 dark:bg-ink-900"
+        />
+      </div>
+
+      <label class="flex items-start gap-2 text-sm">
+        <input type="checkbox" name="marketingConsent" value="true" class="mt-0.5" />
+        <span>
+          {isDE
+            ? 'Senden Sie mir gelegentlich Produkt-Updates (kein Spam). Sie können jederzeit abbestellen.'
+            : 'Send me occasional product updates (no spam). Unsubscribe any time.'}
+        </span>
+      </label>
+
+      <label class="flex items-start gap-2 text-sm">
+        <input type="checkbox" required class="mt-0.5" />
+        <span>
+          {isDE ? 'Ich akzeptiere die ' : 'I accept the '}
+          <a class="underline" href={routePath('terms', locale)}>{isDE ? 'AGB' : 'terms'}</a>
+          {isDE ? ' und die ' : ' and the '}
+          <a class="underline" href={routePath('privacy', locale)}>{isDE ? 'Datenschutzerklärung' : 'privacy policy'}</a>.
+        </span>
+      </label>
+
+      <button type="submit" class="rounded-md bg-accent-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-accent-600">
+        {isDE ? 'Kostenloses Konto erstellen' : 'Create free account'}
+      </button>
+
+      <p class="rounded-md bg-ink-50 p-3 text-xs text-ink-600 dark:bg-ink-900 dark:text-ink-200">
+        {isDE
+          ? 'Authentifizierung ist noch nicht aktiviert. Diese Seite zeigt das Formular im endgültigen Design — funktional in Kürze.'
+          : 'Authentication is not yet wired up. This page shows the form in its final design — functional shortly.'}
+      </p>
+    </form>
+
+    <p class="mt-6 text-center text-sm text-ink-600 dark:text-ink-200">
+      {isDE ? 'Schon ein Konto?' : 'Already have an account?'}{' '}
+      <a class="font-semibold text-accent-600 hover:underline dark:text-accent-50" href={routePath('login', locale)}>
+        {isDE ? 'Anmelden' : 'Log in'}
+      </a>
+    </p>
+  </div>
+</section>

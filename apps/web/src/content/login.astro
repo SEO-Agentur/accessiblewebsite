@@ -1,0 +1,69 @@
+---
+import type { Locale } from '@accessiblewebsite/shared';
+import { routePath } from '../i18n/routes';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const isDE = locale === 'de';
+---
+
+<section class="px-4 py-20">
+  <div class="mx-auto max-w-md">
+    <h1 class="text-3xl font-bold tracking-tight">{isDE ? 'Anmelden' : 'Log in'}</h1>
+    <p class="mt-2 text-sm text-ink-600 dark:text-ink-200">
+      {isDE
+        ? 'Greifen Sie auf Ihr Dashboard, Scan-Verlauf und Siegel-Einbettungs-Code zu.'
+        : 'Access your dashboard, scan history, and seal embed code.'}
+    </p>
+
+    <form
+      method="POST"
+      action="/api/v1/auth/login"
+      class="mt-8 grid gap-4 rounded-xl border border-ink-200 bg-white p-6 dark:border-ink-600 dark:bg-ink-800"
+    >
+      <div>
+        <label for="email" class="block text-sm font-medium">{isDE ? 'E-Mail' : 'Email'}</label>
+        <input
+          id="email"
+          type="email"
+          name="email"
+          required
+          autocomplete="email"
+          class="mt-1 block w-full rounded-md border border-ink-200 bg-white px-3 py-2 dark:border-ink-600 dark:bg-ink-900"
+        />
+      </div>
+
+      <div>
+        <label for="password" class="block text-sm font-medium">{isDE ? 'Passwort' : 'Password'}</label>
+        <input
+          id="password"
+          type="password"
+          name="password"
+          required
+          autocomplete="current-password"
+          class="mt-1 block w-full rounded-md border border-ink-200 bg-white px-3 py-2 dark:border-ink-600 dark:bg-ink-900"
+        />
+      </div>
+
+      <button type="submit" class="rounded-md bg-accent-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-accent-600">
+        {isDE ? 'Anmelden' : 'Log in'}
+      </button>
+
+      <p class="rounded-md bg-ink-50 p-3 text-xs text-ink-600 dark:bg-ink-900 dark:text-ink-200">
+        {isDE
+          ? 'Authentifizierung ist noch nicht aktiviert. Diese Seite zeigt das Formular im endgültigen Design — funktional in Kürze.'
+          : 'Authentication is not yet wired up. This page shows the form in its final design — functional shortly.'}
+      </p>
+    </form>
+
+    <p class="mt-6 text-center text-sm text-ink-600 dark:text-ink-200">
+      {isDE ? 'Noch kein Konto?' : 'Don’t have an account?'}{' '}
+      <a class="font-semibold text-accent-600 hover:underline dark:text-accent-50" href={routePath('signup', locale)}>
+        {isDE ? 'Kostenlos registrieren' : 'Sign up free'}
+      </a>
+    </p>
+  </div>
+</section>

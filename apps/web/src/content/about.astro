@@ -1,0 +1,109 @@
+---
+import type { Locale } from '@accessiblewebsite/shared';
+import { routePath } from '../i18n/routes';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const isDE = locale === 'de';
+
+const orgSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'AccessibleWebsite',
+  url: 'https://accessiblewebsite.net',
+  sameAs: ['https://barrierefreiewebseite.net'],
+  description: isDE
+    ? 'Unabhängiges Beratungs- und Monitoring-Unternehmen für Web-Barrierefreiheit. Spezialisiert auf WCAG 2.2 AA, EAA und ADA-Konformität.'
+    : 'Independent web accessibility consulting and monitoring firm. Specialised in WCAG 2.2 AA, EAA, and ADA conformance.',
+  knowsAbout: [
+    'WCAG 2.2 AA',
+    'Web Content Accessibility Guidelines',
+    'European Accessibility Act',
+    'Americans with Disabilities Act Title III',
+    'Section 508',
+    'EN 301 549',
+    'BFSG',
+  ],
+};
+---
+
+<script is:inline type="application/ld+json" set:html={JSON.stringify(orgSchema)} />
+
+<section class="px-4 py-16">
+  <div class="mx-auto max-w-3xl">
+    <h1 class="text-4xl font-bold tracking-tight">
+      {isDE ? 'Über uns' : 'About'}
+    </h1>
+    <p class="mt-4 text-lg text-ink-600 dark:text-ink-200">
+      {isDE
+        ? 'Wir sind Entwickler und Barrierefreiheits-Fachleute, die müde davon sind, wie der Markt für Barrierefreiheit funktioniert. Also haben wir etwas anderes gebaut.'
+        : "We are developers and accessibility specialists who got tired of how the accessibility market works. So we built something different."}
+    </p>
+
+    <h2 class="mt-12 text-2xl font-bold">{isDE ? 'Was uns frustriert hat' : 'What frustrated us'}</h2>
+    <p class="mt-3 text-ink-600 dark:text-ink-200">
+      {isDE
+        ? 'Overlay-Widgets, die sich als Lösung verkaufen, aber Klagen anziehen. Audit-Firmen, die 50 Seiten PDF abliefern und dann verschwinden. Tools, die WCAG-Konformität versprechen, aber nur statisches HTML prüfen und Farbkontrast still ignorieren. Beratungen ohne Code-Erfahrung, deren Empfehlungen die Entwickler nicht umsetzen können.'
+        : 'Overlay widgets that sell themselves as a solution but attract lawsuits. Audit firms that deliver a 50-page PDF and then disappear. Tools that promise WCAG conformance but only check static HTML and silently ignore colour contrast. Consultancies without code experience whose recommendations developers can\'t actually ship.'}
+    </p>
+    <p class="mt-3 text-ink-600 dark:text-ink-200">
+      {isDE
+        ? 'Die Menschen, die unsere Webseiten am dringendsten brauchen, werden von Marketing-Akrobatik im Stich gelassen. Wir wollten ein Unternehmen aufbauen, das diese Lücke schließt.'
+        : 'The people who most need our websites to work are the ones marketing acrobatics fail. We wanted to build a company that closes that gap.'}
+    </p>
+
+    <h2 class="mt-12 text-2xl font-bold">{isDE ? 'Was uns anders macht' : 'What makes us different'}</h2>
+    <dl class="mt-4 space-y-4">
+      <div>
+        <dt class="font-semibold">{isDE ? 'Code-first, nicht PDF-first.' : 'Code-first, not PDF-first.'}</dt>
+        <dd class="mt-1 text-sm text-ink-600 dark:text-ink-200">
+          {isDE
+            ? 'Jede Empfehlung ist umsetzbar. Wir liefern Pull Requests, keine theoretischen Ratschläge.'
+            : 'Every recommendation is actionable. We deliver pull requests, not theoretical advice.'}
+        </dd>
+      </div>
+      <div>
+        <dt class="font-semibold">{isDE ? 'Anbieter-neutral.' : 'Vendor-neutral.'}</dt>
+        <dd class="mt-1 text-sm text-ink-600 dark:text-ink-200">
+          {isDE
+            ? 'Wir verkaufen keine Overlay-Widgets, keine Browser-Erweiterungen, keine "magischen" Plugins. Wenn ein Open-Source-Tool Ihr Problem löst, sagen wir es Ihnen.'
+            : 'We don’t sell overlay widgets, browser extensions, or "magic" plugins. If an open-source tool solves your problem, we tell you.'}
+        </dd>
+      </div>
+      <div>
+        <dt class="font-semibold">{isDE ? 'Transparente Preise.' : 'Transparent pricing.'}</dt>
+        <dd class="mt-1 text-sm text-ink-600 dark:text-ink-200">
+          {isDE
+            ? 'Festpreise auf der Webseite. Keine Verhandlung über Stundensätze, keine "Discovery-Calls", bevor Sie Zahlen sehen.'
+            : 'Fixed prices on the website. No haggling over hourly rates, no "discovery calls" before you see numbers.'}
+        </dd>
+      </div>
+      <div>
+        <dt class="font-semibold">{isDE ? 'Eat our own dog food.' : 'We eat our own dog food.'}</dt>
+        <dd class="mt-1 text-sm text-ink-600 dark:text-ink-200">
+          {isDE
+            ? 'Diese Webseite besteht ihre eigene Prüfung mit 100/100. JavaScript ist nicht erforderlich, um irgendetwas zu tun, was Sie hier brauchen.'
+            : "This website passes our own scanner at 100/100. JavaScript is not required to do anything you need to do here."}
+        </dd>
+      </div>
+    </dl>
+
+    <h2 class="mt-12 text-2xl font-bold">{isDE ? 'Was wir nicht sind' : 'What we are not'}</h2>
+    <ul class="mt-4 space-y-2 text-sm text-ink-600 dark:text-ink-200">
+      <li>✗ {isDE ? 'Wir sind keine Anwaltskanzlei. Wenn Sie verklagt wurden, brauchen Sie zuerst einen Anwalt.' : 'We are not a law firm. If you have been sued, you need a lawyer first.'}</li>
+      <li>✗ {isDE ? 'Wir sind keine "Compliance-Versicherung". Wir können niemandem garantieren, dass er nicht verklagt wird.' : 'We are not "compliance insurance". We cannot guarantee anyone that they won’t be sued.'}</li>
+      <li>✗ {isDE ? 'Wir sind keine Overlay-Anbieter. Wir verachten sie aktiv.' : 'We are not overlay vendors. We actively despise them.'}</li>
+    </ul>
+
+    <h2 class="mt-12 text-2xl font-bold">{isDE ? 'Mehr erfahren' : 'Learn more'}</h2>
+    <ul class="mt-4 space-y-2 text-sm">
+      <li>→ <a class="underline" href={routePath('team', locale)}>{isDE ? 'Lernen Sie das Team kennen' : 'Meet the team'}</a></li>
+      <li>→ <a class="underline" href={routePath('methodology', locale)}>{isDE ? 'Wie wir prüfen' : 'How we audit'}</a></li>
+      <li>→ <a class="underline" href={routePath('caseStudies', locale)}>{isDE ? 'Fallstudien' : 'Case studies'}</a></li>
+      <li>→ <a class="underline" href={routePath('legalLandscape', locale)}>{isDE ? 'Aktuelle Rechtslage' : 'The current legal landscape'}</a></li>
+    </ul>
+  </div>
+</section>

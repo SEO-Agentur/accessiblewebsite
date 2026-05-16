@@ -1,0 +1,102 @@
+---
+import type { Locale } from '@accessiblewebsite/shared';
+import { routePath } from '../i18n/routes';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const isDE = locale === 'de';
+
+const studies = [
+  {
+    slug: 'mittelstand-saas',
+    industry: isDE ? 'B2B SaaS' : 'B2B SaaS',
+    headline: isDE
+      ? 'Mittelständischer SaaS-Anbieter: von 34 auf 98 in 21 Tagen'
+      : 'Mid-market SaaS vendor: from 34 to 98 in 21 days',
+    summary: isDE
+      ? 'Mit dem Inkrafttreten des EAA stand der Vertrieb in Deutschland still — Procurement-Teams verlangten VPAT-Nachweise. Wir lieferten Audit, Code-Korrekturen und Dokumentation in drei Wochen. Drei eingefrorene Deals lebten innerhalb von vier Wochen wieder auf.'
+      : 'When the EAA took effect, German sales stalled — procurement teams demanded VPAT evidence. We delivered audit, code fixes, and documentation in three weeks. Three frozen deals came back to life within four weeks.',
+    before: 34,
+    after: 98,
+    duration: isDE ? '21 Tage' : '21 days',
+  },
+  {
+    slug: 'e-commerce-fashion',
+    industry: isDE ? 'E-Commerce (Mode)' : 'E-commerce (fashion)',
+    headline: isDE
+      ? 'Online-Modehändler: 67 → 96, Conversion-Rate +4,1 %'
+      : 'Online fashion retailer: 67 → 96, conversion rate +4.1%',
+    summary: isDE
+      ? 'Verbesserter Farbkontrast und tatsächlich funktionierende Tastatur-Navigation hatten einen messbaren Effekt auf alle Nutzer — nicht nur jene mit Einschränkungen. A/B-Test über sechs Wochen.'
+      : 'Improved colour contrast and actually-working keyboard navigation had a measurable effect on every user — not just those with disabilities. Six-week A/B test.',
+    before: 67,
+    after: 96,
+    duration: isDE ? '14 Tage' : '14 days',
+  },
+  {
+    slug: 'oeffentlicher-sektor',
+    industry: isDE ? 'Öffentlicher Sektor' : 'Public sector',
+    headline: isDE
+      ? 'Bürgerportal einer deutschen Stadt: 41 → 99, vollständige BITV-Konformität'
+      : 'A German city’s citizen portal: 41 → 99, full BITV conformance',
+    summary: isDE
+      ? 'Ein Bürgerportal mit 1.200 Seiten musste BITV 2.0 und damit faktisch WCAG 2.1 AA + EN 301 549 erfüllen. Wir gingen über das Minimum: Tastatur-Navigation, klare Sprache, NVDA-getestet. Audit-fähige Dokumentation für die Stadtverwaltung.'
+      : 'A 1,200-page citizen portal had to meet BITV 2.0 (effectively WCAG 2.1 AA + EN 301 549). We went beyond minimum: keyboard nav, plain language, NVDA-tested. Audit-ready documentation for the city government.',
+    before: 41,
+    after: 99,
+    duration: isDE ? '6 Wochen' : '6 weeks',
+  },
+];
+---
+
+<section class="px-4 py-16">
+  <div class="mx-auto max-w-5xl">
+    <h1 class="text-4xl font-bold tracking-tight">
+      {isDE ? 'Fallstudien' : 'Case studies'}
+    </h1>
+    <p class="mt-4 text-lg text-ink-600 dark:text-ink-200">
+      {isDE
+        ? 'Echte Bewertungen, echte Zeitrahmen, anonymisiert auf Wunsch des Kunden. Auf Anfrage stellen wir Referenz-Kontakte zur Verfügung.'
+        : 'Real scores, real timelines, anonymised at client request. Reference contacts available on request.'}
+    </p>
+
+    <div class="mt-12 space-y-6">
+      {studies.map((s) => (
+        <article class="rounded-xl border border-ink-200 bg-white p-6 dark:border-ink-600 dark:bg-ink-800">
+          <p class="text-xs uppercase tracking-wide text-ink-400">{s.industry}</p>
+          <h2 class="mt-1 text-xl font-bold">{s.headline}</h2>
+          <p class="mt-3 text-sm text-ink-600 dark:text-ink-200">{s.summary}</p>
+          <dl class="mt-4 grid grid-cols-3 gap-4 text-sm">
+            <div>
+              <dt class="text-ink-400">{isDE ? 'Vorher' : 'Before'}</dt>
+              <dd class="mt-1 text-2xl font-bold text-red-600 dark:text-red-400">{s.before}/100</dd>
+            </div>
+            <div>
+              <dt class="text-ink-400">{isDE ? 'Nachher' : 'After'}</dt>
+              <dd class="mt-1 text-2xl font-bold text-accent-600 dark:text-accent-50">{s.after}/100</dd>
+            </div>
+            <div>
+              <dt class="text-ink-400">{isDE ? 'Dauer' : 'Duration'}</dt>
+              <dd class="mt-1 text-2xl font-bold">{s.duration}</dd>
+            </div>
+          </dl>
+        </article>
+      ))}
+    </div>
+
+    <div class="mt-16 rounded-xl bg-ink-50 p-6 dark:bg-ink-800/50">
+      <h2 class="text-xl font-bold">{isDE ? 'Möchten Sie die nächste sein?' : 'Want to be the next one?'}</h2>
+      <p class="mt-2 text-sm text-ink-600 dark:text-ink-200">
+        {isDE
+          ? 'Wir starten mit einem kostenlosen Scan und einem 48-Stunden-Angebot. Keine Verpflichtung.'
+          : 'We start with a free scan and a 48-hour quote. No commitment.'}
+      </p>
+      <a href={routePath('remediation', locale)} class="mt-4 inline-block rounded-md bg-accent-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-accent-600">
+        {isDE ? 'Angebot anfordern' : 'Request a quote'}
+      </a>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,53 @@
+---
+import type { Locale } from '@accessiblewebsite/shared';
+import { routePath } from '../i18n/routes';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const isDE = locale === 'de';
+---
+
+<section class="px-4 py-24">
+  <div class="mx-auto max-w-2xl text-center">
+    <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-accent-500 text-white" aria-hidden="true">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 6 9 17l-5-5" />
+      </svg>
+    </div>
+
+    <h1 class="mt-6 text-3xl font-bold tracking-tight">
+      {isDE ? 'Vielen Dank — wir melden uns innerhalb von 48 Stunden' : "Thank you — we'll reply within 48 hours"}
+    </h1>
+    <p class="mt-4 text-lg text-ink-600 dark:text-ink-200">
+      {isDE
+        ? 'Ihre Anfrage ist eingegangen. Eine Fachkraft aus unserem Team meldet sich mit einem Festpreis-Angebot, einem Zeitplan und allen Fragen, die wir noch haben.'
+        : 'Your request is in. A specialist on our team will reply with a fixed-price quote, a timeline, and any questions we still have.'}
+    </p>
+
+    <div class="mt-8 rounded-xl bg-ink-50 p-6 text-left text-sm dark:bg-ink-800/50">
+      <h2 class="font-semibold">{isDE ? 'Was als nächstes passiert' : 'What happens next'}</h2>
+      <ol class="mt-3 space-y-2 text-ink-600 dark:text-ink-200">
+        <li>1. {isDE ? 'Wir scannen Ihre Webseite vollständig (kostenlos, automatisch).' : 'We run a full scan of your site (free, automatic).'}</li>
+        <li>2. {isDE ? 'Eine Fachkraft prüft die Top-Issues manuell.' : 'A specialist reviews the top issues by hand.'}</li>
+        <li>3. {isDE ? 'Sie erhalten ein Festpreis-Angebot per E-Mail — meist innerhalb von 24 Stunden.' : 'You receive a fixed-price quote by email — usually within 24 hours.'}</li>
+        <li>4. {isDE ? 'Wenn Sie zustimmen, beginnen wir innerhalb von 5 Werktagen.' : 'If you accept, we begin within 5 business days.'}</li>
+      </ol>
+    </div>
+
+    <p class="mt-8 text-sm text-ink-400">
+      {isDE ? 'Falls etwas dringend ist, schreiben Sie uns direkt: ' : 'If anything is urgent, write us directly: '}
+      <a class="underline" href={`mailto:${isDE ? 'team@barrierefreiewebseite.net' : 'team@accessiblewebsite.net'}`}>
+        {isDE ? 'team@barrierefreiewebseite.net' : 'team@accessiblewebsite.net'}
+      </a>
+    </p>
+
+    <div class="mt-10">
+      <a href={routePath('home', locale)} class="text-sm font-semibold text-accent-600 hover:underline dark:text-accent-50">
+        ← {isDE ? 'Zurück zur Startseite' : 'Back to home'}
+      </a>
+    </div>
+  </div>
+</section>

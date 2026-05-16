@@ -1,0 +1,91 @@
+---
+import type { Locale } from '@accessiblewebsite/shared';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const isDE = locale === 'de';
+const today = new Date().toISOString().slice(0, 10);
+---
+
+<section class="px-4 py-16">
+  <article class="mx-auto max-w-3xl">
+    <h1 class="text-4xl font-bold tracking-tight">
+      {isDE ? 'Allgemeine Geschäftsbedingungen' : 'Terms of service'}
+    </h1>
+    <p class="mt-2 text-sm text-ink-400">
+      {isDE ? 'Stand: ' : 'Effective: '}<time datetime={today}>{today}</time>
+    </p>
+
+    <h2 class="mt-8 text-xl font-bold">{isDE ? '1. Geltungsbereich' : '1. Scope'}</h2>
+    <p class="mt-2 text-sm text-ink-600 dark:text-ink-200">
+      {isDE
+        ? 'Diese AGB regeln die Nutzung der unter accessiblewebsite.net und barrierefreiewebseite.net angebotenen Dienste (gemeinsam: "der Dienst") zwischen dem Betreiber und dem Kunden.'
+        : 'These terms govern the use of the services offered at accessiblewebsite.net and barrierefreiewebseite.net (collectively, "the Service") between the operator and the customer.'}
+    </p>
+
+    <h2 class="mt-8 text-xl font-bold">{isDE ? '2. Leistungen' : '2. Services'}</h2>
+    <ul class="mt-3 space-y-2 text-sm text-ink-600 dark:text-ink-200">
+      <li>• {isDE ? 'Automatisierte Barrierefreiheits-Prüfungen gegen WCAG 2.2 AA.' : 'Automated accessibility scans against WCAG 2.2 AA.'}</li>
+      <li>• {isDE ? 'Ausstellung eines Silber- bzw. Gold-Siegels nach bestandener Prüfung.' : 'Issuance of Silver or Gold seals upon passing the scan.'}</li>
+      <li>• {isDE ? 'Listung im öffentlichen Verzeichnis (optional, opt-out möglich).' : 'Listing in the public directory (optional, opt-out available).'}</li>
+      <li>• {isDE ? 'Manuelle Umsetzungs-Dienstleistungen gemäß individueller Vereinbarung.' : 'Manual remediation services per individual agreement.'}</li>
+    </ul>
+
+    <h2 class="mt-8 text-xl font-bold">{isDE ? '3. Vertragsschluss' : '3. Contract formation'}</h2>
+    <p class="mt-2 text-sm text-ink-600 dark:text-ink-200">
+      {isDE
+        ? 'Bei kostenlosen Diensten gilt der Vertrag mit der Kontoerstellung als geschlossen. Bei kostenpflichtigen Abonnements oder Umsetzungs-Aufträgen gilt der Vertrag mit der Bestätigung der Bestellung bzw. dem unterzeichneten Angebot als geschlossen.'
+        : 'For free services, the contract is formed upon account creation. For paid subscriptions or remediation projects, the contract is formed upon order confirmation or signed quote.'}
+    </p>
+
+    <h2 class="mt-8 text-xl font-bold">{isDE ? '4. Preise und Zahlung' : '4. Pricing and payment'}</h2>
+    <p class="mt-2 text-sm text-ink-600 dark:text-ink-200">
+      {isDE
+        ? 'Preise verstehen sich in Euro (€) zzgl. gesetzlicher Umsatzsteuer, sofern anwendbar. Abonnement-Zahlungen erfolgen monatlich oder jährlich im Voraus über Stripe. Umsetzungs-Projekte werden zu 50 % bei Auftragsannahme und 50 % bei Lieferung fällig.'
+        : 'Prices are in Euros (€) plus VAT where applicable. Subscription payments are billed monthly or annually in advance via Stripe. Remediation projects are billed 50% on contract acceptance and 50% on delivery.'}
+    </p>
+
+    <h2 class="mt-8 text-xl font-bold">{isDE ? '5. Widerrufsrecht (Verbraucher)' : '5. Right of withdrawal (consumers)'}</h2>
+    <p class="mt-2 text-sm text-ink-600 dark:text-ink-200">
+      {isDE
+        ? 'Verbraucher haben das Recht, binnen 14 Tagen ohne Angabe von Gründen den Vertrag zu widerrufen. Bei sofortiger Leistungserbringung (digitaler Dienst, der ohne Wartezeit beginnt) verzichtet der Verbraucher mit Beginn der Nutzung auf das Widerrufsrecht.'
+        : 'Consumers have the right to withdraw from the contract within 14 days without reason. For services rendered immediately (digital service starting without delay), the consumer waives the right of withdrawal upon starting to use the service.'}
+    </p>
+
+    <h2 class="mt-8 text-xl font-bold">{isDE ? '6. Haftung und Garantien' : '6. Liability and warranties'}</h2>
+    <p class="mt-2 text-sm text-ink-600 dark:text-ink-200">
+      {isDE
+        ? 'Wir liefern Konformitäts-Audits nach dem Stand der Technik. Wir geben keine Garantie, dass eine erfolgreich geprüfte Webseite gegen alle möglichen Klagen oder behördlichen Maßnahmen geschützt ist. Bei Umsetzungs-Projekten gilt eine 100 %-Garantie: Wenn die Webseite nach Lieferung den Re-Scan nicht besteht, erstatten wir den Auftragswert vollständig.'
+        : 'We deliver compliance audits to the state of the art. We make no warranty that a successfully scanned website is shielded from all possible lawsuits or regulatory action. For remediation projects, a 100% guarantee applies: if the site does not pass the post-delivery re-scan, we refund the project value in full.'}
+    </p>
+    <p class="mt-2 text-sm text-ink-600 dark:text-ink-200">
+      {isDE
+        ? 'Die Haftung für mittelbare Schäden, entgangenen Gewinn und Datenverlust ist ausgeschlossen, soweit gesetzlich zulässig. Die Haftung für Vorsatz und grobe Fahrlässigkeit bleibt unberührt.'
+        : 'Liability for indirect damages, lost profit, and data loss is excluded where legally permitted. Liability for intent and gross negligence is unaffected.'}
+    </p>
+
+    <h2 class="mt-8 text-xl font-bold">{isDE ? '7. Kündigung' : '7. Termination'}</h2>
+    <p class="mt-2 text-sm text-ink-600 dark:text-ink-200">
+      {isDE
+        ? 'Monats-Abonnements können jederzeit zum Ende der laufenden Abrechnungsperiode gekündigt werden. Jahres-Abonnements können bis zu 30 Tage vor Verlängerung gekündigt werden.'
+        : 'Monthly subscriptions can be cancelled any time at the end of the current billing period. Annual subscriptions can be cancelled up to 30 days before renewal.'}
+    </p>
+
+    <h2 class="mt-8 text-xl font-bold">{isDE ? '8. Anwendbares Recht und Gerichtsstand' : '8. Governing law and venue'}</h2>
+    <p class="mt-2 text-sm text-ink-600 dark:text-ink-200">
+      {isDE
+        ? 'Es gilt das Recht der Bundesrepublik Deutschland. Gerichtsstand für Kaufleute, juristische Personen des öffentlichen Rechts und öffentlich-rechtliche Sondervermögen ist der Sitz des Betreibers.'
+        : 'German law applies. The exclusive venue for merchants, legal persons under public law, and public-law special funds is the registered office of the operator.'}
+    </p>
+
+    <h2 class="mt-8 text-xl font-bold">{isDE ? '9. Salvatorische Klausel' : '9. Severability'}</h2>
+    <p class="mt-2 text-sm text-ink-600 dark:text-ink-200">
+      {isDE
+        ? 'Sollten einzelne Bestimmungen dieser AGB unwirksam sein, bleibt die Wirksamkeit der übrigen Bestimmungen unberührt.'
+        : 'If individual provisions of these terms are invalid, the validity of the remaining provisions is unaffected.'}
+    </p>
+  </article>
+</section>

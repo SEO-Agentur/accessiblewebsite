@@ -1,0 +1,156 @@
+---
+import type { Locale } from '@accessiblewebsite/shared';
+import { routePath } from '../i18n/routes';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const isDE = locale === 'de';
+---
+
+<section class="px-4 py-16">
+  <div class="mx-auto max-w-4xl">
+    <h1 class="text-4xl font-bold tracking-tight">
+      {isDE ? 'Wie wir prüfen' : 'How we audit'}
+    </h1>
+    <p class="mt-4 text-lg text-ink-600 dark:text-ink-200">
+      {isDE
+        ? 'Echte Browser. Echte Berechnungen. Keine Heuristiken-Theaterstücke. Diese Seite beschreibt unsere Prüfmethodik in genug Detail, dass Ihre Entwickler und Ihre Anwälte sie nachvollziehen können.'
+        : "Real browsers. Real computation. No heuristic theatre. This page describes our audit methodology in enough detail that your developers and your lawyers can both follow it."}
+    </p>
+
+    <h2 class="mt-12 text-2xl font-bold">{isDE ? '1. Welche Regeln wir prüfen' : '1. What we test against'}</h2>
+    <p class="mt-3 text-ink-600 dark:text-ink-200">
+      {isDE
+        ? 'Wir messen gegen die Erfolgskriterien der Web Content Accessibility Guidelines 2.2 auf Konformitätsstufe AA — den Stand der Technik, der von folgenden Regelwerken verlangt wird:'
+        : 'We measure against the Web Content Accessibility Guidelines 2.2 at conformance level AA — the state of the art required by:'}
+    </p>
+    <ul class="mt-4 space-y-2 text-sm text-ink-600 dark:text-ink-200">
+      <li>• <a class="underline" rel="noopener" href="https://www.w3.org/TR/WCAG22/">W3C WCAG 2.2 AA</a> — {isDE ? 'die internationale Norm' : 'the international standard'}</li>
+      <li>• <a class="underline" rel="noopener" href="https://eur-lex.europa.eu/eli/dir/2019/882/oj">European Accessibility Act (Directive 2019/882)</a> — {isDE ? 'EU-weit durchsetzbar seit 28. Juni 2025' : 'EU-wide, enforceable since 28 June 2025'}</li>
+      <li>• <a class="underline" rel="noopener" href="https://www.gesetze-im-internet.de/bfsg/">Barrierefreiheitsstärkungsgesetz (BFSG)</a> — {isDE ? 'deutsche Umsetzung des EAA' : 'German implementation of the EAA'}</li>
+      <li>• <a class="underline" rel="noopener" href="https://www.ada.gov/resources/2010-design-standards/">Americans with Disabilities Act, Title III</a> — {isDE ? 'US-Bundesgesetz' : 'US federal law'}</li>
+      <li>• <a class="underline" rel="noopener" href="https://www.section508.gov/">Section 508</a> — {isDE ? 'US-Bundesbehörden' : 'US federal agencies'}</li>
+      <li>• <a class="underline" rel="noopener" href="https://www.etsi.org/deliver/etsi_en/301500_301599/301549/03.02.01_60/en_301549v030201p.pdf">EN 301 549</a> — {isDE ? 'EU-harmonisierte Norm für ICT-Beschaffung' : 'harmonised European standard for ICT procurement'}</li>
+    </ul>
+
+    <h2 class="mt-12 text-2xl font-bold">{isDE ? '2. Wie der automatische Scan funktioniert' : '2. How the automated scan works'}</h2>
+    <p class="mt-3 text-ink-600 dark:text-ink-200">
+      {isDE
+        ? 'Wir starten einen echten Chromium-Browser über Playwright, laden Ihre Seite mit Ihren echten Stylesheets und Skripten und injizieren'
+        : 'We launch a real Chromium browser via Playwright, load your page with its real stylesheets and scripts, and inject'} <a class="underline" rel="noopener" href="https://github.com/dequelabs/axe-core">axe-core</a>{isDE
+        ? ' in den Seitenkontext. axe-core ist die gleiche Test-Engine wie hinter Google Lighthouse, WAVE und Deque WorldSpace.'
+        : ' into the page context. axe-core is the same test engine that powers Google Lighthouse, WAVE, and Deque WorldSpace.'}
+    </p>
+    <p class="mt-3 text-ink-600 dark:text-ink-200">
+      {isDE
+        ? 'Wichtig: Ein echter Browser-Kontext ist nicht verhandelbar. Etwa ein Drittel der WCAG-Regeln — einschließlich Farbkontrast (1.4.3), Sichtbarkeit des Fokus (2.4.7) und Berührungsziel-Größe (2.5.8, neu in WCAG 2.2) — benötigen '
+        : 'Crucially: a real browser context is non-negotiable. Around a third of WCAG rules — including colour contrast (1.4.3), focus visibility (2.4.7), and touch target size (2.5.8, new in WCAG 2.2) — require '}<code class="rounded bg-ink-100 px-1.5 py-0.5 text-sm dark:bg-ink-800">getComputedStyle()</code>{isDE
+        ? ' nach einem echten Layout-Pass. Scanner, die auf statischem HTML basieren, übersehen sie still.'
+        : ' after a real layout pass. Scanners that operate on static HTML silently miss them.'}
+    </p>
+
+    <h2 class="mt-12 text-2xl font-bold">{isDE ? '3. Was geprüft wird' : '3. What is checked'}</h2>
+    <ul class="mt-4 grid gap-3 sm:grid-cols-2">
+      <li class="rounded-lg border border-ink-200 p-3 text-sm dark:border-ink-600">
+        <strong>{isDE ? 'Wahrnehmbarkeit' : 'Perceivable'}</strong>
+        <p class="mt-1 text-ink-600 dark:text-ink-200">
+          {isDE
+            ? 'Alt-Texte für Bilder, Farbkontrast 4,5:1 (Text) und 3:1 (Großtext/UI), Untertitel, semantisches HTML, korrekte Überschriften-Hierarchie.'
+            : 'Image alt text, colour contrast 4.5:1 (text) and 3:1 (large/UI), captions, semantic HTML, correct heading hierarchy.'}
+        </p>
+      </li>
+      <li class="rounded-lg border border-ink-200 p-3 text-sm dark:border-ink-600">
+        <strong>{isDE ? 'Bedienbarkeit' : 'Operable'}</strong>
+        <p class="mt-1 text-ink-600 dark:text-ink-200">
+          {isDE
+            ? 'Vollständige Tastatur-Navigation, sichtbarer Fokus-Indikator, Skip-Link, Berührungsziele ≥ 24×24 px, keine Tastatur-Fallen.'
+            : 'Full keyboard navigation, visible focus indicator, skip link, touch targets ≥24×24 px, no keyboard traps.'}
+        </p>
+      </li>
+      <li class="rounded-lg border border-ink-200 p-3 text-sm dark:border-ink-600">
+        <strong>{isDE ? 'Verständlichkeit' : 'Understandable'}</strong>
+        <p class="mt-1 text-ink-600 dark:text-ink-200">
+          {isDE
+            ? 'lang-Attribut korrekt gesetzt, Formularfelder mit Labels verknüpft, Fehlermeldungen via aria-describedby, konsistente Navigation.'
+            : 'lang attribute set correctly, form fields associated with labels, error messages via aria-describedby, consistent navigation.'}
+        </p>
+      </li>
+      <li class="rounded-lg border border-ink-200 p-3 text-sm dark:border-ink-600">
+        <strong>{isDE ? 'Robustheit' : 'Robust'}</strong>
+        <p class="mt-1 text-ink-600 dark:text-ink-200">
+          {isDE
+            ? 'Valides HTML5, korrekte ARIA-Rollen und -Zustände, kein duplizierter id-Attribute, kompatibel mit NVDA, JAWS, VoiceOver, TalkBack.'
+            : 'Valid HTML5, correct ARIA roles and states, no duplicate id attributes, compatible with NVDA, JAWS, VoiceOver, TalkBack.'}
+        </p>
+      </li>
+    </ul>
+
+    <h2 class="mt-12 text-2xl font-bold">{isDE ? '4. Wie wir bewerten' : '4. How we score'}</h2>
+    <p class="mt-3 text-ink-600 dark:text-ink-200">
+      {isDE
+        ? 'Jede Verletzung trägt eine Strafe abhängig von ihrer Schwere bei: kritisch −12, schwerwiegend −6, mittel −3, gering −1. Eine Webseite startet bei 100. Werte ab 80 sind silber-würdig, ab 95 gold-würdig. Wir veröffentlichen unsere Gewichtungs-Tabelle bewusst, damit Sie sie selbst überprüfen können.'
+        : 'Each violation contributes a penalty weighted by severity: critical −12, serious −6, moderate −3, minor −1. A site starts at 100. Scores ≥ 80 qualify for the Silver Seal; ≥ 95 for Gold. We publish our weighting table on purpose so you can verify it yourself.'}
+    </p>
+
+    <h2 class="mt-12 text-2xl font-bold">{isDE ? '5. Was die Automation NICHT findet' : "5. What automation doesn't catch"}</h2>
+    <p class="mt-3 text-ink-600 dark:text-ink-200">
+      {isDE
+        ? 'Automatische Tests finden zwischen 30 % und 60 % der WCAG-Verstöße, abhängig von der Seitenkomplexität — der Rest braucht menschliches Urteil:'
+        : 'Automated testing catches between 30% and 60% of WCAG violations, depending on page complexity — the rest requires human judgment:'}
+    </p>
+    <ul class="mt-4 space-y-2 text-sm text-ink-600 dark:text-ink-200">
+      <li>• {isDE ? 'Ob ein Alt-Text die Bildaussage tatsächlich beschreibt' : 'Whether an alt text actually describes the image'}</li>
+      <li>• {isDE ? 'Ob die Tastatur-Reihenfolge sinnvoll ist' : 'Whether the keyboard order makes sense'}</li>
+      <li>• {isDE ? 'Ob ARIA-Beschriftungen den Bildschirm-Vorleser hilfreich machen oder verwirren' : 'Whether ARIA labels help or confuse the screen reader'}</li>
+      <li>• {isDE ? 'Ob Animationen Anfälle auslösen könnten' : 'Whether animations could trigger seizures'}</li>
+      <li>• {isDE ? 'Ob Inhalte ohne kognitive Last verständlich sind' : 'Whether content is comprehensible without cognitive load'}</li>
+    </ul>
+    <p class="mt-4 text-ink-600 dark:text-ink-200">
+      {isDE
+        ? 'Deshalb prüfen wir alle Business- und Enterprise-Umsetzungs-Projekte zusätzlich von Hand: NVDA auf Windows, VoiceOver auf macOS und iOS, TalkBack auf Android.'
+        : 'For this reason, every Business and Enterprise remediation project includes manual testing: NVDA on Windows, VoiceOver on macOS and iOS, TalkBack on Android.'}
+    </p>
+
+    <h2 class="mt-12 text-2xl font-bold">{isDE ? '6. Wie oft wir scannen' : '6. How often we scan'}</h2>
+    <ul class="mt-4 space-y-2 text-sm text-ink-600 dark:text-ink-200">
+      <li>• <strong>{isDE ? 'Silber' : 'Silver'}:</strong> {isDE ? 'einmalig (Startseite), Sie können jederzeit erneut prüfen.' : 'one-time (homepage), re-scan anytime.'}</li>
+      <li>• <strong>Gold:</strong> {isDE ? 'wöchentlicher Vollscan, bis 250 Seiten, Sitemap-respektiert.' : 'weekly full-site crawl, up to 250 pages, sitemap-respecting.'}</li>
+      <li>• <strong>Gold Pro:</strong> {isDE ? 'täglicher Scan, bis 2.500 Seiten.' : 'daily scans, up to 2,500 pages.'}</li>
+      <li>• <strong>Enterprise:</strong> {isDE ? 'unbegrenzt, individuell konfigurierbar.' : 'unlimited, custom scheduled.'}</li>
+    </ul>
+
+    <h2 class="mt-12 text-2xl font-bold">{isDE ? '7. Rohdaten gehören Ihnen' : '7. Your raw data is yours'}</h2>
+    <p class="mt-3 text-ink-600 dark:text-ink-200">
+      {isDE
+        ? 'Jeder Scan-Lauf erzeugt eine vollständige axe-core JSON-Ausgabe, die wir speichern. Sie können sie jederzeit über die API abrufen (Gold Pro / Enterprise) oder als PDF-Bericht herunterladen. Kein Datenversand an Dritte, keine Werbe-Tracker, kein KI-Training auf Ihren Daten.'
+        : "Every scan run produces a full axe-core JSON output, which we store. You can retrieve it any time via the API (Gold Pro / Enterprise) or download it as a PDF report. No third-party data sharing, no advertising trackers, no AI training on your data."}
+    </p>
+
+    <h2 class="mt-12 text-2xl font-bold">{isDE ? '8. Wer prüft eigentlich' : '8. Who actually does the work'}</h2>
+    <p class="mt-3 text-ink-600 dark:text-ink-200">
+      {isDE ? 'Unser Team trägt die ' : 'Our team holds '}
+      <a class="underline" rel="noopener" href="https://www.accessibilityassociation.org/s/certification">IAAP CPACC and IAAP WAS</a>
+      {isDE
+        ? ' Zertifizierungen. Lernen Sie uns auf der '
+        : ' certifications. Meet us on the '}
+      <a href={routePath('team', locale)} class="underline">{isDE ? 'Team-Seite' : 'team page'}</a>.
+    </p>
+
+    <div class="mt-16 rounded-xl border border-ink-200 bg-accent-50 p-6 dark:border-ink-600 dark:bg-accent-700/10">
+      <p class="font-semibold">
+        {isDE ? 'Bereit, Ihre Webseite zu prüfen?' : 'Ready to test your site?'}
+      </p>
+      <p class="mt-1 text-sm text-ink-600 dark:text-ink-200">
+        {isDE
+          ? 'Ein Scan ist kostenlos. Sie brauchen kein Konto.'
+          : 'A scan is free. You don’t need an account.'}
+      </p>
+      <a href={routePath('home', locale)} class="mt-4 inline-block rounded-md bg-accent-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-accent-600">
+        {isDE ? 'Jetzt scannen' : 'Run a scan'}
+      </a>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,94 @@
+---
+import type { Locale } from '@accessiblewebsite/shared';
+import { routePath } from '../i18n/routes';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const isDE = locale === 'de';
+---
+
+<section class="px-4 py-16">
+  <div class="mx-auto max-w-4xl">
+    <h1 class="text-4xl font-bold tracking-tight">
+      {isDE ? 'Die Rechtslage 2026' : 'The 2026 legal landscape'}
+    </h1>
+    <p class="mt-4 text-lg text-ink-600 dark:text-ink-200">
+      {isDE
+        ? 'Wer ist betroffen, was wird verlangt, was passiert bei Nicht-Konformität — pro Rechtsraum, ohne Anwalts-Theatralik. Diese Seite ist keine Rechtsberatung. Sie ist eine ehrliche Zusammenfassung dessen, was wir und unsere Kunden sehen.'
+        : 'Who is covered, what is required, what happens if you do not comply — per jurisdiction, without lawyer theatre. This page is not legal advice. It is an honest summary of what we and our clients see.'}
+    </p>
+
+    <h2 class="mt-12 text-2xl font-bold">{isDE ? 'European Accessibility Act (EAA) — Richtlinie 2019/882' : 'European Accessibility Act (EAA) — Directive 2019/882'}</h2>
+    <p class="mt-3 text-ink-600 dark:text-ink-200">
+      {isDE ? 'Seit dem 28. Juni 2025 durchsetzbar. Betrifft fast jedes Unternehmen, das in der EU digitale Produkte oder Dienstleistungen an Verbraucher verkauft.' : 'Enforceable since 28 June 2025. Affects nearly every business that sells digital products or services to consumers in the EU.'}
+    </p>
+    <ul class="mt-4 space-y-2 text-sm text-ink-600 dark:text-ink-200">
+      <li>• <strong>{isDE ? 'Wer:' : 'Who:'}</strong> {isDE ? 'B2C-Unternehmen mit > 10 Mitarbeitenden oder > 2 Mio. € Umsatz, die EU-Verbraucher bedienen. Banken, E-Commerce, Streaming, Reise, E-Books, Tickets — fast alles digital für Verbraucher.' : 'B2C businesses with >10 employees or >€2M turnover serving EU consumers. Banking, e-commerce, streaming, travel, e-books, ticketing — nearly everything digital for consumers.'}</li>
+      <li>• <strong>{isDE ? 'Was:' : 'What:'}</strong> {isDE ? 'Konformität mit harmonisierten Normen, in der Praxis EN 301 549 (das WCAG 2.1 AA enthält).' : 'Conformance with harmonised standards, in practice EN 301 549 (which embeds WCAG 2.1 AA).'}</li>
+      <li>• <strong>{isDE ? 'Bußgelder:' : 'Fines:'}</strong> {isDE ? '100.000–1.000.000 € je nach Mitgliedstaat. Zusätzlich Verkaufsverbot des Produkts.' : '€100,000–€1,000,000 depending on member state. Plus product withdrawal orders.'}</li>
+      <li>• <strong>{isDE ? 'Quelle:' : 'Source:'}</strong> <a class="underline" rel="noopener" href="https://eur-lex.europa.eu/eli/dir/2019/882/oj">Directive (EU) 2019/882 on EUR-Lex</a></li>
+    </ul>
+
+    <h2 class="mt-12 text-2xl font-bold">{isDE ? 'BFSG — Barrierefreiheitsstärkungsgesetz (DE)' : 'BFSG — Barrierefreiheitsstärkungsgesetz (Germany)'}</h2>
+    <p class="mt-3 text-ink-600 dark:text-ink-200">
+      {isDE
+        ? 'Die deutsche Umsetzung des EAA. Seit 28. Juni 2025 in Kraft. Marktüberwachung durch die Marktüberwachungsbehörden der Länder.'
+        : 'The German implementation of the EAA. In force since 28 June 2025. Market surveillance by the federal-state market surveillance authorities.'}
+    </p>
+    <ul class="mt-4 space-y-2 text-sm text-ink-600 dark:text-ink-200">
+      <li>• <strong>{isDE ? 'Bußgelder:' : 'Fines:'}</strong> {isDE ? 'bis 100.000 € pro Verstoß (§ 37 BFSG). Aufsichtsbehörden können Vertrieb stoppen.' : 'up to €100,000 per violation (§ 37 BFSG). Authorities can order sales stop.'}</li>
+      <li>• <strong>{isDE ? 'Was verlangt wird:' : 'What is required:'}</strong> {isDE ? 'EN 301 549, in der Praxis WCAG 2.1 AA. WCAG 2.2 AA ist sicherheitsorientiert und empfehlenswert.' : 'EN 301 549, in practice WCAG 2.1 AA. WCAG 2.2 AA is the prudent baseline.'}</li>
+      <li>• <strong>{isDE ? 'Quelle:' : 'Source:'}</strong> <a class="underline" rel="noopener" href="https://www.gesetze-im-internet.de/bfsg/">BFSG auf Gesetze-im-Internet</a></li>
+    </ul>
+
+    <h2 class="mt-12 text-2xl font-bold">ADA Title III (USA)</h2>
+    <p class="mt-3 text-ink-600 dark:text-ink-200">
+      {isDE
+        ? 'Der Americans with Disabilities Act erwähnt das Web nicht explizit, aber die US-Gerichte legen ihn so aus, dass öffentlich zugängliche Webseiten "places of public accommodation" sein können. Klagen explodieren seit Jahren.'
+        : 'The Americans with Disabilities Act does not explicitly mention the web, but US courts have read it as covering public-facing websites as "places of public accommodation". Lawsuit filings have been climbing for years.'}
+    </p>
+    <ul class="mt-4 space-y-2 text-sm text-ink-600 dark:text-ink-200">
+      <li>• <strong>{isDE ? 'Klagen 2024:' : '2024 lawsuits:'}</strong> {isDE ? 'über 4.000 Bundes-Klagen wegen Web-Barrierefreiheit (Seyfarth-Shaw-Bericht).' : 'over 4,000 federal lawsuits on web accessibility (Seyfarth Shaw report).'}</li>
+      <li>• <strong>{isDE ? 'Häufige Bemerkungen:' : 'Common allegations:'}</strong> {isDE ? 'fehlende Alt-Texte, fehlende Tastatur-Navigation, schlechter Farbkontrast, fehlende Formular-Labels.' : 'missing alt text, missing keyboard navigation, poor colour contrast, missing form labels.'}</li>
+      <li>• <strong>{isDE ? 'Vergleichswerte:' : 'Settlement values:'}</strong> {isDE ? 'meist 5.000–50.000 $ plus Pflicht zur Umsetzung. Gerichtskosten oft das Mehrfache.' : 'typically $5,000–$50,000 plus mandatory remediation. Legal costs often a multiple of that.'}</li>
+      <li>• <strong>{isDE ? 'Quelle:' : 'Source:'}</strong> <a class="underline" rel="noopener" href="https://www.seyfarth.com/news-insights/ada-title-iii-website-accessibility-lawsuits.html">Seyfarth Shaw ADA Title III Report</a></li>
+    </ul>
+
+    <h2 class="mt-12 text-2xl font-bold">Section 508 (USA, federal)</h2>
+    <p class="mt-3 text-ink-600 dark:text-ink-200">
+      {isDE
+        ? 'Wenn Sie an US-Bundesbehörden verkaufen oder von ihnen gefördert werden, gilt Section 508. Es verweist explizit auf WCAG 2.0 AA als Maßstab und ein VPAT-Dokument ist faktisch Pflicht.'
+        : 'If you sell to or are funded by US federal agencies, Section 508 applies. It explicitly references WCAG 2.0 AA and a VPAT document is effectively mandatory.'}
+    </p>
+
+    <h2 class="mt-12 text-2xl font-bold">{isDE ? 'Was Sie als "Good-Faith"-Konformität zeigen müssen' : 'What you must show as "good-faith" compliance'}</h2>
+    <ol class="mt-4 space-y-3 text-sm text-ink-600 dark:text-ink-200">
+      <li>1. {isDE ? 'Audit durch eine qualifizierte Stelle, datiert und unterzeichnet.' : 'Audit by a qualified party, dated and signed.'}</li>
+      <li>2. {isDE ? 'Behobene Probleme, dokumentiert pro Erfolgskriterium.' : 'Issues remediated, documented per success criterion.'}</li>
+      <li>3. {isDE ? 'Öffentliche Barrierefreiheits-Erklärung mit Kontaktweg für Probleme.' : 'Public accessibility statement with a contact path for issues.'}</li>
+      <li>4. {isDE ? 'Laufendes Monitoring (mindestens quartalsweise).' : 'Ongoing monitoring (quarterly at minimum).'}</li>
+      <li>5. {isDE ? 'VPAT-Dokument für B2B-Vertrieb auf Anfrage.' : 'VPAT document for B2B sales on request.'}</li>
+    </ol>
+
+    <p class="mt-8 rounded-lg bg-ink-50 p-4 text-sm text-ink-600 dark:bg-ink-800/50 dark:text-ink-200">
+      {isDE
+        ? 'Diese Seite ist eine Zusammenfassung, keine Rechtsberatung. Bei konkretem Beratungsbedarf wenden Sie sich an einen auf IT-Recht spezialisierten Anwalt. Wir arbeiten regelmäßig mit den Rechtsabteilungen unserer Kunden zusammen — fragen Sie uns nach Empfehlungen.'
+        : 'This page is a summary, not legal advice. For specific guidance, consult an attorney specialised in IT law. We work with clients’ legal teams regularly — ask us for referrals.'}
+    </p>
+
+    <div class="mt-12 rounded-xl border border-ink-200 bg-accent-50 p-6 dark:border-ink-600 dark:bg-accent-700/10">
+      <h2 class="text-xl font-bold">{isDE ? 'Konformitäts-Dokumentation einholen' : 'Get compliance documentation'}</h2>
+      <p class="mt-2 text-sm">
+        {isDE
+          ? 'Unsere Business- und Enterprise-Pakete beinhalten ein vollständiges ADA/EAA/BFSG-Dokumentationspaket. Anwalts-tauglich, datiert, unterzeichnet.'
+          : 'Our Business and Enterprise packages include a full ADA/EAA/BFSG documentation pack. Lawyer-ready, dated, signed.'}
+      </p>
+      <a href={routePath('remediation', locale)} class="mt-4 inline-block rounded-md bg-accent-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-accent-600">
+        {isDE ? 'Pakete ansehen' : 'See the packages'}
+      </a>
+    </div>
+  </div>
+</section>

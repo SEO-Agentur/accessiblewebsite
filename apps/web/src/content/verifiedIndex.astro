@@ -1,0 +1,73 @@
+---
+import type { Locale } from '@accessiblewebsite/shared';
+import { routePath } from '../i18n/routes';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const isDE = locale === 'de';
+
+// Placeholder data — once monitored_sites has rows with is_public_in_directory=true,
+// query Drizzle here. Stays SSR (export const prerender = false in [...slug]).
+const sites: Array<{
+  domain: string;
+  score: number;
+  tier: 'silver' | 'gold';
+  industry: string;
+  country: string;
+}> = [];
+---
+
+<section class="px-4 py-16">
+  <div class="mx-auto max-w-5xl">
+    <h1 class="text-4xl font-bold tracking-tight">
+      {isDE ? 'Verifizierte Webseiten' : 'Verified websites'}
+    </h1>
+    <p class="mt-4 text-lg text-ink-600 dark:text-ink-200">
+      {isDE
+        ? 'Webseiten, die unabhängig auf WCAG 2.2 AA Konformität geprüft wurden. Jede Listung verlinkt auf den vollständigen Bericht, den letzten Scan, und die Verlaufsgeschichte.'
+        : 'Websites independently verified for WCAG 2.2 AA conformance. Every listing links to the full report, the latest scan, and the history.'}
+    </p>
+
+    {sites.length === 0 ? (
+      <div class="mt-12 rounded-xl border-2 border-dashed border-ink-200 p-12 text-center dark:border-ink-600">
+        <p class="text-lg font-semibold">
+          {isDE ? 'Noch keine öffentlichen Listungen' : 'No public listings yet'}
+        </p>
+        <p class="mt-2 text-sm text-ink-600 dark:text-ink-200">
+          {isDE
+            ? 'Sobald die ersten Webseiten ihre Prüfung bestehen und der öffentlichen Listung zustimmen, erscheinen sie hier. Möchten Sie die erste sein?'
+            : 'As soon as the first sites pass their scan and opt into the public directory, they will appear here. Want to be first?'}
+        </p>
+        <a href={routePath('home', locale)} class="mt-6 inline-block rounded-md bg-accent-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-accent-600">
+          {isDE ? 'Webseite jetzt prüfen' : 'Scan your site now'}
+        </a>
+      </div>
+    ) : (
+      <ul class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {sites.map((site) => (
+          <li class="rounded-xl border border-ink-200 bg-white p-4 dark:border-ink-600 dark:bg-ink-800">
+            <a href={`${routePath('verifiedIndex', locale)}/${site.domain}`} class="block">
+              <p class="font-semibold">{site.domain}</p>
+              <p class="text-sm text-ink-400">{site.industry} · {site.country}</p>
+              <p class="mt-2 text-2xl font-bold text-accent-600 dark:text-accent-50">{site.score}/100</p>
+              <p class="text-xs uppercase tracking-wide text-ink-400">{site.tier === 'gold' ? 'Gold' : 'Silver'}</p>
+            </a>
+          </li>
+        ))}
+      </ul>
+    )}
+
+    <div class="mt-16 rounded-xl bg-ink-50 p-6 dark:bg-ink-800/50">
+      <h2 class="text-xl font-bold">{isDE ? 'Wie das Siegel funktioniert' : 'How the seal works'}</h2>
+      <ol class="mt-4 space-y-3 text-sm text-ink-600 dark:text-ink-200">
+        <li>1. {isDE ? 'Sie führen einen kostenlosen Scan durch.' : 'You run a free scan.'}</li>
+        <li>2. {isDE ? 'Wenn der Wert ≥ 80 ist, erhalten Sie das Silber-Siegel (90 Tage gültig).' : 'If the score is ≥ 80, you earn the Silver Seal (valid 90 days).'}</li>
+        <li>3. {isDE ? 'Mit einem Gold-Abo wird das Siegel live: wöchentliche Scans, automatische Status-Updates, Alarme bei Regressionen.' : 'With a Gold subscription the seal goes live: weekly scans, automatic status updates, alerts on regression.'}</li>
+        <li>4. {isDE ? 'Klicker auf das Siegel landen auf Ihrer öffentlichen Verifizierungs-Seite. Vertrauenssignal, das Sie selbst nicht fälschen können.' : 'Clicks on the seal land on your public verification page. A trust signal you cannot fake yourself.'}</li>
+      </ol>
+    </div>
+  </div>
+</section>

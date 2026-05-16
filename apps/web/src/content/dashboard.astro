@@ -1,0 +1,60 @@
+---
+import type { Locale } from '@accessiblewebsite/shared';
+import { routePath } from '../i18n/routes';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const isDE = locale === 'de';
+---
+
+<section class="px-4 py-16">
+  <div class="mx-auto max-w-5xl">
+    <h1 class="text-3xl font-bold tracking-tight">{isDE ? 'Dashboard' : 'Dashboard'}</h1>
+    <p class="mt-2 text-ink-600 dark:text-ink-200">
+      {isDE
+        ? 'Verwalten Sie Ihre überwachten Webseiten, Prüfungen und Umsetzungs-Projekte an einem Ort.'
+        : 'Manage your monitored sites, scans, and remediation projects in one place.'}
+    </p>
+
+    <div class="mt-8 rounded-xl border-2 border-dashed border-ink-200 p-12 text-center dark:border-ink-600">
+      <h2 class="text-xl font-semibold">{isDE ? 'Anmeldung erforderlich' : 'Sign in required'}</h2>
+      <p class="mt-2 text-sm text-ink-600 dark:text-ink-200">
+        {isDE
+          ? 'Diese Seite wird nach Aktivierung der Authentifizierung verfügbar sein. Sie können bereits ein Konto erstellen — wir aktivieren es, sobald die Anmeldung live ist.'
+          : 'This page will be available once authentication is enabled. You can already create an account — we will activate it as soon as login goes live.'}
+      </p>
+      <div class="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
+        <a href={routePath('signup', locale)} class="rounded-md bg-accent-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-accent-600">
+          {isDE ? 'Konto erstellen' : 'Create account'}
+        </a>
+        <a href={routePath('login', locale)} class="rounded-md border border-ink-200 px-5 py-2.5 text-sm font-semibold hover:bg-ink-50 dark:border-ink-600 dark:hover:bg-ink-800">
+          {isDE ? 'Anmelden' : 'Log in'}
+        </a>
+      </div>
+    </div>
+
+    <div class="mt-12 grid gap-4 sm:grid-cols-3">
+      <div class="rounded-xl border border-ink-200 p-4 dark:border-ink-600">
+        <h3 class="font-semibold">{isDE ? 'Überwachte Webseiten' : 'Monitored sites'}</h3>
+        <p class="mt-1 text-sm text-ink-600 dark:text-ink-200">
+          {isDE ? 'Domains hinzufügen, Verifikationstoken, automatische Scans.' : 'Add domains, verification tokens, automatic scans.'}
+        </p>
+      </div>
+      <div class="rounded-xl border border-ink-200 p-4 dark:border-ink-600">
+        <h3 class="font-semibold">{isDE ? 'Scan-Verlauf' : 'Scan history'}</h3>
+        <p class="mt-1 text-sm text-ink-600 dark:text-ink-200">
+          {isDE ? 'PDF-Berichte, JSON-Rohdaten, Trends über Zeit.' : 'PDF reports, raw JSON, trends over time.'}
+        </p>
+      </div>
+      <div class="rounded-xl border border-ink-200 p-4 dark:border-ink-600">
+        <h3 class="font-semibold">{isDE ? 'Umsetzungs-Projekte' : 'Remediation projects'}</h3>
+        <p class="mt-1 text-sm text-ink-600 dark:text-ink-200">
+          {isDE ? 'Live-Status, geschätzter Abschluss, Rechnungen.' : 'Live status, estimated completion, invoices.'}
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
