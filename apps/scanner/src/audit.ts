@@ -55,11 +55,34 @@ export const AXE_RUN_TAGS = [
   'ACT',
 ] as const;
 
+/**
+ * The bits of an axe-core rule result we want to surface to humans:
+ * the rule's stable id, its plain-English help text, and the most
+ * specific WCAG SC reference we can tease out of its tags.
+ */
+export interface RuleMeta {
+  id: string;
+  help: string;
+  helpUrl?: string;
+  wcagCriterion: string;
+  tags: string[];
+}
+
 export interface AuditResult {
   violations: ScanViolation[];
-  passCount: number;
-  incompleteCount: number;
-  inapplicableCount: number;
+  passes: RuleMeta[];
+  incomplete: RuleMeta[];
+  inapplicable: RuleMeta[];
+}
+
+function toRuleMeta(r: AxeResult): RuleMeta {
+  return {
+    id: r.id,
+    help: r.help,
+    helpUrl: r.helpUrl,
+    wcagCriterion: wcagCriterionFromTags(r.tags),
+    tags: r.tags,
+  };
 }
 
 export function wcagCriterionFromTags(tags: string[]): string {
@@ -133,9 +156,9 @@ export function toAuditResult(result: AxeRunResult, pageUrl: string): AuditResul
   }
   return {
     violations,
-    passCount: result.passes.length,
-    incompleteCount: result.incomplete.length,
-    inapplicableCount: result.inapplicable.length,
+    passes: result.passes.map(toRuleMeta),
+    incomplete: result.incomplete.map(toRuleMeta),
+    inapplicable: result.inapplicable.map(toRuleMeta),
   };
 }
 

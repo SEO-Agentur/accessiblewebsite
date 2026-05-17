@@ -2,6 +2,7 @@
 import Base from '../../layouts/Base.astro';
 import { eq, asc } from 'drizzle-orm';
 import { scans, scanIssues, type Scan, type ScanIssue } from '@accessiblewebsite/db';
+import { MANUAL_PROCEDURES } from '@accessiblewebsite/shared';
 import { db } from '../../lib/db';
 import { getScanQueue } from '../../lib/queue';
 import { t } from '../../i18n';
@@ -104,17 +105,24 @@ const isComplete = scan.status === 'completed';
 // Detect whether this scan completed via the Firecrawl failover (partial
 // audit — semantic rules only, no color contrast / focus / touch-target
 // verification).
+type RuleSummary = { id: string; help: string; wcagCriterion: string };
 type RawResults = {
   scanMode?: string;
   passCount?: number;
   incompleteCount?: number;
   inapplicableCount?: number;
+  passes?: RuleSummary[];
+  incomplete?: RuleSummary[];
+  inapplicable?: RuleSummary[];
 };
 const rawResults = (scan.rawResults ?? null) as RawResults | null;
 const isPartialScan = rawResults?.scanMode === 'partial_firecrawl';
-const passCount = rawResults?.passCount ?? 0;
-const incompleteCount = rawResults?.incompleteCount ?? 0;
-const inapplicableCount = rawResults?.inapplicableCount ?? 0;
+const passList = rawResults?.passes ?? [];
+const incompleteList = rawResults?.incomplete ?? [];
+const inapplicableList = rawResults?.inapplicable ?? [];
+const passCount = rawResults?.passCount ?? passList.length;
+const incompleteCount = rawResults?.incompleteCount ?? incompleteList.length;
+const inapplicableCount = rawResults?.inapplicableCount ?? inapplicableList.length;
 
 // Belt + braces auto-refresh for the in-flight states:
 //   1. HTTP Refresh header — fires before any HTML is parsed, survives
@@ -391,6 +399,116 @@ const pageDescription = isComplete
               })}
             </section>
           )}
+
+          <section class="mt-12 space-y-3">
+            <h2 class="text-xl font-bold">
+              {isDE ? 'Vollständige Regel-Liste' : 'Full rule breakdown'}
+            </h2>
+            <p class="text-sm text-ink-600 dark:text-ink-200">
+              {isDE
+                ? 'Jede Regel, die wir geprüft haben — bestanden, manuelle Prüfung empfohlen, oder ohne passende Elemente. Wir paywallen diese Liste nicht.'
+                : "Every rule we checked — passed, manual review recommended, or with no matching elements on this page. We don't paywall this list."}
+            </p>
+
+            {passList.length > 0 && (
+              <details class="group rounded-xl border border-emerald-200 bg-emerald-50/50 dark:border-emerald-700 dark:bg-emerald-900/10">
+                <summary class="cursor-pointer rounded-xl px-4 py-3 text-sm font-semibold text-emerald-800 hover:bg-emerald-50 dark:text-emerald-200 dark:hover:bg-emerald-900/20">
+                  ✓ {isDE ? 'Bestandene Prüfungen' : 'Passed audits'} ({passList.length})
+                </summary>
+                <ol class="space-y-1 px-6 pb-4 text-sm text-ink-600 dark:text-ink-200">
+                  {passList.map((r, i) => (
+                    <li class="flex gap-2">
+                      <span class="text-ink-400 tabular-nums">{i + 1}.</span>
+                      <span>{r.help}</span>
+                    </li>
+                  ))}
+                </ol>
+              </details>
+            )}
+
+            {incompleteList.length > 0 && (
+              <details class="group rounded-xl border border-amber-200 bg-amber-50/50 dark:border-amber-700 dark:bg-amber-900/10">
+                <summary class="cursor-pointer rounded-xl px-4 py-3 text-sm font-semibold text-amber-800 hover:bg-amber-50 dark:text-amber-200 dark:hover:bg-amber-900/20">
+                  ⚠ {isDE ? 'Manuelle Prüfung empfohlen' : 'Manual review recommended'} ({incompleteList.length})
+                </summary>
+                <ol class="space-y-1 px-6 pb-4 text-sm text-ink-600 dark:text-ink-200">
+                  {incompleteList.map((r, i) => (
+                    <li class="flex gap-2">
+                      <span class="text-ink-400 tabular-nums">{i + 1}.</span>
+                      <span>{r.help}</span>
+                    </li>
+                  ))}
+                </ol>
+              </details>
+            )}
+
+            <details class="group rounded-xl border border-ink-200 bg-white dark:border-ink-600 dark:bg-ink-800">
+              <summary class="cursor-pointer rounded-xl px-4 py-3 text-sm font-semibold hover:bg-ink-50 dark:hover:bg-ink-700">
+                ⚙ {isDE
+                  ? 'Prozeduren, die Automation nicht prüfen kann'
+                  : 'Procedures automation cannot verify'}{' '}
+                ({MANUAL_PROCEDURES.length})
+              </summary>
+              <div class="px-6 pb-4 text-sm text-ink-600 dark:text-ink-200">
+                <p class="mb-3 text-xs italic text-ink-500 dark:text-ink-300">
+                  {isDE
+                    ? 'WCAG-Kriterien, die nur ein Mensch prüfen kann. Wir paywallen sie nicht — wir verkaufen den Review selbst.'
+                    : 'WCAG criteria that only a human reviewer can verify. We do not paywall them — we sell the review itself.'}
+                </p>
+                <ol class="space-y-3">
+                  {MANUAL_PROCEDURES.map((p, i) => (
+                    <li>
+                      <p>
+                        <span class="text-ink-400 tabular-nums">{i + 1}.</span>{' '}
+                        <span class="mr-2 inline-block rounded-full bg-ink-100 px-2 py-0.5 text-xs font-semibold dark:bg-ink-700">
+                          {p.levels.join('/')}
+                        </span>
+                        <span class="font-semibold">{p.title[locale]}</span>{' '}
+                        <span class="text-xs text-ink-400">WCAG {p.wcagCriteria.join(', ')}</span>
+                      </p>
+                      <p class="mt-1 pl-6 text-xs">{p.description[locale]}</p>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            </details>
+
+            {inapplicableList.length > 0 && (
+              <details class="group rounded-xl border border-ink-200 bg-white dark:border-ink-600 dark:bg-ink-800">
+                <summary class="cursor-pointer rounded-xl px-4 py-3 text-sm font-semibold hover:bg-ink-50 dark:hover:bg-ink-700">
+                  ⊘ {isDE ? 'Nicht anwendbar' : 'Not applicable'} ({inapplicableList.length})
+                </summary>
+                <ol class="space-y-1 px-6 pb-4 text-sm text-ink-600 dark:text-ink-200">
+                  {inapplicableList.map((r, i) => (
+                    <li class="flex gap-2">
+                      <span class="text-ink-400 tabular-nums">{i + 1}.</span>
+                      <span>{r.help}</span>
+                    </li>
+                  ))}
+                </ol>
+              </details>
+            )}
+          </section>
+
+          <div class="mt-10 flex flex-wrap gap-3">
+            <a
+              href={`/scan/${scan.id}.txt`}
+              class="inline-flex items-center gap-2 rounded-md border border-ink-200 bg-white px-4 py-2 text-sm font-semibold hover:bg-ink-50 dark:border-ink-600 dark:bg-ink-800 dark:hover:bg-ink-700"
+              download={`scan-${scan.id}.txt`}
+            >
+              <span aria-hidden="true">📄</span>
+              {isDE ? 'Bericht als Text (.txt) herunterladen' : 'Download report as text (.txt)'}
+            </a>
+            <a
+              href={`/scan/${scan.id}.txt`}
+              class="inline-flex items-center gap-2 rounded-md border border-ink-200 bg-white px-4 py-2 text-sm font-semibold hover:bg-ink-50 dark:border-ink-600 dark:bg-ink-800 dark:hover:bg-ink-700"
+              target="_blank"
+              rel="noopener"
+            >
+              <span aria-hidden="true">👁</span>
+              {isDE ? 'Im Browser ansehen' : 'View in browser'}
+            </a>
+          </div>
 
           <p class="mt-12 text-xs text-ink-400">
             {isDE ? 'Scan abgeschlossen am ' : 'Scan completed at '}

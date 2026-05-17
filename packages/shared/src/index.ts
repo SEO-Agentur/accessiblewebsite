@@ -127,3 +127,5 @@ export const QUEUE_NAMES = {
   scan: 'accessiblewebsite-scan',
   email: 'accessiblewebsite-email',
 } as const;
+
+export { MANUAL_PROCEDURES, type ManualProcedure, type ManualProcedureId } from './manualProcedures.js';

@@ -5,7 +5,7 @@ import { and, eq, inArray, lt, sql } from 'drizzle-orm';
 import { ScanJobPayload, QUEUE_NAMES, type ScanViolation } from '@accessiblewebsite/shared';
 import { getDb, scans, scanIssues } from '@accessiblewebsite/db';
 import { env } from './env.js';
-import { auditPage, computeScore } from './audit.js';
+import { auditPage, computeScore, type RuleMeta } from './audit.js';
 import { auditStaticHtml } from './audit-static.js';
 import { fetchHtmlViaFirecrawl } from './firecrawl.js';
 import { discoverUrls } from './crawler.js';
@@ -99,10 +99,19 @@ async function runScan(payload: typeof ScanJobPayload._type): Promise<void> {
   // score against an empty violation set.
   let pagesAttempted = 0;
   let pagesLoaded = 0;
-  let passCount = 0;
-  let incompleteCount = 0;
-  let inapplicableCount = 0;
+  // Deduped across pages: a rule that passed on every page should appear
+  // once in the report, not 250 times.
+  const passes = new Map<string, RuleMeta>();
+  const incomplete = new Map<string, RuleMeta>();
+  const inapplicable = new Map<string, RuleMeta>();
   const failedPages: Array<{ url: string; reason: string }> = [];
+
+  const mergeRules = (
+    target: Map<string, RuleMeta>,
+    rules: RuleMeta[],
+  ): void => {
+    for (const r of rules) target.set(r.id, r);
+  };
 
   try {
     const urls =
@@ -137,9 +146,9 @@ async function runScan(payload: typeof ScanJobPayload._type): Promise<void> {
           `audit ${url}`,
         );
         allViolations.push(...pageResult.violations);
-        passCount += pageResult.passCount;
-        incompleteCount += pageResult.incompleteCount;
-        inapplicableCount += pageResult.inapplicableCount;
+        mergeRules(passes, pageResult.passes);
+        mergeRules(incomplete, pageResult.incomplete);
+        mergeRules(inapplicable, pageResult.inapplicable);
         pagesLoaded++;
       } catch (err) {
         const reason = err instanceof Error ? err.message : String(err);
@@ -173,9 +182,9 @@ async function runScan(payload: typeof ScanJobPayload._type): Promise<void> {
             `static-audit ${url}`,
           );
           allViolations.push(...fcResult.violations);
-          passCount += fcResult.passCount;
-          incompleteCount += fcResult.incompleteCount;
-          inapplicableCount += fcResult.inapplicableCount;
+          mergeRules(passes, fcResult.passes);
+          mergeRules(incomplete, fcResult.incomplete);
+          mergeRules(inapplicable, fcResult.inapplicable);
           pagesLoaded++;
         } catch (err) {
           const reason = err instanceof Error ? err.message : String(err);
@@ -243,9 +252,26 @@ async function runScan(payload: typeof ScanJobPayload._type): Promise<void> {
             failedPages,
             firecrawlFailures,
             scanMode,
-            passCount,
-            incompleteCount,
-            inapplicableCount,
+            passCount: passes.size,
+            incompleteCount: incomplete.size,
+            inapplicableCount: inapplicable.size,
+            // Full lists (deduped by rule id) so the UI + text report can
+            // name each passing / manual / not-applicable rule.
+            passes: Array.from(passes.values()).map((r) => ({
+              id: r.id,
+              help: r.help,
+              wcagCriterion: r.wcagCriterion,
+            })),
+            incomplete: Array.from(incomplete.values()).map((r) => ({
+              id: r.id,
+              help: r.help,
+              wcagCriterion: r.wcagCriterion,
+            })),
+            inapplicable: Array.from(inapplicable.values()).map((r) => ({
+              id: r.id,
+              help: r.help,
+              wcagCriterion: r.wcagCriterion,
+            })),
           })}::jsonb`,
         })
         .where(eq(scans.id, scanId));
