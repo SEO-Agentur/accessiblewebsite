@@ -115,10 +115,22 @@ async function runScan(payload: typeof ScanJobPayload._type): Promise<void> {
     for (const url of urls) {
       pagesAttempted++;
       try {
+        // `load` fires when all subresources (CSS, scripts, images) finish,
+        // which gives client-rendered content time to mount. `domcontentloaded`
+        // fires before most JS executes — that's why our earlier scan of
+        // optimoza.com found 1 issue where WAVE found 76: we were auditing
+        // the pre-hydration DOM.
         await page.goto(url, {
-          waitUntil: 'domcontentloaded',
+          waitUntil: 'load',
           timeout: config.SCANNER_GOTO_TIMEOUT_MS,
         });
+        // Best-effort wait for any lazy-rendered content to settle. Bounded
+        // short so analytics-heavy sites that never go truly idle don't
+        // wedge the audit.
+        await page
+          .waitForLoadState('networkidle', { timeout: 5_000 })
+          .catch(() => undefined);
+
         const pageResult = await withTimeout(
           auditPage(page, url),
           config.SCANNER_AUDIT_TIMEOUT_MS,
