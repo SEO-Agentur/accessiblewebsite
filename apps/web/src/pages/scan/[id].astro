@@ -281,51 +281,90 @@ const pageDescription = isComplete
               <p class="text-sm text-ink-400">
                 {isDE ? 'Probleme gesamt' : 'Total issues'}
               </p>
-              <p class="mt-1 text-4xl font-bold">{scan.totalIssues ?? 0}</p>
-              <dl class="mt-3 space-y-1 text-xs">
-                <div class="flex justify-between"><dt class="text-ink-400">{severityLabel('critical')}</dt><dd>{scan.criticalIssues ?? 0}</dd></div>
-                <div class="flex justify-between"><dt class="text-ink-400">{severityLabel('serious')}</dt><dd>{scan.seriousIssues ?? 0}</dd></div>
-                <div class="flex justify-between"><dt class="text-ink-400">{severityLabel('moderate')}</dt><dd>{scan.moderateIssues ?? 0}</dd></div>
-                <div class="flex justify-between"><dt class="text-ink-400">{severityLabel('minor')}</dt><dd>{scan.minorIssues ?? 0}</dd></div>
-              </dl>
+              <a
+                href="#issues"
+                class="mt-1 block text-4xl font-bold hover:underline focus-visible:underline"
+              >
+                {scan.totalIssues ?? 0}
+              </a>
+              <ul class="mt-3 space-y-0.5 text-xs">
+                {SEVERITY_ORDER.map((sev) => {
+                  const count =
+                    sev === 'critical' ? (scan.criticalIssues ?? 0)
+                    : sev === 'serious' ? (scan.seriousIssues ?? 0)
+                    : sev === 'moderate' ? (scan.moderateIssues ?? 0)
+                    : (scan.minorIssues ?? 0);
+                  if (count === 0) {
+                    return (
+                      <li class="flex justify-between px-1 py-0.5 text-ink-400">
+                        <span>{severityLabel(sev)}</span>
+                        <span>0</span>
+                      </li>
+                    );
+                  }
+                  return (
+                    <li>
+                      <a
+                        href={`#severity-${sev}`}
+                        class="-mx-1 flex justify-between rounded px-1 py-0.5 hover:bg-ink-100 hover:underline focus-visible:bg-ink-100 dark:hover:bg-ink-700 dark:focus-visible:bg-ink-700"
+                      >
+                        <span class="text-ink-400">{severityLabel(sev)}</span>
+                        <span class="font-semibold tabular-nums">{count}</span>
+                      </a>
+                    </li>
+                  );
+                })}
+              </ul>
             </div>
           </section>
 
           {(passCount > 0 || incompleteCount > 0 || inapplicableCount > 0) && (
             <section class="mt-6 grid gap-3 sm:grid-cols-3" aria-label={isDE ? 'WCAG-Regeln Übersicht' : 'WCAG rules overview'}>
-              <div class="rounded-lg border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-700 dark:bg-emerald-900/20">
+              <a
+                href="#passed-audits"
+                class="group block rounded-lg border border-emerald-200 bg-emerald-50 p-4 transition hover:border-emerald-400 hover:shadow-sm focus-visible:border-emerald-400 dark:border-emerald-700 dark:bg-emerald-900/20 dark:hover:border-emerald-500"
+                aria-describedby="passed-audits-card-desc"
+              >
                 <p class="text-xs uppercase tracking-wide text-emerald-700 dark:text-emerald-300">
-                  {isDE ? 'Bestandene Prüfungen' : 'Passed audits'}
+                  {isDE ? 'Bestandene Prüfungen' : 'Passed audits'} <span aria-hidden="true" class="text-emerald-500 transition group-hover:translate-x-0.5">→</span>
                 </p>
                 <p class="mt-1 text-2xl font-bold text-emerald-800 dark:text-emerald-200">{passCount}</p>
-                <p class="mt-1 text-xs text-emerald-700/80 dark:text-emerald-200/80">
+                <p id="passed-audits-card-desc" class="mt-1 text-xs text-emerald-700/80 dark:text-emerald-200/80">
                   {isDE
                     ? 'WCAG-Regeln, die diese Seite besteht.'
                     : 'WCAG rules this page passes.'}
                 </p>
-              </div>
-              <div class="rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-700 dark:bg-amber-900/20">
+              </a>
+              <a
+                href="#manual-review"
+                class="group block rounded-lg border border-amber-200 bg-amber-50 p-4 transition hover:border-amber-400 hover:shadow-sm focus-visible:border-amber-400 dark:border-amber-700 dark:bg-amber-900/20 dark:hover:border-amber-500"
+                aria-describedby="manual-review-card-desc"
+              >
                 <p class="text-xs uppercase tracking-wide text-amber-700 dark:text-amber-300">
-                  {isDE ? 'Manuelle Prüfung empfohlen' : 'Manual review recommended'}
+                  {isDE ? 'Manuelle Prüfung empfohlen' : 'Manual review recommended'} <span aria-hidden="true" class="text-amber-500 transition group-hover:translate-x-0.5">→</span>
                 </p>
                 <p class="mt-1 text-2xl font-bold text-amber-800 dark:text-amber-200">{incompleteCount}</p>
-                <p class="mt-1 text-xs text-amber-700/80 dark:text-amber-200/80">
+                <p id="manual-review-card-desc" class="mt-1 text-xs text-amber-700/80 dark:text-amber-200/80">
                   {isDE
                     ? 'Regeln, die automatisch nicht eindeutig prüfbar sind.'
                     : 'Rules that automation can\'t conclusively verify.'}
                 </p>
-              </div>
-              <div class="rounded-lg border border-ink-200 bg-ink-50 p-4 dark:border-ink-600 dark:bg-ink-800">
+              </a>
+              <a
+                href="#not-applicable"
+                class="group block rounded-lg border border-ink-200 bg-ink-50 p-4 transition hover:border-ink-400 hover:shadow-sm focus-visible:border-ink-400 dark:border-ink-600 dark:bg-ink-800 dark:hover:border-ink-400"
+                aria-describedby="not-applicable-card-desc"
+              >
                 <p class="text-xs uppercase tracking-wide text-ink-500 dark:text-ink-300">
-                  {isDE ? 'Nicht anwendbar' : 'Not applicable'}
+                  {isDE ? 'Nicht anwendbar' : 'Not applicable'} <span aria-hidden="true" class="text-ink-400 transition group-hover:translate-x-0.5">→</span>
                 </p>
                 <p class="mt-1 text-2xl font-bold text-ink-700 dark:text-ink-100">{inapplicableCount}</p>
-                <p class="mt-1 text-xs text-ink-500 dark:text-ink-300">
+                <p id="not-applicable-card-desc" class="mt-1 text-xs text-ink-500 dark:text-ink-300">
                   {isDE
                     ? 'Regeln ohne passende Elemente auf dieser Seite.'
                     : 'Rules with no matching elements on this page.'}
                 </p>
-              </div>
+              </a>
             </section>
           )}
 
@@ -357,12 +396,12 @@ const pageDescription = isComplete
                 : '🎉 No violations found. This site passes our automated WCAG 2.2 AA checks.'}
             </p>
           ) : (
-            <section class="mt-10 space-y-8">
+            <section id="issues" class="mt-10 space-y-8 scroll-mt-20">
               {SEVERITY_ORDER.map((sev) => {
                 const group = issuesBySeverity[sev];
                 if (group.length === 0) return null;
                 return (
-                  <div>
+                  <div id={`severity-${sev}`} class="scroll-mt-20">
                     <h2 class="text-xl font-bold">
                       <span class={`mr-2 inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${severityChipClass(sev)}`}>
                         {severityLabel(sev)}
@@ -411,7 +450,7 @@ const pageDescription = isComplete
             </p>
 
             {passList.length > 0 && (
-              <details class="group rounded-xl border border-emerald-200 bg-emerald-50/50 dark:border-emerald-700 dark:bg-emerald-900/10">
+              <details id="passed-audits" class="group scroll-mt-20 rounded-xl border border-emerald-200 bg-emerald-50/50 dark:border-emerald-700 dark:bg-emerald-900/10">
                 <summary class="cursor-pointer rounded-xl px-4 py-3 text-sm font-semibold text-emerald-800 hover:bg-emerald-50 dark:text-emerald-200 dark:hover:bg-emerald-900/20">
                   ✓ {isDE ? 'Bestandene Prüfungen' : 'Passed audits'} ({passList.length})
                 </summary>
@@ -427,7 +466,7 @@ const pageDescription = isComplete
             )}
 
             {incompleteList.length > 0 && (
-              <details class="group rounded-xl border border-amber-200 bg-amber-50/50 dark:border-amber-700 dark:bg-amber-900/10">
+              <details id="manual-review" class="group scroll-mt-20 rounded-xl border border-amber-200 bg-amber-50/50 dark:border-amber-700 dark:bg-amber-900/10">
                 <summary class="cursor-pointer rounded-xl px-4 py-3 text-sm font-semibold text-amber-800 hover:bg-amber-50 dark:text-amber-200 dark:hover:bg-amber-900/20">
                   ⚠ {isDE ? 'Manuelle Prüfung empfohlen' : 'Manual review recommended'} ({incompleteList.length})
                 </summary>
@@ -474,7 +513,7 @@ const pageDescription = isComplete
             </details>
 
             {inapplicableList.length > 0 && (
-              <details class="group rounded-xl border border-ink-200 bg-white dark:border-ink-600 dark:bg-ink-800">
+              <details id="not-applicable" class="group scroll-mt-20 rounded-xl border border-ink-200 bg-white dark:border-ink-600 dark:bg-ink-800">
                 <summary class="cursor-pointer rounded-xl px-4 py-3 text-sm font-semibold hover:bg-ink-50 dark:hover:bg-ink-700">
                   ⊘ {isDE ? 'Nicht anwendbar' : 'Not applicable'} ({inapplicableList.length})
                 </summary>
