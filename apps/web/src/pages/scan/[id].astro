@@ -1,5 +1,6 @@
 ---
 import Base from '../../layouts/Base.astro';
+import RuleCard from '../../components/static/RuleCard.astro';
 import { eq, asc } from 'drizzle-orm';
 import { scans, scanIssues, type Scan, type ScanIssue } from '@accessiblewebsite/db';
 import { MANUAL_PROCEDURES } from '@accessiblewebsite/shared';
@@ -320,51 +321,31 @@ const pageDescription = isComplete
 
           {(passCount > 0 || incompleteCount > 0 || inapplicableCount > 0) && (
             <section class="mt-6 grid gap-3 sm:grid-cols-3" aria-label={isDE ? 'WCAG-Regeln Übersicht' : 'WCAG rules overview'}>
-              <a
-                href="#passed-audits"
-                class="group block rounded-lg border border-emerald-200 bg-emerald-50 p-4 transition hover:border-emerald-400 hover:shadow-sm focus-visible:border-emerald-400 dark:border-emerald-700 dark:bg-emerald-900/20 dark:hover:border-emerald-500"
-                aria-describedby="passed-audits-card-desc"
-              >
-                <p class="text-xs uppercase tracking-wide text-emerald-700 dark:text-emerald-300">
-                  {isDE ? 'Bestandene Prüfungen' : 'Passed audits'} <span aria-hidden="true" class="text-emerald-500 transition group-hover:translate-x-0.5">→</span>
-                </p>
-                <p class="mt-1 text-2xl font-bold text-emerald-800 dark:text-emerald-200">{passCount}</p>
-                <p id="passed-audits-card-desc" class="mt-1 text-xs text-emerald-700/80 dark:text-emerald-200/80">
-                  {isDE
-                    ? 'WCAG-Regeln, die diese Seite besteht.'
-                    : 'WCAG rules this page passes.'}
-                </p>
-              </a>
-              <a
-                href="#manual-review"
-                class="group block rounded-lg border border-amber-200 bg-amber-50 p-4 transition hover:border-amber-400 hover:shadow-sm focus-visible:border-amber-400 dark:border-amber-700 dark:bg-amber-900/20 dark:hover:border-amber-500"
-                aria-describedby="manual-review-card-desc"
-              >
-                <p class="text-xs uppercase tracking-wide text-amber-700 dark:text-amber-300">
-                  {isDE ? 'Manuelle Prüfung empfohlen' : 'Manual review recommended'} <span aria-hidden="true" class="text-amber-500 transition group-hover:translate-x-0.5">→</span>
-                </p>
-                <p class="mt-1 text-2xl font-bold text-amber-800 dark:text-amber-200">{incompleteCount}</p>
-                <p id="manual-review-card-desc" class="mt-1 text-xs text-amber-700/80 dark:text-amber-200/80">
-                  {isDE
-                    ? 'Regeln, die automatisch nicht eindeutig prüfbar sind.'
-                    : 'Rules that automation can\'t conclusively verify.'}
-                </p>
-              </a>
-              <a
-                href="#not-applicable"
-                class="group block rounded-lg border border-ink-200 bg-ink-50 p-4 transition hover:border-ink-400 hover:shadow-sm focus-visible:border-ink-400 dark:border-ink-600 dark:bg-ink-800 dark:hover:border-ink-400"
-                aria-describedby="not-applicable-card-desc"
-              >
-                <p class="text-xs uppercase tracking-wide text-ink-500 dark:text-ink-300">
-                  {isDE ? 'Nicht anwendbar' : 'Not applicable'} <span aria-hidden="true" class="text-ink-400 transition group-hover:translate-x-0.5">→</span>
-                </p>
-                <p class="mt-1 text-2xl font-bold text-ink-700 dark:text-ink-100">{inapplicableCount}</p>
-                <p id="not-applicable-card-desc" class="mt-1 text-xs text-ink-500 dark:text-ink-300">
-                  {isDE
-                    ? 'Regeln ohne passende Elemente auf dieser Seite.'
-                    : 'Rules with no matching elements on this page.'}
-                </p>
-              </a>
+              <RuleCard
+                href={passCount > 0 ? '#passed-audits' : null}
+                tone="emerald"
+                label={isDE ? 'Bestandene Prüfungen' : 'Passed audits'}
+                count={passCount}
+                description={isDE ? 'WCAG-Regeln, die diese Seite besteht.' : 'WCAG rules this page passes.'}
+              />
+              <RuleCard
+                href={incompleteCount > 0 ? '#manual-review' : null}
+                tone="amber"
+                label={isDE ? 'Manuelle Prüfung empfohlen' : 'Manual review recommended'}
+                count={incompleteCount}
+                description={isDE
+                  ? 'Regeln, die automatisch nicht eindeutig prüfbar sind.'
+                  : "Rules that automation can't conclusively verify."}
+              />
+              <RuleCard
+                href={inapplicableCount > 0 ? '#not-applicable' : null}
+                tone="ink"
+                label={isDE ? 'Nicht anwendbar' : 'Not applicable'}
+                count={inapplicableCount}
+                description={isDE
+                  ? 'Regeln ohne passende Elemente auf dieser Seite.'
+                  : 'Rules with no matching elements on this page.'}
+              />
             </section>
           )}
 
