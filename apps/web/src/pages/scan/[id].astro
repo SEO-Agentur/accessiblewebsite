@@ -101,6 +101,12 @@ const isRunning = scan.status === 'queued' || scan.status === 'running';
 const isFailed = scan.status === 'failed';
 const isComplete = scan.status === 'completed';
 
+// Detect whether this scan completed via the Firecrawl failover (partial
+// audit — semantic rules only, no color contrast / focus / touch-target
+// verification).
+const rawResults = (scan.rawResults ?? null) as { scanMode?: string } | null;
+const isPartialScan = rawResults?.scanMode === 'partial_firecrawl';
+
 // Belt + braces auto-refresh for the in-flight states:
 //   1. HTTP Refresh header — fires before any HTML is parsed, survives
 //      a stalled body stream
@@ -199,6 +205,33 @@ const pageDescription = isComplete
 
       {isComplete && (
         <>
+          {isPartialScan && (
+            <aside
+              role="status"
+              class="mt-8 rounded-xl border-2 border-amber-300 bg-amber-50 p-5 text-sm text-amber-900 dark:border-amber-700 dark:bg-amber-900/20 dark:text-amber-100"
+            >
+              <p class="font-semibold">
+                {isDE
+                  ? 'Teil-Scan (Fallback) — Live-Browser-Tests nicht möglich'
+                  : 'Partial scan (failover) — live-browser checks unavailable'}
+              </p>
+              <p class="mt-2">
+                {isDE
+                  ? 'Unser primärer Scanner konnte diese Webseite nicht direkt laden (vermutlich Bot-Schutz oder Geo-Sperre). Wir haben über einen Failover die gerenderte HTML-Seite geholt und semantische Prüfungen (Alt-Text, Labels, Überschriften-Hierarchie, ARIA, lang-Attribut, doppelte IDs) durchgeführt. Nicht geprüft: Farbkontrast, Fokus-Sichtbarkeit, Berührungsziel-Größe — diese benötigen einen echten Browser-Layout. Die Bewertung ist daher auf maximal '
+                  : "Our primary scanner couldn't load this site directly (likely bot protection or geo-block). We fetched the rendered HTML via a failover and ran the semantic axe-core rules (alt text, labels, heading order, ARIA, lang attribute, duplicate IDs). Not checked: colour contrast, focus visibility, touch target size — those need a real browser layout. The score is capped at "}
+                <strong>{isDE ? '80 begrenzt' : '80'}</strong>{isDE ? '.' : ' for this reason.'}
+              </p>
+              <p class="mt-2 text-xs">
+                {isDE
+                  ? 'Für eine vollständige WCAG-2.2-AA-Prüfung beauftragen Sie einen Audit über unsere '
+                  : 'For a complete WCAG 2.2 AA audit, request a human review via our '}
+                <a class="underline" href={routePath('remediation', locale)}>
+                  {isDE ? 'Umsetzungs-Seite' : 'remediation page'}
+                </a>.
+              </p>
+            </aside>
+          )}
+
           <section class="mt-8 grid gap-6 sm:grid-cols-3">
             <div class="rounded-xl border border-ink-200 bg-white p-6 sm:col-span-2 dark:border-ink-600 dark:bg-ink-800">
               <p class="text-sm text-ink-400">

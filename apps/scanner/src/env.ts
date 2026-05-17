@@ -18,6 +18,13 @@ const EnvSchema = z.object({
   // How often the watchdog sweeps scans that have been stuck too long.
   SCANNER_WATCHDOG_INTERVAL_MS: z.coerce.number().int().min(10_000).default(60_000),
   SCANNER_STALLED_AFTER_MS: z.coerce.number().int().min(60_000).default(5 * 60_000),
+
+  // Firecrawl failover. When the primary Playwright scanner fails to load
+  // any pages for a scan, the worker retries via Firecrawl (rendered HTML +
+  // axe-core in JSDOM, with browser-only rules disabled). Unset = disabled.
+  FIRECRAWL_API_KEY: z.string().optional(),
+  FIRECRAWL_TIMEOUT_MS: z.coerce.number().int().min(5_000).default(45_000),
+  PARTIAL_SCAN_SCORE_CAP: z.coerce.number().int().min(0).max(100).default(80),
 });
 
 let _cached: z.infer<typeof EnvSchema> | null = null;

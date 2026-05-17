@@ -11,7 +11,7 @@ interface AxeNode {
   failureSummary?: string;
 }
 
-interface AxeResult {
+export interface AxeResult {
   id: string;
   description: string;
   help: string;
@@ -21,14 +21,16 @@ interface AxeResult {
   nodes: AxeNode[];
 }
 
-interface AxeRunResult {
+export interface AxeRunResult {
   violations: AxeResult[];
   passes: AxeResult[];
   incomplete: AxeResult[];
   inapplicable: AxeResult[];
 }
 
-function wcagCriterionFromTags(tags: string[]): string {
+export const AXE_SOURCE_STRING = AXE_SOURCE;
+
+export function wcagCriterionFromTags(tags: string[]): string {
   // axe tags look like "wcag2aa", "wcag111", "wcag2.4.7" depending on version.
   // Prefer the most specific SC reference.
   const sc = tags.find((t) => /^wcag\d{3,4}$/.test(t));
@@ -44,7 +46,7 @@ function wcagCriterionFromTags(tags: string[]): string {
   return tags[0] ?? 'unknown';
 }
 
-function severityFromImpact(impact: AxeResult['impact']): WcagSeverity {
+export function severityFromImpact(impact: AxeResult['impact']): WcagSeverity {
   switch (impact) {
     case 'critical':
       return 'critical';

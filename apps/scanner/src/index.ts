@@ -6,6 +6,8 @@ import { ScanJobPayload, QUEUE_NAMES, type ScanViolation } from '@accessiblewebs
 import { getDb, scans, scanIssues } from '@accessiblewebsite/db';
 import { env } from './env.js';
 import { auditPage, computeScore } from './audit.js';
+import { auditStaticHtml } from './audit-static.js';
+import { fetchHtmlViaFirecrawl } from './firecrawl.js';
 import { discoverUrls } from './crawler.js';
 
 const config = env();
@@ -121,8 +123,44 @@ async function runScan(payload: typeof ScanJobPayload._type): Promise<void> {
       }
     }
 
-    // Homepage scan where the only URL didn't load is a failed scan, not a
-    // free 100/100.
+    // Track whether we fell back to Firecrawl. A partial scan misses every
+    // rule that requires a live browser layout (color contrast, focus
+    // visibility, touch-target size), so the surface area of guarantees is
+    // smaller — the UI labels this and the score is capped.
+    let scanMode: 'full' | 'partial_firecrawl' = 'full';
+    const firecrawlFailures: Array<{ url: string; reason: string }> = [];
+
+    // Failover: primary loaded nothing, try Firecrawl for each URL.
+    if (pagesLoaded === 0 && config.FIRECRAWL_API_KEY) {
+      console.log(
+        `[scan ${scanId}] primary loaded 0 pages — falling back to Firecrawl`,
+      );
+      for (const url of urls) {
+        try {
+          const fc = await withTimeout(
+            fetchHtmlViaFirecrawl(url, config.FIRECRAWL_API_KEY, config.FIRECRAWL_TIMEOUT_MS),
+            config.FIRECRAWL_TIMEOUT_MS,
+            `firecrawl ${url}`,
+          );
+          const violations = await withTimeout(
+            auditStaticHtml(fc.html, fc.finalUrl),
+            config.SCANNER_AUDIT_TIMEOUT_MS,
+            `static-audit ${url}`,
+          );
+          allViolations.push(...violations);
+          pagesLoaded++;
+        } catch (err) {
+          const reason = err instanceof Error ? err.message : String(err);
+          console.warn(`[scan ${scanId}] firecrawl failed ${url}: ${reason}`);
+          firecrawlFailures.push({ url, reason });
+        }
+      }
+      if (pagesLoaded > 0) {
+        scanMode = 'partial_firecrawl';
+      }
+    }
+
+    // After potential failover: still nothing? Record failure.
     if (pagesLoaded === 0) {
       await db
         .update(scans)
@@ -133,6 +171,8 @@ async function runScan(payload: typeof ScanJobPayload._type): Promise<void> {
             pagesAttempted,
             pagesLoaded: 0,
             failedPages,
+            firecrawlAttempted: config.FIRECRAWL_API_KEY ? true : false,
+            firecrawlFailures,
           })}::jsonb`,
         })
         .where(eq(scans.id, scanId));
@@ -142,7 +182,14 @@ async function runScan(payload: typeof ScanJobPayload._type): Promise<void> {
       return;
     }
 
-    const score = computeScore(allViolations);
+    let score = computeScore(allViolations);
+    if (scanMode === 'partial_firecrawl') {
+      // Partial scans can't verify color contrast etc. — cap at the
+      // operator-configured ceiling so customers don't claim gold-level
+      // conformance based on a partial audit.
+      score = Math.min(score, config.PARTIAL_SCAN_SCORE_CAP);
+    }
+
     const bySeverity = {
       critical: allViolations.filter((v) => v.severity === 'critical').length,
       serious: allViolations.filter((v) => v.severity === 'serious').length,
@@ -166,6 +213,8 @@ async function runScan(payload: typeof ScanJobPayload._type): Promise<void> {
             pagesAttempted,
             pagesLoaded,
             failedPages,
+            firecrawlFailures,
+            scanMode,
           })}::jsonb`,
         })
         .where(eq(scans.id, scanId));
@@ -186,7 +235,7 @@ async function runScan(payload: typeof ScanJobPayload._type): Promise<void> {
     });
 
     console.log(
-      `[scan ${scanId}] done score=${score} issues=${allViolations.length} pages=${pagesLoaded}/${pagesAttempted} trigger=${triggeredBy}`,
+      `[scan ${scanId}] done score=${score} issues=${allViolations.length} pages=${pagesLoaded}/${pagesAttempted} mode=${scanMode} trigger=${triggeredBy}`,
     );
   } catch (err) {
     const reason = err instanceof Error ? err.message : String(err);
