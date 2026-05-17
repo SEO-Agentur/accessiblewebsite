@@ -8,6 +8,19 @@ interface Props {
 
 const { locale } = Astro.props;
 const isDE = locale === 'de';
+
+// If already logged in, redirect to dashboard.
+if (Astro.locals.user) {
+  return Astro.redirect(routePath('dashboard', locale), 303);
+}
+
+const errorCode = Astro.url.searchParams.get('error');
+const errorMessage =
+  errorCode === 'invalid'
+    ? (isDE ? 'Bitte geben Sie eine gültige E-Mail und ein Passwort ein.' : 'Please enter a valid email and password.')
+    : errorCode === 'invalid_credentials'
+      ? (isDE ? 'E-Mail oder Passwort ist falsch.' : 'Email or password is incorrect.')
+      : null;
 ---
 
 <section class="px-4 py-20">
@@ -19,10 +32,16 @@ const isDE = locale === 'de';
         : 'Access your dashboard, scan history, and seal embed code.'}
     </p>
 
+    {errorMessage && (
+      <p role="alert" class="mt-6 rounded-md bg-red-50 px-4 py-2 text-sm text-red-800 dark:bg-red-900/20 dark:text-red-200">
+        {errorMessage}
+      </p>
+    )}
+
     <form
       method="POST"
       action="/api/v1/auth/login"
-      class="mt-8 grid gap-4 rounded-xl border border-ink-200 bg-white p-6 dark:border-ink-600 dark:bg-ink-800"
+      class="mt-6 grid gap-4 rounded-xl border border-ink-200 bg-white p-6 dark:border-ink-600 dark:bg-ink-800"
     >
       <div>
         <label for="email" class="block text-sm font-medium">{isDE ? 'E-Mail' : 'Email'}</label>
@@ -51,12 +70,6 @@ const isDE = locale === 'de';
       <button type="submit" class="rounded-md bg-accent-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-accent-600">
         {isDE ? 'Anmelden' : 'Log in'}
       </button>
-
-      <p class="rounded-md bg-ink-50 p-3 text-xs text-ink-600 dark:bg-ink-900 dark:text-ink-200">
-        {isDE
-          ? 'Authentifizierung ist noch nicht aktiviert. Diese Seite zeigt das Formular im endgültigen Design — funktional in Kürze.'
-          : 'Authentication is not yet wired up. This page shows the form in its final design — functional shortly.'}
-      </p>
     </form>
 
     <p class="mt-6 text-center text-sm text-ink-600 dark:text-ink-200">

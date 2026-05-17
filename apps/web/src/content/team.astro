@@ -1,5 +1,8 @@
 ---
 import type { Locale } from '@accessiblewebsite/shared';
+import { eq, asc } from 'drizzle-orm';
+import { staff } from '@accessiblewebsite/db';
+import { db } from '../lib/db';
 import { routePath } from '../i18n/routes';
 
 interface Props {
@@ -9,41 +12,11 @@ interface Props {
 const { locale } = Astro.props;
 const isDE = locale === 'de';
 
-// Placeholder roster — replace with real staff from the DB once it exists.
-const team = [
-  {
-    name: 'Anna Brandt',
-    role: isDE ? 'Gründerin, Leitung Audit' : 'Founder, Head of Audit',
-    bio: isDE
-      ? 'IAAP CPACC + WAS. 9 Jahre Front-End, 5 Jahre fokussiert auf Barrierefreiheit. Hat zuvor das Accessibility-Programm einer börsennotierten SaaS-Firma aufgebaut.'
-      : 'IAAP CPACC + WAS. 9 years front-end engineering, 5 of them focused on accessibility. Previously built the accessibility programme at a publicly-traded SaaS firm.',
-    certifications: ['IAAP CPACC', 'IAAP WAS'],
-  },
-  {
-    name: 'Tom Reuter',
-    role: isDE ? 'Senior Accessibility Engineer' : 'Senior Accessibility Engineer',
-    bio: isDE
-      ? 'IAAP WAS. Spezialisiert auf ARIA-Pattern, Screen-Reader-Verhalten, und komplexe React/Vue/Svelte-Komponenten.'
-      : 'IAAP WAS. Specialises in ARIA patterns, screen reader behaviour, and complex React/Vue/Svelte components.',
-    certifications: ['IAAP WAS'],
-  },
-  {
-    name: 'Lea Hoffmann',
-    role: isDE ? 'Beraterin Recht & Compliance' : 'Legal & Compliance Specialist',
-    bio: isDE
-      ? 'Hintergrund in IT-Recht. Erstellt VPATs, Barrierefreiheits-Erklärungen, und arbeitet eng mit Rechtsabteilungen der Kunden zusammen. Keine Anwältin — wir empfehlen immer, das Endprodukt mit Ihrer eigenen Kanzlei zu prüfen.'
-      : 'Background in IT law. Drafts VPATs, accessibility statements, and works closely with clients’ legal teams. Not an attorney — we always recommend reviewing the final product with your own counsel.',
-    certifications: ['IAAP CPACC'],
-  },
-  {
-    name: 'Marcus Pelletier',
-    role: isDE ? 'QA & Manuelle Prüfung' : 'QA & Manual Testing',
-    bio: isDE
-      ? 'Ist als blinder Tester und Vollzeit-NVDA-Nutzer der Vor-Ort-Realitäts-Check. Alle Business- und Enterprise-Projekte durchlaufen seine manuelle Prüfung, bevor wir sie abliefern.'
-      : 'A blind tester and full-time NVDA user, Marcus is our on-team reality check. Every Business and Enterprise project passes through his manual review before we ship.',
-    certifications: [],
-  },
-];
+const teamRows = await db()
+  .select()
+  .from(staff)
+  .where(eq(staff.profileVisibleInTeamPage, true))
+  .orderBy(asc(staff.fullName));
 ---
 
 <section class="px-4 py-16">
@@ -51,26 +24,56 @@ const team = [
     <h1 class="text-4xl font-bold tracking-tight">{isDE ? 'Das Team' : 'The team'}</h1>
     <p class="mt-4 text-lg text-ink-600 dark:text-ink-200">
       {isDE
-        ? 'Vier Menschen mit zertifizierter Erfahrung. Keine Outsourcer, keine Junior-Wechsel, keine versteckten Subunternehmer.'
-        : 'Four people with certified experience. No outsourcers, no junior bait-and-switch, no hidden subcontractors.'}
+        ? 'Zertifizierte Fachkräfte mit nachweisbarer Erfahrung. Keine Outsourcer, keine versteckten Subunternehmer.'
+        : 'Certified specialists with demonstrable experience. No outsourcers, no hidden subcontractors.'}
     </p>
 
-    <div class="mt-12 grid gap-6 sm:grid-cols-2">
-      {team.map((person) => (
-        <article class="rounded-xl border border-ink-200 bg-white p-6 dark:border-ink-600 dark:bg-ink-800">
-          <h2 class="text-xl font-semibold">{person.name}</h2>
-          <p class="text-sm text-accent-600 dark:text-accent-50">{person.role}</p>
-          <p class="mt-3 text-sm text-ink-600 dark:text-ink-200">{person.bio}</p>
-          {person.certifications.length > 0 && (
-            <ul class="mt-4 flex flex-wrap gap-2 text-xs">
-              {person.certifications.map((cert) => (
-                <li class="rounded-full bg-ink-100 px-2 py-1 dark:bg-ink-700">{cert}</li>
-              ))}
-            </ul>
-          )}
-        </article>
-      ))}
-    </div>
+    {teamRows.length === 0 ? (
+      <div class="mt-12 rounded-xl border-2 border-dashed border-ink-200 p-12 text-center dark:border-ink-600">
+        <p class="text-lg font-semibold">
+          {isDE ? 'Team-Profile in Kürze' : 'Team profiles coming online'}
+        </p>
+        <p class="mt-2 text-sm text-ink-600 dark:text-ink-200">
+          {isDE
+            ? 'Wir veröffentlichen jede Fachkraft mit echtem Namen, Foto, Zertifizierungen und LinkedIn — sobald die Profile fertig sind.'
+            : 'We publish every specialist with their real name, photo, certifications, and LinkedIn — as soon as each profile is finalised.'}
+        </p>
+        <p class="mt-4 text-sm">
+          <a href={routePath('about', locale)} class="font-semibold text-accent-600 hover:underline dark:text-accent-50">
+            {isDE ? 'Über uns lesen' : 'Read About us'} →
+          </a>
+        </p>
+      </div>
+    ) : (
+      <div class="mt-12 grid gap-6 sm:grid-cols-2">
+        {teamRows.map((person) => (
+          <article class="rounded-xl border border-ink-200 bg-white p-6 dark:border-ink-600 dark:bg-ink-800">
+            {person.photoUrl && (
+              <img src={person.photoUrl} alt={`${person.fullName}`} width="80" height="80" class="mb-3 h-20 w-20 rounded-full object-cover" loading="lazy" decoding="async" />
+            )}
+            <h2 class="text-xl font-semibold">{person.fullName}</h2>
+            <p class="text-sm capitalize text-accent-600 dark:text-accent-50">{person.role}</p>
+            {(isDE ? person.bioDe : person.bioEn) && (
+              <p class="mt-3 text-sm text-ink-600 dark:text-ink-200">
+                {isDE ? person.bioDe : person.bioEn}
+              </p>
+            )}
+            {person.certifications && person.certifications.length > 0 && (
+              <ul class="mt-4 flex flex-wrap gap-2 text-xs">
+                {person.certifications.map((cert) => (
+                  <li class="rounded-full bg-ink-100 px-2 py-1 dark:bg-ink-700">{cert}</li>
+                ))}
+              </ul>
+            )}
+            {person.linkedinUrl && (
+              <a href={person.linkedinUrl} rel="noopener" target="_blank" class="mt-4 inline-block text-sm font-semibold text-accent-600 hover:underline dark:text-accent-50">
+                LinkedIn →
+              </a>
+            )}
+          </article>
+        ))}
+      </div>
+    )}
 
     <div class="mt-12 rounded-xl border border-ink-200 p-6 dark:border-ink-600">
       <h2 class="text-xl font-bold">{isDE ? 'Was die Zertifizierungen bedeuten' : 'What the certifications mean'}</h2>

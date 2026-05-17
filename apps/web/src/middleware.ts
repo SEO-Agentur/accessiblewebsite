@@ -1,5 +1,6 @@
 import { defineMiddleware } from 'astro:middleware';
 import type { Locale } from '@accessiblewebsite/shared';
+import { readSessionUser } from './lib/auth';
 
 const EN_HOSTS = new Set([
   'accessiblewebsite.net',
@@ -18,8 +19,6 @@ function detectLocale(host: string | null, cookieLang: string | undefined): Loca
     if (DE_HOSTS.has(host)) return 'de';
     if (EN_HOSTS.has(host)) return 'en';
   }
-  // Dev convenience: if the host header is something unexpected (custom
-  // /etc/hosts entry, ngrok tunnel, etc.) fall back to the cookie, then EN.
   if (cookieLang === 'de') return 'de';
   return 'en';
 }
@@ -31,6 +30,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   context.locals.locale = locale;
   context.locals.host = host ?? '';
+  context.locals.user = await readSessionUser(context.cookies);
 
   return next();
 });

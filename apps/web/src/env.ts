@@ -37,6 +37,19 @@ const EnvSchema = z.preprocess(
     SCAN_RATE_FREE_PER_DAY: z.coerce.number().int().min(1).default(10),
     SCAN_GOLD_MAX_PAGES: z.coerce.number().int().min(1).default(250),
     SCAN_GOLD_PRO_MAX_PAGES: z.coerce.number().int().min(1).default(2500),
+
+    // Operator imprint data. Until COMPANY_NAME is set, the imprint page
+    // renders an admin warning instead of fake company details.
+    COMPANY_NAME: z.string().optional(),
+    COMPANY_ADDRESS_LINE_1: z.string().optional(),
+    COMPANY_ADDRESS_LINE_2: z.string().optional(),
+    COMPANY_POSTAL_CITY: z.string().optional(),
+    COMPANY_COUNTRY: z.string().optional(),
+    COMPANY_MANAGING_DIRECTOR: z.string().optional(),
+    COMPANY_REGISTRY_COURT: z.string().optional(),
+    COMPANY_REGISTRY_NUMBER: z.string().optional(),
+    COMPANY_VAT_ID: z.string().optional(),
+    COMPANY_CONTACT_EMAIL: z.string().email().optional(),
   }),
 );
 

@@ -1,5 +1,6 @@
 ---
 import type { Locale } from '@accessiblewebsite/shared';
+import { getCollection } from 'astro:content';
 import { routePath } from '../i18n/routes';
 
 interface Props {
@@ -9,49 +10,16 @@ interface Props {
 const { locale } = Astro.props;
 const isDE = locale === 'de';
 
-// Placeholder for the first batch of editorial posts. Replace with content
-// collections when a real CMS or markdown pipeline lands.
-const posts = [
-  {
-    title: isDE
-      ? 'Warum WCAG 2.2 AA und nicht 2.1: die neun neuen Erfolgskriterien'
-      : 'Why WCAG 2.2 AA and not 2.1: the nine new success criteria',
-    date: '2026-05-12',
-    slug: 'wcag-22-aa-new-criteria',
-    excerpt: isDE
-      ? 'WCAG 2.2 AA fügt neun Erfolgskriterien hinzu, die meisten praxisrelevant. Wir gehen jedes einzelne durch — mit Codebeispielen, die heute live gehen können.'
-      : 'WCAG 2.2 AA adds nine success criteria, most of them with real-world bite. We go through each one — with code examples that can ship today.',
-  },
-  {
-    title: isDE
-      ? 'EAA-Konformität für deutsche SaaS-Anbieter: ein praktischer Leitfaden'
-      : 'EAA compliance for German SaaS vendors: a practical guide',
-    date: '2026-04-30',
-    slug: 'eaa-saas-guide',
-    excerpt: isDE
-      ? 'Seit dem 28. Juni 2025 ist der EAA durchsetzbar. Was bedeutet das in der Praxis für ein 30-Mann-SaaS-Team in München, Berlin oder Wien? Konkrete Schritte, was-wenn-Szenarien.'
-      : 'The EAA has been enforceable since 28 June 2025. What does that mean in practice for a 30-person SaaS team in Munich, Berlin, or Vienna? Concrete steps, what-if scenarios.',
-  },
-  {
-    title: isDE
-      ? 'Warum wir keine Overlay-Widgets installieren — und Sie es auch nicht tun sollten'
-      : 'Why we don’t install overlay widgets — and you shouldn’t either',
-    date: '2026-04-15',
-    slug: 'why-no-overlays',
-    excerpt: isDE
-      ? '400+ ADA-Klagen, breite Ablehnung durch die Disability-Community, messbare Performance-Belastung. Wir erklären unsere Position aus erster Hand.'
-      : '400+ ADA lawsuits, broad rejection from the disability community, measurable performance overhead. We explain our position first-hand.',
-  },
-];
+const posts = (await getCollection('blog'))
+  .filter((p) => !p.data.draft && p.data.language === locale)
+  .sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());
 
-const fmtDate = (iso: string): string => {
-  const d = new Date(iso);
-  return d.toLocaleDateString(isDE ? 'de-DE' : 'en-GB', {
+const fmtDate = (d: Date): string =>
+  d.toLocaleDateString(isDE ? 'de-DE' : 'en-GB', {
     day: 'numeric',
     month: isDE ? 'long' : 'short',
     year: 'numeric',
   });
-};
 ---
 
 <section class="px-4 py-16">
@@ -59,33 +27,47 @@ const fmtDate = (iso: string): string => {
     <h1 class="text-4xl font-bold tracking-tight">Blog</h1>
     <p class="mt-4 text-lg text-ink-600 dark:text-ink-200">
       {isDE
-        ? 'Originalforschung und praktische Leitfäden zu Web-Barrierefreiheit, WCAG 2.2 AA und den Gesetzen, die uns alle betreffen. Alles geschrieben von zertifizierten Fachkräften, datiert und mit Quellenangaben.'
-        : 'Original research and practical guides on web accessibility, WCAG 2.2 AA, and the laws that affect us all. Every post written by certified specialists, dated, with sources cited.'}
+        ? 'Originalforschung und praktische Leitfäden zu Web-Barrierefreiheit, WCAG 2.2 AA und den Gesetzen, die uns alle betreffen. Jeder Beitrag von zertifizierten Fachkräften, datiert und mit Quellen.'
+        : 'Original research and practical guides on web accessibility, WCAG 2.2 AA, and the laws that affect us all. Every post by certified specialists, dated, with sources cited.'}
     </p>
 
-    <div class="mt-12 space-y-8">
-      {posts.map((post) => (
-        <article class="border-b border-ink-200 pb-8 dark:border-ink-700">
-          <p class="text-xs uppercase tracking-wide text-ink-400">
-            <time datetime={post.date}>{fmtDate(post.date)}</time>
-          </p>
-          <h2 class="mt-2 text-xl font-semibold">
-            <a href={`${routePath('blog', locale)}/${post.slug}`} class="hover:underline">
-              {post.title}
+    {posts.length === 0 ? (
+      <div class="mt-12 rounded-xl border-2 border-dashed border-ink-200 p-12 text-center dark:border-ink-600">
+        <p class="text-lg font-semibold">
+          {isDE ? 'Noch keine Beiträge in dieser Sprache' : 'No posts in this language yet'}
+        </p>
+        <p class="mt-2 text-sm text-ink-600 dark:text-ink-200">
+          {isDE
+            ? 'Während wir den Blog aufbauen, sind unsere ausführlichsten Inhalte in der '
+            : 'While we build out the blog, our deepest content lives in the '}
+          <a href={routePath('methodology', locale)} class="underline">{isDE ? 'Methodik' : 'methodology'}</a>
+          {isDE ? '-Seite und auf der ' : ' page and on the '}
+          <a href={routePath('legalLandscape', locale)} class="underline">{isDE ? 'Rechtslage' : 'legal-landscape'}</a>
+          {isDE ? '-Seite.' : ' page.'}
+        </p>
+      </div>
+    ) : (
+      <div class="mt-12 space-y-8">
+        {posts.map((post) => (
+          <article class="border-b border-ink-200 pb-8 dark:border-ink-700">
+            <p class="text-xs uppercase tracking-wide text-ink-400">
+              <time datetime={post.data.publishedAt.toISOString()}>
+                {fmtDate(post.data.publishedAt)}
+              </time>
+              <span class="ml-2 text-ink-400">· {post.data.author}</span>
+            </p>
+            <h2 class="mt-2 text-xl font-semibold">
+              <a href={`${routePath('blog', locale)}/${post.id}`} class="hover:underline">
+                {post.data.title}
+              </a>
+            </h2>
+            <p class="mt-2 text-sm text-ink-600 dark:text-ink-200">{post.data.description}</p>
+            <a href={`${routePath('blog', locale)}/${post.id}`} class="mt-3 inline-block text-sm font-semibold text-accent-600 hover:underline dark:text-accent-50">
+              {isDE ? 'Weiterlesen' : 'Read more'} →
             </a>
-          </h2>
-          <p class="mt-2 text-sm text-ink-600 dark:text-ink-200">{post.excerpt}</p>
-          <a href={`${routePath('blog', locale)}/${post.slug}`} class="mt-3 inline-block text-sm font-semibold text-accent-600 hover:underline dark:text-accent-50">
-            {isDE ? 'Weiterlesen' : 'Read more'} →
-          </a>
-        </article>
-      ))}
-    </div>
-
-    <p class="mt-12 text-sm text-ink-400">
-      {isDE
-        ? 'Mehr Beiträge in Kürze. Schreiben Sie uns, wenn Sie über neue Beiträge informiert werden möchten — kein Newsletter-Spam, nur eine E-Mail bei neuem Material.'
-        : 'More posts coming soon. Email us if you want to be notified — no newsletter spam, just an email when new material lands.'}
-    </p>
+          </article>
+        ))}
+      </div>
+    )}
   </div>
 </section>

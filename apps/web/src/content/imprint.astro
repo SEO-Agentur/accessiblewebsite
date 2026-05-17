@@ -1,5 +1,6 @@
 ---
 import type { Locale } from '@accessiblewebsite/shared';
+import { env } from '../env';
 
 interface Props {
   locale: Locale;
@@ -7,6 +8,15 @@ interface Props {
 
 const { locale } = Astro.props;
 const isDE = locale === 'de';
+
+const cfg = env();
+const hasOperatorData = Boolean(
+  cfg.COMPANY_NAME &&
+    cfg.COMPANY_ADDRESS_LINE_1 &&
+    cfg.COMPANY_POSTAL_CITY &&
+    cfg.COMPANY_MANAGING_DIRECTOR &&
+    cfg.COMPANY_CONTACT_EMAIL,
+);
 ---
 
 <section class="px-4 py-16">
@@ -15,81 +25,118 @@ const isDE = locale === 'de';
       {isDE ? 'Impressum' : 'Imprint'}
     </h1>
     <p class="mt-2 text-sm text-ink-400">
-      {isDE
-        ? 'Angaben gemäß § 5 TMG'
-        : 'Disclosure per § 5 of the German Telemedia Act (TMG)'}
+      {isDE ? 'Angaben gemäß § 5 TMG' : 'Disclosure per § 5 of the German Telemedia Act (TMG)'}
     </p>
 
-    <div class="mt-8 space-y-6 text-sm text-ink-600 dark:text-ink-200">
-      <div>
-        <h2 class="font-semibold text-ink-900 dark:text-ink-50">{isDE ? 'Betreiber' : 'Operator'}</h2>
-        <p class="mt-1">
-          SEO Agentur GmbH<br />
-          Beispielstraße 1<br />
-          12345 Berlin<br />
-          {isDE ? 'Deutschland' : 'Germany'}
-        </p>
-      </div>
-
-      <div>
-        <h2 class="font-semibold text-ink-900 dark:text-ink-50">{isDE ? 'Vertreten durch' : 'Represented by'}</h2>
-        <p class="mt-1">Cyrus Badde, {isDE ? 'Geschäftsführer' : 'Managing Director'}</p>
-      </div>
-
-      <div>
-        <h2 class="font-semibold text-ink-900 dark:text-ink-50">{isDE ? 'Kontakt' : 'Contact'}</h2>
-        <p class="mt-1">
-          {isDE ? 'E-Mail: ' : 'Email: '}
-          <a class="underline" href={`mailto:${isDE ? 'team@barrierefreiewebseite.net' : 'team@accessiblewebsite.net'}`}>
-            {isDE ? 'team@barrierefreiewebseite.net' : 'team@accessiblewebsite.net'}
-          </a>
-        </p>
-      </div>
-
-      <div>
-        <h2 class="font-semibold text-ink-900 dark:text-ink-50">{isDE ? 'Registereintrag' : 'Register entry'}</h2>
-        <p class="mt-1">
-          {isDE ? 'Eintragung im Handelsregister' : 'Commercial register entry'}<br />
-          {isDE ? 'Registergericht: Amtsgericht Berlin' : 'Registering court: Amtsgericht Berlin'}<br />
-          {isDE ? 'Registernummer: HRB 000000' : 'Register number: HRB 000000'}
-        </p>
-      </div>
-
-      <div>
-        <h2 class="font-semibold text-ink-900 dark:text-ink-50">{isDE ? 'Umsatzsteuer-ID' : 'VAT ID'}</h2>
-        <p class="mt-1">
-          {isDE
-            ? 'Umsatzsteuer-Identifikationsnummer gemäß § 27a UStG:'
-            : 'VAT identification number per § 27a German VAT Act:'}{' '}
-          DE000000000
-        </p>
-      </div>
-
-      <div>
-        <h2 class="font-semibold text-ink-900 dark:text-ink-50">
-          {isDE ? 'Verantwortlich für den Inhalt (§ 18 Abs. 2 MStV)' : 'Responsible for content per § 18(2) MStV'}
+    {!hasOperatorData ? (
+      <div
+        role="alert"
+        class="mt-8 rounded-xl border-2 border-amber-300 bg-amber-50 p-6 text-sm text-amber-900 dark:border-amber-700 dark:bg-amber-900/20 dark:text-amber-100"
+      >
+        <h2 class="text-base font-bold">
+          {isDE ? 'Imprint-Daten nicht konfiguriert' : 'Imprint data not configured'}
         </h2>
-        <p class="mt-1">Cyrus Badde, {isDE ? 'Anschrift wie oben' : 'address as above'}</p>
-      </div>
-
-      <div>
-        <h2 class="font-semibold text-ink-900 dark:text-ink-50">{isDE ? 'EU-Streitschlichtung' : 'EU dispute resolution'}</h2>
-        <p class="mt-1">
+        <p class="mt-2">
           {isDE
-            ? 'Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung bereit: '
-            : 'The European Commission provides an online dispute resolution platform: '}
-          <a class="underline" rel="noopener" href="https://ec.europa.eu/consumers/odr/">https://ec.europa.eu/consumers/odr/</a>.
-          {isDE
-            ? ' Wir sind nicht verpflichtet und nicht bereit, an einem Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.'
-            : ' We are not obliged and not willing to participate in dispute resolution proceedings before a consumer arbitration board.'}
+            ? 'Diese Seite zeigt erst dann verbindliche Angaben, wenn der Betreiber die COMPANY_*-Variablen in der .env-Datei gesetzt hat. Vor der Live-Schaltung in der EU ist das ein Pflichtfeld nach § 5 TMG.'
+            : "This page only shows binding details once the operator has set the COMPANY_* variables in the .env file. Before going public in the EU, this is a § 5 TMG legal requirement."}
+        </p>
+        <p class="mt-3 font-mono text-xs">
+          COMPANY_NAME, COMPANY_ADDRESS_LINE_1, COMPANY_POSTAL_CITY,<br />
+          COMPANY_MANAGING_DIRECTOR, COMPANY_CONTACT_EMAIL,<br />
+          COMPANY_REGISTRY_COURT, COMPANY_REGISTRY_NUMBER, COMPANY_VAT_ID
         </p>
       </div>
+    ) : (
+      <div class="mt-8 space-y-6 text-sm text-ink-600 dark:text-ink-200">
+        <div>
+          <h2 class="font-semibold text-ink-900 dark:text-ink-50">
+            {isDE ? 'Betreiber' : 'Operator'}
+          </h2>
+          <p class="mt-1">
+            {cfg.COMPANY_NAME}<br />
+            {cfg.COMPANY_ADDRESS_LINE_1}<br />
+            {cfg.COMPANY_ADDRESS_LINE_2 && (<>{cfg.COMPANY_ADDRESS_LINE_2}<br /></>)}
+            {cfg.COMPANY_POSTAL_CITY}<br />
+            {cfg.COMPANY_COUNTRY ?? (isDE ? 'Deutschland' : 'Germany')}
+          </p>
+        </div>
 
-      <p class="rounded-md bg-amber-50 p-3 text-xs text-amber-800 dark:bg-amber-900/20 dark:text-amber-200">
-        {isDE
-          ? 'Hinweis: Die hier gezeigten Angaben sind Platzhalter. Vor der Live-Schaltung müssen die rechtlich verbindlichen Firmendaten eingetragen werden.'
-          : 'Note: the details shown here are placeholders. Before going public, the legally binding company data must be entered.'}
-      </p>
-    </div>
+        <div>
+          <h2 class="font-semibold text-ink-900 dark:text-ink-50">
+            {isDE ? 'Vertreten durch' : 'Represented by'}
+          </h2>
+          <p class="mt-1">
+            {cfg.COMPANY_MANAGING_DIRECTOR}, {isDE ? 'Geschäftsführer' : 'Managing Director'}
+          </p>
+        </div>
+
+        <div>
+          <h2 class="font-semibold text-ink-900 dark:text-ink-50">
+            {isDE ? 'Kontakt' : 'Contact'}
+          </h2>
+          <p class="mt-1">
+            {isDE ? 'E-Mail: ' : 'Email: '}
+            <a class="underline" href={`mailto:${cfg.COMPANY_CONTACT_EMAIL}`}>
+              {cfg.COMPANY_CONTACT_EMAIL}
+            </a>
+          </p>
+        </div>
+
+        {(cfg.COMPANY_REGISTRY_COURT || cfg.COMPANY_REGISTRY_NUMBER) && (
+          <div>
+            <h2 class="font-semibold text-ink-900 dark:text-ink-50">
+              {isDE ? 'Registereintrag' : 'Register entry'}
+            </h2>
+            <p class="mt-1">
+              {cfg.COMPANY_REGISTRY_COURT && (
+                <>{isDE ? 'Registergericht: ' : 'Registering court: '}{cfg.COMPANY_REGISTRY_COURT}<br /></>
+              )}
+              {cfg.COMPANY_REGISTRY_NUMBER && (
+                <>{isDE ? 'Registernummer: ' : 'Register number: '}{cfg.COMPANY_REGISTRY_NUMBER}</>
+              )}
+            </p>
+          </div>
+        )}
+
+        {cfg.COMPANY_VAT_ID && (
+          <div>
+            <h2 class="font-semibold text-ink-900 dark:text-ink-50">
+              {isDE ? 'Umsatzsteuer-ID' : 'VAT ID'}
+            </h2>
+            <p class="mt-1">
+              {isDE
+                ? 'Umsatzsteuer-Identifikationsnummer gemäß § 27a UStG: '
+                : 'VAT identification number per § 27a German VAT Act: '}
+              {cfg.COMPANY_VAT_ID}
+            </p>
+          </div>
+        )}
+
+        <div>
+          <h2 class="font-semibold text-ink-900 dark:text-ink-50">
+            {isDE
+              ? 'Verantwortlich für den Inhalt (§ 18 Abs. 2 MStV)'
+              : 'Responsible for content per § 18(2) MStV'}
+          </h2>
+          <p class="mt-1">{cfg.COMPANY_MANAGING_DIRECTOR}, {isDE ? 'Anschrift wie oben' : 'address as above'}</p>
+        </div>
+
+        <div>
+          <h2 class="font-semibold text-ink-900 dark:text-ink-50">
+            {isDE ? 'EU-Streitschlichtung' : 'EU dispute resolution'}
+          </h2>
+          <p class="mt-1">
+            {isDE
+              ? 'Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung bereit: '
+              : 'The European Commission provides an online dispute resolution platform: '}
+            <a class="underline" rel="noopener" href="https://ec.europa.eu/consumers/odr/">https://ec.europa.eu/consumers/odr/</a>.
+            {isDE
+              ? ' Wir sind nicht verpflichtet und nicht bereit, an einem Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.'
+              : ' We are not obliged and not willing to participate in dispute resolution proceedings before a consumer arbitration board.'}
+          </p>
+        </div>
+      </div>
+    )}
   </article>
 </section>

@@ -8,54 +8,89 @@ interface Props {
 const { locale } = Astro.props;
 const isDE = locale === 'de';
 
+// Curated external resources we trust and recommend. Every link points to a
+// real, free, authoritative source. No placeholders, no fake PDFs hosted
+// here — these references are what our own team relies on.
 const resources = [
   {
-    title: isDE ? 'WCAG 2.2 AA Umsetzungs-Checkliste' : 'WCAG 2.2 AA Implementation Checklist',
+    title: isDE ? 'WCAG 2.2 — die offizielle W3C-Empfehlung' : 'WCAG 2.2 — the official W3C recommendation',
     description: isDE
-      ? 'Alle 50 Erfolgskriterien als Checkliste, plus die neun neuen Kriterien in WCAG 2.2, mit praktischen Code-Beispielen.'
-      : 'All 50 success criteria as a checklist, including the nine new criteria in WCAG 2.2, with practical code examples.',
-    href: '#',
-    cta: isDE ? 'Herunterladen (PDF, 1,2 MB)' : 'Download (PDF, 1.2 MB)',
+      ? 'Die internationale Norm in Volltext. Alle Erfolgskriterien, Techniken, häufige Fehler, mit kanonischen Beispielen.'
+      : 'The international standard in full text. Every success criterion, technique, common failure, with canonical examples.',
+    href: 'https://www.w3.org/TR/WCAG22/',
+    source: 'W3C',
   },
   {
-    title: isDE ? 'EAA / BFSG Konformitäts-Leitfaden' : 'EAA / BFSG Compliance Playbook',
+    title: isDE ? 'How to Meet WCAG 2.2 (Quick Reference)' : 'How to Meet WCAG 2.2 (Quick Reference)',
     description: isDE
-      ? 'Schritt-für-Schritt durch die EAA-Pflichten: Wer betroffen ist, was dokumentiert sein muss, wie ein VPAT auszusehen hat. Stand: Mai 2026.'
-      : 'Step-by-step through EAA obligations: who is covered, what must be documented, what a VPAT should contain. Last updated: May 2026.',
-    href: '#',
-    cta: isDE ? 'Herunterladen (PDF, 800 KB)' : 'Download (PDF, 800 KB)',
+      ? 'Filterbarer W3C-Leitfaden mit den Erfolgskriterien gruppiert nach Konformitätsstufe. Praktischer als die Volltext-Norm.'
+      : 'Filterable W3C guide with success criteria grouped by conformance level. More practical than the full standard.',
+    href: 'https://www.w3.org/WAI/WCAG22/quickref/',
+    source: 'W3C',
   },
   {
-    title: isDE ? 'NVDA Screen-Reader Test-Anleitung' : 'NVDA Screen Reader Testing Guide',
+    title: isDE ? 'WebAIM Million — die häufigsten Fehler im Web' : 'WebAIM Million — the most common web errors',
     description: isDE
-      ? 'NVDA installieren, sinnvoll konfigurieren, eine Webseite systematisch durchtesten. Tastenkürzel-Cheatsheet inklusive.'
-      : 'Install NVDA, configure it sensibly, systematically test a website. Keyboard shortcut cheat sheet included.',
-    href: '#',
-    cta: isDE ? 'Anleitung lesen' : 'Read the guide',
+      ? 'Jährliche automatische Auswertung der 1 Million meistbesuchten Webseiten. Welche Fehler überall vorkommen — und welche Sie zuerst beheben sollten.'
+      : 'Annual automated review of the top 1 million most-visited sites. Which errors appear everywhere — and which to fix first.',
+    href: 'https://webaim.org/projects/million/',
+    source: 'WebAIM',
   },
   {
-    title: isDE ? 'WordPress Barrierefreiheits-Audit (Skript)' : 'WordPress Accessibility Audit Playbook',
+    title: isDE ? 'WebAIM Overlay-Faktenblatt' : 'WebAIM Overlay Factsheet',
     description: isDE
-      ? 'Konkrete Schritte für WordPress-Webseiten: Theme, Plugins, Editor, Gutenberg-Blöcke. Die häufigsten 12 Probleme und ihre Lösungen.'
-      : 'Concrete steps for WordPress sites: theme, plugins, editor, Gutenberg blocks. The 12 most common issues and their fixes.',
-    href: '#',
-    cta: isDE ? 'Skript öffnen' : 'Open playbook',
+      ? 'Warum Overlay-Widgets keine Lösung sind, unterzeichnet von hunderten Fachleuten und Mitgliedern der Behinderten-Community.'
+      : "Why overlay widgets aren't a solution, signed by hundreds of practitioners and members of the disability community.",
+    href: 'https://overlayfactsheet.com/',
+    source: 'WebAIM',
   },
   {
-    title: isDE ? 'Farbkontrast-Spickzettel' : 'Colour Contrast Cheat Sheet',
+    title: isDE ? 'EN 301 549 — harmonisierte EU-Norm' : 'EN 301 549 — harmonised European standard',
     description: isDE
-      ? 'Eine kompakte Karte mit den 1.4.3 und 1.4.11 Schwellwerten plus Beispielen, was passt und was nicht. Drucken und an die Pinnwand.'
-      : 'A compact card with the 1.4.3 and 1.4.11 thresholds plus what passes and what fails. Print it and pin it.',
-    href: '#',
-    cta: isDE ? 'Herunterladen (PDF, 200 KB)' : 'Download (PDF, 200 KB)',
+      ? 'Die Norm, die EAA und BFSG in der Praxis erzwingen. PDF, ETSI-Publikation.'
+      : 'The standard that EAA and BFSG enforce in practice. PDF, ETSI publication.',
+    href: 'https://www.etsi.org/deliver/etsi_en/301500_301599/301549/03.02.01_60/en_301549v030201p.pdf',
+    source: 'ETSI',
   },
   {
-    title: isDE ? 'Tastatur-Navigation Audit-Skript' : 'Keyboard Navigation Audit Script',
+    title: isDE ? 'NVDA Screen-Reader (kostenlos)' : 'NVDA Screen Reader (free)',
     description: isDE
-      ? 'Eine 15-Schritte-Anleitung, die Sie mit Tab-Taste und ohne Maus durchgehen können. Findet zuverlässig Fokus-Fallen und unsichtbare Fokus-Zustände.'
-      : 'A 15-step protocol you can run with the Tab key and no mouse. Reliably finds focus traps and invisible focus states.',
-    href: '#',
-    cta: isDE ? 'Skript öffnen' : 'Open the script',
+      ? 'Der von der Community am häufigsten verwendete Bildschirm-Vorleser für Windows. Open Source, kostenlos.'
+      : 'The screen reader most-used by the community on Windows. Open source, free.',
+    href: 'https://www.nvaccess.org/download/',
+    source: 'NV Access',
+  },
+  {
+    title: isDE ? 'axe-core — die Engine hinter Lighthouse, Wave, Pa11y' : 'axe-core — the engine behind Lighthouse, Wave, Pa11y',
+    description: isDE
+      ? 'Die Open-Source-Regel-Engine, die wir und fast jeder andere automatische Scanner verwendet. Auch in Ihrem Browser nutzbar via axe DevTools.'
+      : 'The open-source rule engine we (and nearly every other automated scanner) use. Also usable in your own browser via axe DevTools.',
+    href: 'https://github.com/dequelabs/axe-core',
+    source: 'Deque Labs',
+  },
+  {
+    title: isDE ? 'IAAP-Zertifizierungen' : 'IAAP Certifications',
+    description: isDE
+      ? 'Wie man eine Karriere in der Barrierefreiheit zertifiziert: CPACC (Grundlagen) und WAS (Web). Lernpfade und Prüfungstermine.'
+      : 'How to credential an accessibility career: CPACC (fundamentals) and WAS (web). Learning paths and exam schedules.',
+    href: 'https://www.accessibilityassociation.org/s/certification',
+    source: 'IAAP',
+  },
+  {
+    title: isDE ? 'Inclusive Components — robuste UI-Pattern' : 'Inclusive Components — robust UI patterns',
+    description: isDE
+      ? 'Heydon Pickerings Sammlung praktischer barrierefreier Komponenten: Tabs, Akkordeons, Tooltipps, Karussells — wie es richtig geht.'
+      : "Heydon Pickering's collection of practical accessible components: tabs, accordions, tooltips, carousels — done right.",
+    href: 'https://inclusive-components.design/',
+    source: 'Heydon Pickering',
+  },
+  {
+    title: isDE ? 'ARIA Authoring Practices Guide' : 'ARIA Authoring Practices Guide',
+    description: isDE
+      ? 'W3C-Referenz für jedes ARIA-Design-Muster. Wenn Sie eine benutzerdefinierte Komponente bauen, lesen Sie zuerst diese Seite.'
+      : "W3C reference for every ARIA design pattern. If you're building a custom component, read this page first.",
+    href: 'https://www.w3.org/WAI/ARIA/apg/',
+    source: 'W3C',
   },
 ];
 ---
@@ -63,35 +98,38 @@ const resources = [
 <section class="px-4 py-16">
   <div class="mx-auto max-w-5xl">
     <h1 class="text-4xl font-bold tracking-tight">
-      {isDE ? 'Kostenlose Ressourcen' : 'Free resources'}
+      {isDE ? 'Empfohlene Ressourcen' : 'Recommended resources'}
     </h1>
     <p class="mt-4 text-lg text-ink-600 dark:text-ink-200">
       {isDE
-        ? 'Wir verkaufen Umsetzungs-Dienstleistungen, aber das Wissen sollte frei sein. Diese Materialien sind kostenlos, ohne Konto, ohne E-Mail-Eintrag.'
-        : 'We sell remediation services, but the knowledge should be free. These materials are free, no account, no email wall.'}
+        ? 'Wir verkaufen Umsetzungs-Dienstleistungen, aber das Wissen sollte frei sein. Diese externen Quellen sind kostenlos, autoritativ, und gehören in jedes Lesezeichen.'
+        : 'We sell remediation services, but the knowledge should be free. These external sources are free, authoritative, and belong in every bookmark bar.'}
     </p>
 
-    <div class="mt-12 grid gap-6 sm:grid-cols-2">
+    <div class="mt-12 grid gap-4 sm:grid-cols-2">
       {resources.map((r) => (
-        <article class="rounded-xl border border-ink-200 bg-white p-6 dark:border-ink-600 dark:bg-ink-800">
-          <h2 class="text-lg font-semibold">{r.title}</h2>
+        <a
+          href={r.href}
+          rel="noopener"
+          target="_blank"
+          class="block rounded-xl border border-ink-200 bg-white p-5 hover:border-accent-500 hover:shadow-sm dark:border-ink-600 dark:bg-ink-800 dark:hover:border-accent-500"
+        >
+          <p class="text-xs uppercase tracking-wide text-ink-400">{r.source}</p>
+          <h2 class="mt-1 text-lg font-semibold">{r.title} ↗</h2>
           <p class="mt-2 text-sm text-ink-600 dark:text-ink-200">{r.description}</p>
-          <a href={r.href} class="mt-4 inline-block text-sm font-semibold text-accent-600 hover:underline dark:text-accent-50">
-            {r.cta} →
-          </a>
-        </article>
+        </a>
       ))}
     </div>
 
     <div class="mt-16 rounded-xl bg-ink-50 p-6 dark:bg-ink-800/50">
-      <h2 class="text-xl font-bold">{isDE ? 'Fehlt eine Ressource?' : 'Missing a resource?'}</h2>
+      <h2 class="text-xl font-bold">{isDE ? 'Etwas fehlt?' : 'Missing something?'}</h2>
       <p class="mt-2 text-sm text-ink-600 dark:text-ink-200">
         {isDE
-          ? 'Wenn Sie ein Thema vermissen, das wir abdecken sollten, schreiben Sie uns. Wir veröffentlichen regelmäßig neues Material.'
-          : 'If there is a topic we should cover, email us. We publish new material regularly.'}
+          ? 'Wenn Sie eine Quelle vermissen, die wir empfehlen sollten, schreiben Sie uns. Wir aktualisieren diese Seite regelmäßig.'
+          : 'If there is a source we should recommend, email us. We update this page regularly.'}
       </p>
       <a href={`mailto:${isDE ? 'team@barrierefreiewebseite.net' : 'team@accessiblewebsite.net'}`} class="mt-4 inline-block text-sm font-semibold text-accent-600 hover:underline dark:text-accent-50">
-        {isDE ? 'E-Mail schreiben' : 'Send us an email'} →
+        {isDE ? 'E-Mail schreiben' : 'Send an email'} →
       </a>
     </div>
   </div>
