@@ -52,6 +52,12 @@ const metaDescription = description ?? strings.meta.defaultDescription;
     <meta name="twitter:card" content="summary_large_image" />
 
     <meta name="theme-color" content="#0f8b5e" />
+
+    <!--
+      Per-page extras: the scan results page uses this to inject
+      <meta http-equiv="refresh"> while a scan is queued/running.
+    -->
+    <slot name="head" />
   </head>
   <body class="min-h-screen flex flex-col">
     <a href="#main" class="skip-link">{strings.nav.skipToContent}</a>

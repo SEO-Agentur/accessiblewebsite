@@ -101,6 +101,15 @@ const isRunning = scan.status === 'queued' || scan.status === 'running';
 const isFailed = scan.status === 'failed';
 const isComplete = scan.status === 'completed';
 
+// Belt + braces auto-refresh for the in-flight states:
+//   1. HTTP Refresh header — fires before any HTML is parsed, survives
+//      a stalled body stream
+//   2. <meta http-equiv="refresh"> injected via the Base layout's
+//      `head` slot — backup for proxies that strip the header
+if (isRunning) {
+  Astro.response.headers.set('Refresh', '3');
+}
+
 const pageTitle = isComplete
   ? `${score}/100 — ${targetHost} — ${strings.meta.siteName}`
   : isRunning
