@@ -3,6 +3,7 @@ import Base from '../../layouts/Base.astro';
 import { eq, asc } from 'drizzle-orm';
 import { scans, scanIssues, type Scan, type ScanIssue } from '@accessiblewebsite/db';
 import { db } from '../../lib/db';
+import { getScanQueue } from '../../lib/queue';
 import { t } from '../../i18n';
 import { routePath } from '../../i18n/routes';
 
@@ -38,6 +39,23 @@ if (scan.status === 'completed') {
     .from(scanIssues)
     .where(eq(scanIssues.scanId, id))
     .orderBy(asc(scanIssues.severity), asc(scanIssues.wcagCriterion));
+}
+
+// While the scan is still in flight, show position in the queue so the user
+// understands the wait. Position 0 means "next up", or "currently running".
+let queuePosition: number | null = null;
+if (scan.status === 'queued' || scan.status === 'running') {
+  try {
+    const queue = getScanQueue();
+    const waiting = await queue.getWaiting(0, 200);
+    const idx = waiting.findIndex((j) => {
+      const data = j.data as { scanId?: string };
+      return data.scanId === id;
+    });
+    queuePosition = idx >= 0 ? idx : null;
+  } catch {
+    // Redis unreachable — fall through, page still renders.
+  }
 }
 
 const SEVERITY_ORDER = ['critical', 'serious', 'moderate', 'minor'] as const;
@@ -132,10 +150,21 @@ const pageDescription = isComplete
               ? (isDE ? 'In Warteschlange…' : 'Queued…')
               : (isDE ? 'Scan läuft…' : 'Scanning…')}
           </h2>
+
+          {scan.status === 'queued' && queuePosition !== null && (
+            <p class="mt-2 text-sm text-ink-600 dark:text-ink-200">
+              {queuePosition === 0
+                ? (isDE ? 'Sie sind als Nächstes dran.' : 'You are next in line.')
+                : (isDE
+                    ? `${queuePosition} ${queuePosition === 1 ? 'Scan' : 'Scans'} vor Ihnen.`
+                    : `${queuePosition} ${queuePosition === 1 ? 'scan' : 'scans'} ahead of you.`)}
+            </p>
+          )}
+
           <p class="mt-2 text-sm text-ink-600 dark:text-ink-200">
             {isDE
-              ? 'Diese Seite aktualisiert sich automatisch, sobald die Ergebnisse fertig sind. Üblicherweise unter 30 Sekunden.'
-              : 'This page refreshes automatically once results are ready. Usually under 30 seconds.'}
+              ? 'Diese Seite aktualisiert sich automatisch. Typische Dauer: 10–30 Sekunden. Maximum: 90 Sekunden — danach markieren wir den Scan automatisch als fehlgeschlagen.'
+              : 'This page auto-refreshes. Typical duration: 10–30 seconds. Hard cap: 90 seconds — after that we automatically mark the scan as failed.'}
           </p>
           <p class="mt-3 text-xs text-ink-400">
             {isDE ? 'Scan-ID: ' : 'Scan ID: '}<code>{scan.id}</code>
