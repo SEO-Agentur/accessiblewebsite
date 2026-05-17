@@ -12,7 +12,7 @@ const isDE = locale === 'de';
 
 <section class="px-4 py-24">
   <div class="mx-auto max-w-2xl text-center">
-    <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-accent-500 text-white" aria-hidden="true">
+    <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-brand-700 text-white" aria-hidden="true">
       <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
         <path d="M20 6 9 17l-5-5" />
       </svg>
@@ -45,7 +45,7 @@ const isDE = locale === 'de';
     </p>
 
     <div class="mt-10">
-      <a href={routePath('home', locale)} class="text-sm font-semibold text-accent-600 hover:underline dark:text-accent-50">
+      <a href={routePath('home', locale)} class="text-sm font-semibold text-brand-700 hover:underline dark:text-brand-200">
         ← {isDE ? 'Zurück zur Startseite' : 'Back to home'}
       </a>
     </div>

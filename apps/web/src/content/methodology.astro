@@ -139,7 +139,7 @@ const isDE = locale === 'de';
       <a href={routePath('team', locale)} class="underline">{isDE ? 'Team-Seite' : 'team page'}</a>.
     </p>
 
-    <div class="mt-16 rounded-xl border border-ink-200 bg-accent-50 p-6 dark:border-ink-600 dark:bg-accent-700/10">
+    <div class="mt-16 rounded-xl border border-brand-200 bg-brand-50 p-6 dark:border-brand-700 dark:bg-brand-900/30">
       <p class="font-semibold">
         {isDE ? 'Bereit, Ihre Webseite zu prüfen?' : 'Ready to test your site?'}
       </p>
@@ -148,7 +148,7 @@ const isDE = locale === 'de';
           ? 'Ein Scan ist kostenlos. Sie brauchen kein Konto.'
           : 'A scan is free. You don’t need an account.'}
       </p>
-      <a href={routePath('home', locale)} class="mt-4 inline-block rounded-md bg-accent-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-accent-600">
+      <a href={routePath('home', locale)} class="mt-4 inline-block rounded-md bg-brand-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-800">
         {isDE ? 'Jetzt scannen' : 'Run a scan'}
       </a>
     </div>

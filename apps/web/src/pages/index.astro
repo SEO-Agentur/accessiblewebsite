@@ -25,7 +25,7 @@ const errorMessage =
     <div class="mx-auto max-w-3xl text-center">
       <h1 class="text-4xl font-bold tracking-tight sm:text-5xl">
         {strings.home.heroTitleA}
-        <span class="text-accent-500"> {strings.home.heroTitleB}</span>
+        <span class="text-brand-700"> {strings.home.heroTitleB}</span>
       </h1>
       <p class="mt-6 text-lg text-ink-600 dark:text-ink-200">
         {strings.home.heroSubtitle}
@@ -46,13 +46,13 @@ const errorMessage =
           inputmode="url"
           autocomplete="url"
           placeholder={strings.home.scanFormPlaceholder}
-          class="flex-1 rounded-md border border-ink-200 bg-white px-4 py-3 text-base text-ink-900 placeholder:text-ink-400 focus:border-accent-500 dark:border-ink-600 dark:bg-ink-800 dark:text-ink-50"
+          class="flex-1 rounded-md border border-ink-200 bg-white px-4 py-3 text-base text-ink-900 placeholder:text-ink-400 focus:border-brand-700 dark:border-ink-600 dark:bg-ink-800 dark:text-ink-50"
           aria-invalid={errorMessage !== null}
           aria-describedby={errorMessage !== null ? 'scan-error' : undefined}
         />
         <button
           type="submit"
-          class="rounded-md bg-accent-500 px-6 py-3 text-base font-semibold text-white hover:bg-accent-600 focus:bg-accent-600 sm:min-h-[44px]"
+          class="rounded-md bg-brand-700 px-6 py-3 text-base font-semibold text-white hover:bg-brand-800 focus:bg-brand-800 sm:min-h-[44px]"
         >
           {strings.home.scanFormCta}
         </button>

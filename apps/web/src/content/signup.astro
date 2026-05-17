@@ -79,14 +79,14 @@ const errorMessage =
         </span>
       </label>
 
-      <button type="submit" class="rounded-md bg-accent-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-accent-600">
+      <button type="submit" class="rounded-md bg-brand-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-800">
         {isDE ? 'Kostenloses Konto erstellen' : 'Create free account'}
       </button>
     </form>
 
     <p class="mt-6 text-center text-sm text-ink-600 dark:text-ink-200">
       {isDE ? 'Schon ein Konto?' : 'Already have an account?'}{' '}
-      <a class="font-semibold text-accent-600 hover:underline dark:text-accent-50" href={routePath('login', locale)}>
+      <a class="font-semibold text-brand-700 hover:underline dark:text-brand-200" href={routePath('login', locale)}>
         {isDE ? 'Anmelden' : 'Log in'}
       </a>
     </p>

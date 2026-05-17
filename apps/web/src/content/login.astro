@@ -64,14 +64,14 @@ const errorMessage =
         />
       </div>
 
-      <button type="submit" class="rounded-md bg-accent-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-accent-600">
+      <button type="submit" class="rounded-md bg-brand-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-800">
         {isDE ? 'Anmelden' : 'Log in'}
       </button>
     </form>
 
     <p class="mt-6 text-center text-sm text-ink-600 dark:text-ink-200">
       {isDE ? 'Noch kein Konto?' : 'Don’t have an account?'}{' '}
-      <a class="font-semibold text-accent-600 hover:underline dark:text-accent-50" href={routePath('signup', locale)}>
+      <a class="font-semibold text-brand-700 hover:underline dark:text-brand-200" href={routePath('signup', locale)}>
         {isDE ? 'Kostenlos registrieren' : 'Sign up free'}
       </a>
     </p>

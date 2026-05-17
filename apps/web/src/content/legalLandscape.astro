@@ -79,14 +79,14 @@ const isDE = locale === 'de';
         : 'This page is a summary, not legal advice. For specific guidance, consult an attorney specialised in IT law. We work with clients’ legal teams regularly — ask us for referrals.'}
     </p>
 
-    <div class="mt-12 rounded-xl border border-ink-200 bg-accent-50 p-6 dark:border-ink-600 dark:bg-accent-700/10">
+    <div class="mt-12 rounded-xl border border-brand-200 bg-brand-50 p-6 dark:border-brand-700 dark:bg-brand-900/30">
       <h2 class="text-xl font-bold">{isDE ? 'Konformitäts-Dokumentation einholen' : 'Get compliance documentation'}</h2>
       <p class="mt-2 text-sm">
         {isDE
           ? 'Unsere Business- und Enterprise-Pakete beinhalten ein vollständiges ADA/EAA/BFSG-Dokumentationspaket. Anwalts-tauglich, datiert, unterzeichnet.'
           : 'Our Business and Enterprise packages include a full ADA/EAA/BFSG documentation pack. Lawyer-ready, dated, signed.'}
       </p>
-      <a href={routePath('remediation', locale)} class="mt-4 inline-block rounded-md bg-accent-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-accent-600">
+      <a href={routePath('remediation', locale)} class="mt-4 inline-block rounded-md bg-brand-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-800">
         {isDE ? 'Pakete ansehen' : 'See the packages'}
       </a>
     </div>

@@ -43,9 +43,15 @@ export default {
           800: '#1e40af',
           900: '#1e3a8a',
         },
-        // STATUS-OK only — passed audits, seal eligibility, "no violations".
-        // Never the primary brand. Darkened from #0f8b5e (4.3:1 button, FAIL)
-        // to #0a7a52 (5.3:1 button, AA with safety margin).
+        // STATUS-OK only — used ONLY for pass-positive contexts:
+        //   - Score colour at >=95 in scan results
+        //   - Site score in the verified directory
+        //   - Case-study "after" number
+        //   - "(-17%)" annual-billing discount
+        //   - "Human remediation" winning-column header
+        //   - 100% guarantee strips
+        // Never used for primary brand, buttons, or links. Darkened from
+        // #0f8b5e (4.3:1 button, FAIL) to #0a7a52 (5.36:1 button, AA with margin).
         //   accent-500 on white:   5.36:1  AA
         //   white on accent-500:   5.36:1  AA (sufficient for chip text)
         //   accent-600 on white:   7.45:1  AAA

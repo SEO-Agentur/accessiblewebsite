@@ -37,7 +37,7 @@ const studies = (await getCollection('caseStudies'))
             : 'We publish case studies only with explicit client consent and with verifiable before/after numbers.'}
         </p>
         <p class="mt-4 text-sm">
-          <a href={routePath('remediation', locale)} class="font-semibold text-accent-600 hover:underline dark:text-accent-50">
+          <a href={routePath('remediation', locale)} class="font-semibold text-brand-700 hover:underline dark:text-brand-200">
             {isDE ? 'Mit uns die erste werden →' : 'Become our first case study →'}
           </a>
         </p>
@@ -83,7 +83,7 @@ const studies = (await getCollection('caseStudies'))
           ? 'Wir starten mit einem kostenlosen Scan und einem 48-Stunden-Angebot. Keine Verpflichtung.'
           : 'We start with a free scan and a 48-hour quote. No commitment.'}
       </p>
-      <a href={routePath('remediation', locale)} class="mt-4 inline-block rounded-md bg-accent-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-accent-600">
+      <a href={routePath('remediation', locale)} class="mt-4 inline-block rounded-md bg-brand-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-800">
         {isDE ? 'Angebot anfordern' : 'Request a quote'}
       </a>
     </div>
