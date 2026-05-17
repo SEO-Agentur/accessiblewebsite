@@ -12,10 +12,9 @@ interface Props {
 const { locale } = Astro.props;
 const isDE = locale === 'de';
 
-if (!Astro.locals.user) {
-  return Astro.redirect(routePath('login', locale), 303);
-}
-const user = Astro.locals.user;
+// Auth gate is enforced by the catch-all router. This component is only
+// reached when there's a real session.
+const user = Astro.locals.user!;
 
 const sites = await db()
   .select()

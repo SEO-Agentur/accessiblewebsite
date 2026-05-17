@@ -9,9 +9,7 @@ interface Props {
 const { locale } = Astro.props;
 const isDE = locale === 'de';
 
-if (Astro.locals.user) {
-  return Astro.redirect(routePath('dashboard', locale), 303);
-}
+// Authenticated users are redirected to /dashboard by the catch-all router.
 
 const errorCode = Astro.url.searchParams.get('error');
 const errorMessage =

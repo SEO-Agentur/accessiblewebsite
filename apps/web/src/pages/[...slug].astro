@@ -1,6 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
-import { keyForPath, type RouteKey } from '../i18n/routes';
+import { keyForPath, routes, type RouteKey } from '../i18n/routes';
 import { t } from '../i18n';
 
 import PricingPage from '../content/pricing.astro';
@@ -41,6 +41,21 @@ if (routeKey === null) {
       : 'Page not found — Seite nicht gefunden',
     { status: 404, headers: { 'content-type': 'text/plain; charset=utf-8' } },
   );
+}
+
+// Auth gates run BEFORE Base starts rendering so the redirect actually fires.
+// (Calling Astro.redirect from inside a content component triggers
+// ResponseSentError because the layout has already begun streaming.)
+const AUTH_REQUIRED: ReadonlySet<RouteKey> = new Set(['dashboard']);
+const GUEST_ONLY: ReadonlySet<RouteKey> = new Set(['login', 'signup']);
+
+if (AUTH_REQUIRED.has(routeKey) && Astro.locals.user === null) {
+  const login = routes.login[locale];
+  return Astro.redirect(login, 303);
+}
+if (GUEST_ONLY.has(routeKey) && Astro.locals.user !== null) {
+  const dashboard = routes.dashboard[locale];
+  return Astro.redirect(dashboard, 303);
 }
 
 // Each page component renders its own <main> body inside the shared Base layout.
