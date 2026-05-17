@@ -1,31 +1,44 @@
 import { z } from 'zod';
 
-const EnvSchema = z.object({
-  NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
+const EnvSchema = z.preprocess(
+  // Treat empty strings as undefined so optional/default fields work even
+  // when .env has `SENTRY_DSN=` (a literal empty value). Without this,
+  // z.string().url().optional() rejects "" before .optional() applies.
+  (input) => {
+    if (typeof input !== 'object' || input === null) return input;
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(input as Record<string, unknown>)) {
+      out[k] = typeof v === 'string' && v.trim() === '' ? undefined : v;
+    }
+    return out;
+  },
+  z.object({
+    NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
 
-  DATABASE_URL: z.string().url(),
-  REDIS_URL: z.string().url(),
+    DATABASE_URL: z.string().url(),
+    REDIS_URL: z.string().url(),
 
-  PUBLIC_SITE_URL_EN: z.string().url().default('https://accessiblewebsite.net'),
-  PUBLIC_SITE_URL_DE: z.string().url().default('https://barrierefreiewebseite.net'),
+    PUBLIC_SITE_URL_EN: z.string().url().default('https://accessiblewebsite.net'),
+    PUBLIC_SITE_URL_DE: z.string().url().default('https://barrierefreiewebseite.net'),
 
-  SESSION_SECRET: z.string().min(32),
-  SEAL_JWT_SECRET: z.string().min(32),
+    SESSION_SECRET: z.string().min(32),
+    SEAL_JWT_SECRET: z.string().min(32),
 
-  RESEND_API_KEY: z.string().optional(),
-  RESEND_FROM_EN: z.string().email().default('team@accessiblewebsite.net'),
-  RESEND_FROM_DE: z.string().email().default('team@barrierefreiewebseite.net'),
+    RESEND_API_KEY: z.string().optional(),
+    RESEND_FROM_EN: z.string().email().default('team@accessiblewebsite.net'),
+    RESEND_FROM_DE: z.string().email().default('team@barrierefreiewebseite.net'),
 
-  STRIPE_SECRET_KEY: z.string().optional(),
-  STRIPE_WEBHOOK_SECRET: z.string().optional(),
+    STRIPE_SECRET_KEY: z.string().optional(),
+    STRIPE_WEBHOOK_SECRET: z.string().optional(),
 
-  SENTRY_DSN: z.string().url().optional(),
+    SENTRY_DSN: z.string().url().optional(),
 
-  SCAN_RATE_ANONYMOUS_PER_HOUR: z.coerce.number().int().min(1).default(3),
-  SCAN_RATE_FREE_PER_DAY: z.coerce.number().int().min(1).default(10),
-  SCAN_GOLD_MAX_PAGES: z.coerce.number().int().min(1).default(250),
-  SCAN_GOLD_PRO_MAX_PAGES: z.coerce.number().int().min(1).default(2500),
-});
+    SCAN_RATE_ANONYMOUS_PER_HOUR: z.coerce.number().int().min(1).default(3),
+    SCAN_RATE_FREE_PER_DAY: z.coerce.number().int().min(1).default(10),
+    SCAN_GOLD_MAX_PAGES: z.coerce.number().int().min(1).default(250),
+    SCAN_GOLD_PRO_MAX_PAGES: z.coerce.number().int().min(1).default(2500),
+  }),
+);
 
 export type Env = z.infer<typeof EnvSchema>;
 
