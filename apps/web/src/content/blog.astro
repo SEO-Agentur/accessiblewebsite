@@ -27,8 +27,8 @@ const fmtDate = (d: Date): string =>
     <h1 class="text-4xl font-bold tracking-tight">Blog</h1>
     <p class="mt-4 text-lg text-ink-600 dark:text-ink-200">
       {isDE
-        ? 'Originalforschung und praktische Leitfäden zu Web-Barrierefreiheit, WCAG 2.2 AA und den Gesetzen, die uns alle betreffen. Jeder Beitrag von zertifizierten Fachkräften, datiert und mit Quellen.'
-        : 'Original research and practical guides on web accessibility, WCAG 2.2 AA, and the laws that affect us all. Every post by certified specialists, dated, with sources cited.'}
+        ? 'Originalforschung und praktische Leitfäden zu Web-Barrierefreiheit, WCAG 2.2 AA und den Gesetzen, die uns alle betreffen. Jeder Beitrag von Barrierefreiheits-Fachkräften, datiert und mit Quellen.'
+        : 'Original research and practical guides on web accessibility, WCAG 2.2 AA, and the laws that affect us all. Every post by accessibility specialists, dated, with sources cited.'}
     </p>
 
     {posts.length === 0 ? (
@@ -50,11 +50,11 @@ const fmtDate = (d: Date): string =>
       <div class="mt-12 space-y-8">
         {posts.map((post) => (
           <article class="border-b border-ink-200 pb-8 dark:border-ink-700">
-            <p class="text-xs uppercase tracking-wide text-ink-400">
+            <p class="text-xs uppercase tracking-wide text-ink-500 dark:text-ink-400">
               <time datetime={post.data.publishedAt.toISOString()}>
                 {fmtDate(post.data.publishedAt)}
               </time>
-              <span class="ml-2 text-ink-400">· {post.data.author}</span>
+              <span class="ml-2 text-ink-500 dark:text-ink-400">· {post.data.author}</span>
             </p>
             <h2 class="mt-2 text-xl font-semibold">
               <a href={`${routePath('blog', locale)}/${post.id}`} class="hover:underline">

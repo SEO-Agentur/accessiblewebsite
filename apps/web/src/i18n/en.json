@@ -2,7 +2,7 @@
   "meta": {
     "siteName": "AccessibleWebsite",
     "tagline": "WCAG 2.2 AA scanning, sealing, and remediation",
-    "defaultDescription": "Scan your website for WCAG 2.2 AA conformance. Earn a verifiable accessibility seal. Get your site fixed by certified specialists."
+    "defaultDescription": "Scan your website for WCAG 2.2 AA conformance. Earn a verifiable accessibility seal. Get your site fixed by accessibility specialists — real code, not overlay widgets."
   },
   "nav": {
     "skipToContent": "Skip to main content",
@@ -32,7 +32,7 @@
     "noJsBannerBody": "That’s fine — this site works without it. Submit the form above and you’ll be taken to your results."
   },
   "footer": {
-    "tagline": "Real accessibility, certified by humans.",
+    "tagline": "Accessibility done by humans, not widgets.",
     "rights": "All rights reserved.",
     "privacy": "Privacy",
     "terms": "Terms",

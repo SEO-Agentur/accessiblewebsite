@@ -16,7 +16,7 @@ const today = new Date().toISOString().slice(0, 10);
     <h1 class="text-4xl font-bold tracking-tight">
       {isDE ? 'Datenschutzerklärung' : 'Privacy policy'}
     </h1>
-    <p class="mt-2 text-sm text-ink-400">
+    <p class="mt-2 text-sm text-ink-500 dark:text-ink-400">
       {isDE ? 'Stand: ' : 'Effective: '}<time datetime={today}>{today}</time>
     </p>
 

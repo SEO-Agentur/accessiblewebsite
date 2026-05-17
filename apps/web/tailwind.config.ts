@@ -15,12 +15,21 @@ export default {
         ],
       },
       colors: {
-        // Neutral ramp — text, surfaces, borders. Unchanged.
+        // Neutral ramp — text, surfaces, borders.
+        // Two muted tiers because no single shade passes 4.5:1 on BOTH
+        // ink-50 (light bg) and ink-900 (dark bg):
+        //   ink-400 (#8a8a93) on ink-50: 3.19:1  FAIL
+        //   ink-400 (#8a8a93) on ink-900: 4.85:1 PASS
+        //   ink-500 (#5e5e66) on ink-50: 6.5:1   PASS (AAA)
+        //   ink-500 (#5e5e66) on ink-900: 2.59:1 FAIL
+        // So muted text uses `text-ink-500 dark:text-ink-400` — each shade
+        // applied where it passes.
         ink: {
           50: '#f7f7f8',
           100: '#eeeef0',
           200: '#d6d6db',
           400: '#8a8a93',
+          500: '#5e5e66',
           600: '#4a4a52',
           800: '#1f1f24',
           900: '#0e0e11',

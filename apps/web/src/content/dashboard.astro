@@ -50,7 +50,7 @@ const errorCode = Astro.url.searchParams.get('error');
   <div class="mx-auto max-w-5xl">
     <header class="flex flex-wrap items-center justify-between gap-3">
       <div>
-        <p class="text-sm text-ink-400">{isDE ? 'Angemeldet als' : 'Signed in as'} {user.email}</p>
+        <p class="text-sm text-ink-500 dark:text-ink-400">{isDE ? 'Angemeldet als' : 'Signed in as'} {user.email}</p>
         <h1 class="text-3xl font-bold tracking-tight">
           {isDE ? `Willkommen, ${user.fullName ?? user.email}` : `Welcome, ${user.fullName ?? user.email}`}
         </h1>
@@ -98,7 +98,7 @@ const errorCode = Astro.url.searchParams.get('error');
             <li class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-ink-200 bg-white p-4 dark:border-ink-600 dark:bg-ink-800">
               <div>
                 <p class="font-semibold">{site.domain}</p>
-                <p class="text-xs text-ink-400">
+                <p class="text-xs text-ink-500 dark:text-ink-400">
                   {isDE ? 'Letzter Scan: ' : 'Last scan: '}{fmtDate(site.lastScanAt)}
                   {site.currentScore !== null && (
                     <span class="ml-2 font-semibold text-ink-700 dark:text-ink-200">
@@ -138,7 +138,7 @@ const errorCode = Astro.url.searchParams.get('error');
             {isDE ? 'Hinzufügen' : 'Add site'}
           </button>
         </div>
-        <p class="mt-2 text-xs text-ink-400">
+        <p class="mt-2 text-xs text-ink-500 dark:text-ink-400">
           {isDE
             ? 'Nur die Domain (z. B. ihre-firma.de), ohne https:// oder Pfad.'
             : 'Just the domain (e.g. yourcompany.com), no https:// or path.'}
@@ -161,7 +161,7 @@ const errorCode = Astro.url.searchParams.get('error');
                 <a href={`/scan/${scan.id}`} class="font-semibold underline hover:text-brand-700 dark:hover:text-brand-200">
                   {(() => { try { return new URL(scan.targetUrl).host; } catch { return scan.targetUrl; } })()}
                 </a>
-                <span class="ml-2 text-xs text-ink-400">{fmtDate(scan.createdAt)}</span>
+                <span class="ml-2 text-xs text-ink-500 dark:text-ink-400">{fmtDate(scan.createdAt)}</span>
               </div>
               <div class="flex items-center gap-2 text-xs">
                 {scan.score !== null && <span class="font-semibold">{scan.score}/100</span>}

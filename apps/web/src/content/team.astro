@@ -24,8 +24,8 @@ const teamRows = await db()
     <h1 class="text-4xl font-bold tracking-tight">{isDE ? 'Das Team' : 'The team'}</h1>
     <p class="mt-4 text-lg text-ink-600 dark:text-ink-200">
       {isDE
-        ? 'Zertifizierte Fachkräfte mit nachweisbarer Erfahrung. Keine Outsourcer, keine versteckten Subunternehmer.'
-        : 'Certified specialists with demonstrable experience. No outsourcers, no hidden subcontractors.'}
+        ? 'Fachkräfte mit nachweisbarer Erfahrung. Keine Outsourcer, keine versteckten Subunternehmer.'
+        : 'Specialists with demonstrable experience. No outsourcers, no hidden subcontractors.'}
     </p>
 
     {teamRows.length === 0 ? (
@@ -95,7 +95,7 @@ const teamRows = await db()
           </dd>
         </div>
       </dl>
-      <p class="mt-4 text-xs text-ink-400">
+      <p class="mt-4 text-xs text-ink-500 dark:text-ink-400">
         {isDE ? 'Quelle: ' : 'Source: '}
         <a class="underline" rel="noopener" href="https://www.accessibilityassociation.org/s/certification">IAAP Certification</a>
       </p>

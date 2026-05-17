@@ -79,7 +79,7 @@ const serviceSchema = {
       <article class="rounded-xl border border-ink-200 bg-white p-6 dark:border-ink-600 dark:bg-ink-800">
         <h3 class="text-xl font-semibold">{isDE ? 'Silber' : 'Silver'}</h3>
         <p class="mt-1 text-3xl font-bold">{fmtPrice(0)}</p>
-        <p class="text-sm text-ink-400">{isDE ? 'Für immer kostenlos' : 'Forever free'}</p>
+        <p class="text-sm text-ink-500 dark:text-ink-400">{isDE ? 'Für immer kostenlos' : 'Forever free'}</p>
         <ul class="mt-4 space-y-2 text-sm">
           <li>✓ {isDE ? 'Startseiten-Prüfung' : 'Homepage scan'}</li>
           <li>✓ {isDE ? 'Silber-Siegel, 90 Tage gültig' : 'Silver Seal, valid 90 days'}</li>
@@ -97,7 +97,7 @@ const serviceSchema = {
         </span>
         <h3 class="text-xl font-semibold">Gold</h3>
         <p class="mt-1 text-3xl font-bold">{fmtPrice(19, 'mo')}</p>
-        <p class="text-sm text-ink-400">
+        <p class="text-sm text-ink-500 dark:text-ink-400">
           {isDE ? 'oder ' : 'or '}{fmtPrice(190, 'yr')} <span class="text-accent-600">(−17%)</span>
         </p>
         <ul class="mt-4 space-y-2 text-sm">
@@ -115,7 +115,7 @@ const serviceSchema = {
       <article class="rounded-xl border border-ink-200 bg-white p-6 dark:border-ink-600 dark:bg-ink-800">
         <h3 class="text-xl font-semibold">Gold Pro</h3>
         <p class="mt-1 text-3xl font-bold">{fmtPrice(49, 'mo')}</p>
-        <p class="text-sm text-ink-400">
+        <p class="text-sm text-ink-500 dark:text-ink-400">
           {isDE ? 'oder ' : 'or '}{fmtPrice(490, 'yr')}
         </p>
         <ul class="mt-4 space-y-2 text-sm">
@@ -131,7 +131,7 @@ const serviceSchema = {
       </article>
     </div>
 
-    <p class="mt-6 text-sm text-ink-400">
+    <p class="mt-6 text-sm text-ink-500 dark:text-ink-400">
       {isDE
         ? 'Enterprise (unbegrenzte Seiten, mehrere Domains, dedizierte Ansprechperson) ab '
         : 'Enterprise (unlimited pages, multi-domain, dedicated success manager) from '}
@@ -146,15 +146,15 @@ const serviceSchema = {
     </h2>
     <p class="mt-2 text-ink-600 dark:text-ink-200">
       {isDE
-        ? 'Wenn Sie durchgefallen sind. Echte Code-Korrekturen durch IAAP-zertifizierte Fachkräfte. Keine Overlay-Widgets.'
-        : 'If you failed. Real code fixes by IAAP-certified specialists. No overlay widgets.'}
+        ? 'Wenn Sie durchgefallen sind. Echte Code-Korrekturen durch Barrierefreiheits-Fachkräfte. Keine Overlay-Widgets.'
+        : 'If you failed. Real code fixes by accessibility specialists. No overlay widgets.'}
     </p>
 
     <div class="mt-8 grid gap-6 md:grid-cols-3">
       <article class="rounded-xl border border-ink-200 bg-white p-6 dark:border-ink-600 dark:bg-ink-800">
         <h3 class="text-xl font-semibold">Starter Fix</h3>
         <p class="mt-1 text-3xl font-bold">{fmtPrice(499, 'once')}</p>
-        <p class="text-sm text-ink-400">
+        <p class="text-sm text-ink-500 dark:text-ink-400">
           {isDE ? 'Bis 10 Seiten — Lieferung 7–10 Werktage' : 'Up to 10 pages — 7–10 business days'}
         </p>
         <ul class="mt-4 space-y-2 text-sm">
@@ -174,7 +174,7 @@ const serviceSchema = {
         </span>
         <h3 class="text-xl font-semibold">Business Fix</h3>
         <p class="mt-1 text-3xl font-bold">{fmtPrice(2499, 'once')}</p>
-        <p class="text-sm text-ink-400">
+        <p class="text-sm text-ink-500 dark:text-ink-400">
           {isDE ? 'Bis 100 Seiten — Lieferung 3–4 Wochen' : 'Up to 100 pages — 3–4 weeks'}
         </p>
         <ul class="mt-4 space-y-2 text-sm">
@@ -192,7 +192,7 @@ const serviceSchema = {
       <article class="rounded-xl border border-ink-200 bg-white p-6 dark:border-ink-600 dark:bg-ink-800">
         <h3 class="text-xl font-semibold">Enterprise Fix</h3>
         <p class="mt-1 text-3xl font-bold">{isDE ? 'ab ' : 'from '}{fmtPrice(7500)}</p>
-        <p class="text-sm text-ink-400">
+        <p class="text-sm text-ink-500 dark:text-ink-400">
           {isDE ? 'Unbegrenzte Seiten — individueller Zeitplan' : 'Unlimited pages — custom timeline'}
         </p>
         <ul class="mt-4 space-y-2 text-sm">

@@ -11,6 +11,8 @@ import {
 // scrolling, focus visibility, paint timing, real touch-target geometry.
 // JSDOM can't faithfully evaluate any of these. We disable them explicitly
 // so axe doesn't report misleading results.
+// `color-contrast-enhanced` (AAA, 7:1) is also disabled here — same reason
+// as in the Playwright audit: we target AA, not AAA.
 const BROWSER_ONLY_RULES = [
   'color-contrast',
   'color-contrast-enhanced',

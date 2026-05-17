@@ -116,18 +116,28 @@ export function severityFromImpact(impact: AxeResult['impact']): WcagSeverity {
   }
 }
 
+// Rules we explicitly disable. These would otherwise leak in via the
+// best-practice / EN-301-549 / section508 tag families even though we don't
+// run wcag2aaa directly.
+//   color-contrast-enhanced: WCAG 1.4.6 AAA (7:1 instead of 4.5:1) — our
+//   seal is AA-based, including AAA would fail every well-built site
+//   including W3C's own, and silently push designers toward over-dark UI.
+const DISABLED_RULES = ['color-contrast-enhanced'] as const;
+
 export async function auditPage(page: Page, pageUrl: string): Promise<AuditResult> {
   await page.addScriptTag({ content: AXE_SOURCE });
 
   const result = (await page.evaluate(
     async (tags: readonly string[]) => {
-      // axe is now on window
       // @ts-expect-error injected at runtime
       return await window.axe.run(document, {
         runOnly: { type: 'tag', values: [...tags] },
-        // Ask for everything so the UI can show pass / incomplete /
-        // inapplicable counts (AC-style breakdown).
         resultTypes: ['violations', 'passes', 'incomplete', 'inapplicable'],
+        // AAA contrast (1.4.6) is disabled — our seal is AA-based; including
+        // AAA would fail every well-built site.
+        rules: {
+          'color-contrast-enhanced': { enabled: false },
+        },
       });
     },
     AXE_RUN_TAGS,

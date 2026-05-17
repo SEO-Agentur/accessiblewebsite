@@ -2,7 +2,7 @@
   "meta": {
     "siteName": "Barrierefreiewebseite",
     "tagline": "WCAG 2.2 AA — Prüfung, Siegel und Umsetzung",
-    "defaultDescription": "Prüfen Sie Ihre Webseite auf WCAG 2.2 AA Konformität. Erhalten Sie ein verifizierbares Barrierefreiheits-Siegel. Lassen Sie Ihre Webseite von zertifizierten Fachkräften umsetzen."
+    "defaultDescription": "Prüfen Sie Ihre Webseite auf WCAG 2.2 AA Konformität. Erhalten Sie ein verifizierbares Barrierefreiheits-Siegel. Lassen Sie Ihre Webseite von Barrierefreiheits-Fachkräften umsetzen — echter Code, keine Overlay-Widgets."
   },
   "nav": {
     "skipToContent": "Zum Hauptinhalt springen",
@@ -32,7 +32,7 @@
     "noJsBannerBody": "Das ist in Ordnung — diese Webseite funktioniert auch ohne. Senden Sie das Formular oben ab und Sie gelangen direkt zu Ihrem Ergebnis."
   },
   "footer": {
-    "tagline": "Echte Barrierefreiheit, von Menschen zertifiziert.",
+    "tagline": "Barrierefreiheit von Menschen, nicht von Widgets.",
     "rights": "Alle Rechte vorbehalten.",
     "privacy": "Datenschutz",
     "terms": "AGB",
