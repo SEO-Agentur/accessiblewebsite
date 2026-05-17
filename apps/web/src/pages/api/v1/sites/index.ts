@@ -15,6 +15,15 @@ const AddSiteInput = z.object({
     .min(3)
     .max(253)
     .transform((s) => s.toLowerCase().replace(/^https?:\/\//, '').replace(/\/+$/, '')),
+  // Optional — operator can paste their sitemap.xml URL so full-site
+  // scans use it directly instead of guessing /sitemap.xml. Empty string
+  // and unset both mean "auto-discover".
+  sitemapUrl: z
+    .string()
+    .trim()
+    .transform((s) => (s.length === 0 ? undefined : s))
+    .pipe(z.string().url().optional())
+    .optional(),
 });
 
 async function readBody(request: Request): Promise<Record<string, unknown>> {
@@ -76,6 +85,7 @@ export const POST: APIRoute = async ({ request, locals, redirect }) => {
       verificationToken: randomBytes(24).toString('base64url'),
       verificationStatus: 'pending',
       sealTier: 'none',
+      sitemapUrl: parsed.data.sitemapUrl ?? null,
     });
 
   if (wantsJson(request)) {

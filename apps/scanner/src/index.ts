@@ -69,7 +69,7 @@ async function processScan(job: Job): Promise<void> {
 }
 
 async function runScan(payload: typeof ScanJobPayload._type): Promise<void> {
-  const { scanId, targetUrl, scanType, maxPages, triggeredBy } = payload;
+  const { scanId, targetUrl, scanType, maxPages, triggeredBy, sitemapUrl } = payload;
 
   console.log(`[scan ${scanId}] start ${targetUrl} type=${scanType} max=${maxPages}`);
   await db
@@ -117,7 +117,7 @@ async function runScan(payload: typeof ScanJobPayload._type): Promise<void> {
     const urls =
       scanType === 'homepage'
         ? [targetUrl]
-        : await discoverUrls(page, { startUrl: targetUrl, maxPages });
+        : await discoverUrls(page, { startUrl: targetUrl, maxPages, sitemapUrl });
 
     const allViolations: ScanViolation[] = [];
 

@@ -208,6 +208,10 @@ export const monitoredSites = pgTable(
     isPublicInDirectory: boolean('is_public_in_directory')
       .notNull()
       .default(true),
+    // Optional user-supplied sitemap URL. When set, the scanner uses it
+    // verbatim for full-site scans instead of guessing /sitemap.xml.
+    // Sitemap-index files (with <sitemapindex>) are followed one level.
+    sitemapUrl: text('sitemap_url'),
     createdAt: timestamp('created_at', { withTimezone: true })
       .notNull()
       .default(sql`now()`),

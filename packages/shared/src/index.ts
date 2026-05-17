@@ -118,6 +118,10 @@ export const ScanJobPayload = z.object({
   scanType: z.enum(['homepage', 'full_site']),
   maxPages: z.number().int().min(1).max(2500).default(1),
   triggeredBy: z.enum(['user', 'cron', 'post_remediation', 'anonymous']),
+  // Optional explicit sitemap URL — when set, the crawler uses it directly
+  // for full-site scans instead of probing /sitemap.xml. Sitemap-index
+  // files are followed one level. Ignored for scanType='homepage'.
+  sitemapUrl: z.string().url().optional(),
 });
 export type ScanJobPayload = z.infer<typeof ScanJobPayload>;
 

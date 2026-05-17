@@ -1,0 +1,1 @@
+ALTER TABLE "monitored_sites" ADD COLUMN "sitemap_url" text;
