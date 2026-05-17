@@ -1,29 +1,288 @@
 ---
 import Base from '../../layouts/Base.astro';
+import { eq, asc } from 'drizzle-orm';
+import { scans, scanIssues, type Scan, type ScanIssue } from '@accessiblewebsite/db';
+import { db } from '../../lib/db';
 import { t } from '../../i18n';
+import { routePath } from '../../i18n/routes';
 
 export const prerender = false;
 
-const { id } = Astro.params;
 const locale = Astro.locals.locale;
+const isDE = locale === 'de';
 const strings = t(locale);
 
-// TODO(scanner): fetch real scan record by id, show status + violations.
-// Stub for now to prove the routing flow.
-const isStub = id?.startsWith('stub-') ?? false;
+const { id } = Astro.params;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+if (typeof id !== 'string' || !UUID_RE.test(id)) {
+  return new Response(isDE ? 'Scan nicht gefunden' : 'Scan not found', {
+    status: 404,
+    headers: { 'content-type': 'text/plain; charset=utf-8' },
+  });
+}
+
+const rows = await db().select().from(scans).where(eq(scans.id, id)).limit(1);
+const scan: Scan | undefined = rows[0];
+if (!scan) {
+  return new Response(isDE ? 'Scan nicht gefunden' : 'Scan not found', {
+    status: 404,
+    headers: { 'content-type': 'text/plain; charset=utf-8' },
+  });
+}
+
+let issues: ScanIssue[] = [];
+if (scan.status === 'completed') {
+  issues = await db()
+    .select()
+    .from(scanIssues)
+    .where(eq(scanIssues.scanId, id))
+    .orderBy(asc(scanIssues.severity), asc(scanIssues.wcagCriterion));
+}
+
+const SEVERITY_ORDER = ['critical', 'serious', 'moderate', 'minor'] as const;
+const issuesBySeverity = Object.fromEntries(
+  SEVERITY_ORDER.map((s) => [s, issues.filter((i) => i.severity === s)]),
+) as Record<(typeof SEVERITY_ORDER)[number], ScanIssue[]>;
+
+const targetHost = (() => {
+  try {
+    return new URL(scan.targetUrl).host;
+  } catch {
+    return scan.targetUrl;
+  }
+})();
+
+const score = scan.score ?? 0;
+const scoreColour =
+  score >= 95 ? 'text-accent-600 dark:text-accent-50'
+  : score >= 80 ? 'text-emerald-600 dark:text-emerald-300'
+  : score >= 50 ? 'text-amber-600 dark:text-amber-300'
+  : 'text-red-600 dark:text-red-400';
+
+const sealTier =
+  score >= 95 ? 'gold'
+  : score >= 80 ? 'silver'
+  : null;
+
+const severityLabel = (s: string): string => {
+  if (isDE) {
+    return { critical: 'Kritisch', serious: 'Schwerwiegend', moderate: 'Mittel', minor: 'Gering' }[s] ?? s;
+  }
+  return { critical: 'Critical', serious: 'Serious', moderate: 'Moderate', minor: 'Minor' }[s] ?? s;
+};
+
+const severityChipClass = (s: string): string => ({
+  critical: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200',
+  serious: 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200',
+  moderate: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-200',
+  minor: 'bg-ink-100 text-ink-800 dark:bg-ink-700 dark:text-ink-100',
+}[s] ?? 'bg-ink-100');
+
+const isRunning = scan.status === 'queued' || scan.status === 'running';
+const isFailed = scan.status === 'failed';
+const isComplete = scan.status === 'completed';
+
+const pageTitle = isComplete
+  ? `${score}/100 — ${targetHost} — ${strings.meta.siteName}`
+  : isRunning
+    ? (isDE ? `Scan läuft — ${targetHost}` : `Scan running — ${targetHost}`)
+    : (isDE ? `Scan fehlgeschlagen — ${targetHost}` : `Scan failed — ${targetHost}`);
+
+const pageDescription = isComplete
+  ? (isDE
+      ? `${targetHost} hat ${score}/100 nach WCAG 2.2 AA erreicht. ${scan.totalIssues ?? 0} gefundene Probleme.`
+      : `${targetHost} scored ${score}/100 against WCAG 2.2 AA. ${scan.totalIssues ?? 0} issues found.`)
+  : (isDE
+      ? `Ergebnis-Seite für die Barrierefreiheits-Prüfung von ${targetHost}.`
+      : `Result page for the accessibility scan of ${targetHost}.`);
 ---
 
-<Base title={`Scan ${id} — ${strings.meta.siteName}`}>
-  <section class="px-4 py-16">
-    <div class="mx-auto max-w-3xl">
-      <h1 class="text-2xl font-semibold">Scan {id}</h1>
-      {isStub ? (
-        <p class="mt-4 text-ink-600 dark:text-ink-200">
-          Scan accepted. The worker pipeline isn't wired yet, but the no-JS form
-          submission and the locale-aware routing both reached this page.
+<Base title={pageTitle} description={pageDescription}>
+  {isRunning && (
+    <Fragment slot="head">
+      <meta http-equiv="refresh" content="3" />
+    </Fragment>
+  )}
+
+  <section class="px-4 py-12">
+    <div class="mx-auto max-w-4xl">
+      <p class="text-sm text-ink-400">
+        <a href={routePath('home', locale)} class="hover:underline">
+          {isDE ? 'Startseite' : 'Home'}
+        </a>
+        {' › '}
+        <span aria-current="page">{isDE ? 'Scan' : 'Scan'}</span>
+      </p>
+
+      <header class="mt-4">
+        <h1 class="text-3xl font-bold tracking-tight sm:text-4xl">
+          {targetHost}
+        </h1>
+        <p class="mt-1 break-all text-sm text-ink-400">
+          {scan.targetUrl}
         </p>
-      ) : (
-        <p class="mt-4 text-ink-600 dark:text-ink-200">Loading…</p>
+      </header>
+
+      {isRunning && (
+        <div class="mt-10 rounded-xl border border-ink-200 bg-white p-8 text-center dark:border-ink-600 dark:bg-ink-800" aria-live="polite" aria-busy="true">
+          <div class="mx-auto inline-block animate-spin rounded-full border-4 border-ink-200 border-t-accent-500 p-4" aria-hidden="true" style="width:48px;height:48px;"></div>
+          <h2 class="mt-6 text-xl font-semibold">
+            {scan.status === 'queued'
+              ? (isDE ? 'In Warteschlange…' : 'Queued…')
+              : (isDE ? 'Scan läuft…' : 'Scanning…')}
+          </h2>
+          <p class="mt-2 text-sm text-ink-600 dark:text-ink-200">
+            {isDE
+              ? 'Diese Seite aktualisiert sich automatisch, sobald die Ergebnisse fertig sind. Üblicherweise unter 30 Sekunden.'
+              : 'This page refreshes automatically once results are ready. Usually under 30 seconds.'}
+          </p>
+          <p class="mt-3 text-xs text-ink-400">
+            {isDE ? 'Scan-ID: ' : 'Scan ID: '}<code>{scan.id}</code>
+          </p>
+        </div>
+      )}
+
+      {isFailed && (
+        <div class="mt-10 rounded-xl border border-red-200 bg-red-50 p-8 dark:border-red-700 dark:bg-red-900/20">
+          <h2 class="text-xl font-semibold text-red-800 dark:text-red-200">
+            {isDE ? 'Scan fehlgeschlagen' : 'Scan failed'}
+          </h2>
+          <p class="mt-2 text-sm text-red-700 dark:text-red-200">
+            {isDE
+              ? 'Wir konnten Ihre Webseite nicht laden. Häufige Gründe: Die URL ist nicht öffentlich erreichbar, die Seite hat ein Captcha, oder die Antwortzeit war über 30 Sekunden.'
+              : 'We could not load your site. Common reasons: the URL is not publicly reachable, the page has a captcha, or response time exceeded 30 seconds.'}
+          </p>
+          <a href={routePath('home', locale)} class="mt-4 inline-block rounded-md bg-accent-500 px-4 py-2 text-sm font-semibold text-white hover:bg-accent-600">
+            {isDE ? 'Andere URL prüfen' : 'Scan another URL'}
+          </a>
+        </div>
+      )}
+
+      {isComplete && (
+        <>
+          <section class="mt-8 grid gap-6 sm:grid-cols-3">
+            <div class="rounded-xl border border-ink-200 bg-white p-6 sm:col-span-2 dark:border-ink-600 dark:bg-ink-800">
+              <p class="text-sm text-ink-400">
+                {isDE ? 'Bewertung' : 'Score'}
+              </p>
+              <p class={`mt-1 text-6xl font-bold tracking-tight ${scoreColour}`}>
+                {score}<span class="text-3xl text-ink-400">/100</span>
+              </p>
+              <p class="mt-2 text-sm text-ink-600 dark:text-ink-200">
+                {sealTier === 'gold' && (
+                  <>
+                    🥇 {isDE ? 'Gold-Siegel-würdig (≥ 95)' : 'Gold Seal-eligible (≥ 95)'}
+                  </>
+                )}
+                {sealTier === 'silver' && (
+                  <>
+                    🥈 {isDE ? 'Silber-Siegel-würdig (≥ 80)' : 'Silver Seal-eligible (≥ 80)'}
+                  </>
+                )}
+                {sealTier === null && (
+                  <>
+                    {isDE
+                      ? 'Unter dem Silber-Schwellwert (80). Empfehlung: Umsetzung.'
+                      : 'Below the Silver threshold (80). Remediation recommended.'}
+                  </>
+                )}
+              </p>
+            </div>
+            <div class="rounded-xl border border-ink-200 bg-white p-6 dark:border-ink-600 dark:bg-ink-800">
+              <p class="text-sm text-ink-400">
+                {isDE ? 'Probleme gesamt' : 'Total issues'}
+              </p>
+              <p class="mt-1 text-4xl font-bold">{scan.totalIssues ?? 0}</p>
+              <dl class="mt-3 space-y-1 text-xs">
+                <div class="flex justify-between"><dt class="text-ink-400">{severityLabel('critical')}</dt><dd>{scan.criticalIssues ?? 0}</dd></div>
+                <div class="flex justify-between"><dt class="text-ink-400">{severityLabel('serious')}</dt><dd>{scan.seriousIssues ?? 0}</dd></div>
+                <div class="flex justify-between"><dt class="text-ink-400">{severityLabel('moderate')}</dt><dd>{scan.moderateIssues ?? 0}</dd></div>
+                <div class="flex justify-between"><dt class="text-ink-400">{severityLabel('minor')}</dt><dd>{scan.minorIssues ?? 0}</dd></div>
+              </dl>
+            </div>
+          </section>
+
+          {score < 80 && (scan.criticalIssues ?? 0) + (scan.seriousIssues ?? 0) > 0 && (
+            <aside class="mt-8 rounded-xl border-2 border-accent-500 bg-accent-50 p-6 dark:bg-accent-700/10">
+              <h2 class="text-xl font-bold">
+                {isDE
+                  ? `Wir fanden ${(scan.criticalIssues ?? 0) + (scan.seriousIssues ?? 0)} ernsthafte Probleme auf ${targetHost}`
+                  : `We found ${(scan.criticalIssues ?? 0) + (scan.seriousIssues ?? 0)} serious issues on ${targetHost}`}
+              </h2>
+              <p class="mt-2 text-sm text-ink-700 dark:text-ink-100">
+                {isDE
+                  ? 'Unser Team kann sie in 3–4 Wochen beheben — mit Festpreis und 100 %-Garantie. Angebot in 48 Stunden.'
+                  : 'Our team can fix them in 3–4 weeks — fixed price, 100% guarantee. Quote in 48 hours.'}
+              </p>
+              <a
+                href={`${routePath('remediation', locale)}?url=${encodeURIComponent(scan.targetUrl)}`}
+                class="mt-4 inline-block rounded-md bg-accent-500 px-6 py-3 text-sm font-semibold text-white hover:bg-accent-600"
+              >
+                {isDE ? 'Kostenloses Angebot anfordern' : 'Get a free quote in 48 hours'}
+              </a>
+            </aside>
+          )}
+
+          {issues.length === 0 ? (
+            <p class="mt-10 rounded-lg bg-emerald-50 p-6 text-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-200">
+              {isDE
+                ? '🎉 Keine Verstöße gefunden. Diese Webseite ist nach unseren automatischen Tests konform mit WCAG 2.2 AA.'
+                : '🎉 No violations found. This site passes our automated WCAG 2.2 AA checks.'}
+            </p>
+          ) : (
+            <section class="mt-10 space-y-8">
+              {SEVERITY_ORDER.map((sev) => {
+                const group = issuesBySeverity[sev];
+                if (group.length === 0) return null;
+                return (
+                  <div>
+                    <h2 class="text-xl font-bold">
+                      <span class={`mr-2 inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${severityChipClass(sev)}`}>
+                        {severityLabel(sev)}
+                      </span>
+                      <span class="text-ink-600 dark:text-ink-200">({group.length})</span>
+                    </h2>
+                    <ul class="mt-4 space-y-3">
+                      {group.slice(0, 15).map((iss) => (
+                        <li class="rounded-lg border border-ink-200 bg-white p-4 dark:border-ink-600 dark:bg-ink-800">
+                          <p class="text-xs uppercase tracking-wide text-ink-400">
+                            WCAG {iss.wcagCriterion}
+                          </p>
+                          <p class="mt-1 font-semibold">{iss.description}</p>
+                          {iss.elementSelector && (
+                            <p class="mt-2 break-all rounded bg-ink-50 px-2 py-1 font-mono text-xs text-ink-700 dark:bg-ink-900 dark:text-ink-200">
+                              {iss.elementSelector}
+                            </p>
+                          )}
+                          {iss.remediationHint && (
+                            <p class="mt-2 text-sm text-ink-600 dark:text-ink-200">{iss.remediationHint}</p>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                    {group.length > 15 && (
+                      <p class="mt-3 text-sm text-ink-400">
+                        {isDE
+                          ? `… und ${group.length - 15} weitere ${severityLabel(sev).toLowerCase()} Probleme.`
+                          : `… and ${group.length - 15} more ${severityLabel(sev).toLowerCase()} issues.`}
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
+            </section>
+          )}
+
+          <p class="mt-12 text-xs text-ink-400">
+            {isDE ? 'Scan abgeschlossen am ' : 'Scan completed at '}
+            {scan.completedAt
+              ? scan.completedAt.toLocaleString(isDE ? 'de-DE' : 'en-GB')
+              : '—'}
+            {' · '}
+            {isDE ? 'Scan-ID: ' : 'Scan ID: '}<code>{scan.id}</code>
+          </p>
+        </>
       )}
     </div>
   </section>

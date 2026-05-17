@@ -1,11 +1,15 @@
 import type { APIRoute } from 'astro';
-import { ScanInitiateInput } from '@accessiblewebsite/shared';
+import { randomUUID } from 'node:crypto';
+import { ScanInitiateInput, ScanJobPayload } from '@accessiblewebsite/shared';
+import { scans } from '@accessiblewebsite/db';
+import { db } from '../../../../lib/db';
+import { getScanQueue } from '../../../../lib/queue';
+import { consumeRateLimit, realClientIp } from '../../../../lib/rateLimit';
 import { routePath } from '../../../../i18n/routes';
+import { env } from '../../../../env';
 
 export const prerender = false;
 
-// Standard HTML form submits as application/x-www-form-urlencoded. Fetch/JSON
-// clients use application/json. We accept both.
 async function readBody(request: Request): Promise<Record<string, unknown>> {
   const contentType = request.headers.get('content-type') ?? '';
   if (contentType.includes('application/json')) {
@@ -24,12 +28,13 @@ function wantsJson(request: Request): boolean {
   return accept.includes('application/json');
 }
 
-export const POST: APIRoute = async ({ request, locals, redirect }) => {
+export const POST: APIRoute = async ({ request, locals, redirect, clientAddress }) => {
   const raw = await readBody(request);
   const parsed = ScanInitiateInput.safeParse(raw);
 
+  const home = routePath('home', locals.locale);
+
   if (!parsed.success) {
-    const home = routePath('home', locals.locale);
     if (wantsJson(request)) {
       return new Response(
         JSON.stringify({
@@ -42,10 +47,64 @@ export const POST: APIRoute = async ({ request, locals, redirect }) => {
     return redirect(`${home}?error=invalid_url`, 303);
   }
 
-  // TODO(scanner): enqueue ScanJobPayload on the BullMQ queue here, persist
-  // a `scans` row with status='queued', return the scan id. For now we stub
-  // a deterministic id from the URL so the response flow is testable end-to-end.
-  const scanId = stubScanId(parsed.data.url);
+  // Anonymous rate limit. Once Lucia auth lands, switch to a per-user counter.
+  const ip = realClientIp(request, clientAddress);
+  const cfg = env();
+  const rl = await consumeRateLimit(
+    `ratelimit:scan:anon:${ip}`,
+    cfg.SCAN_RATE_ANONYMOUS_PER_HOUR,
+    3600,
+  );
+  if (!rl.allowed) {
+    if (wantsJson(request)) {
+      return new Response(
+        JSON.stringify({
+          error: 'rate_limited',
+          resetSeconds: rl.resetSeconds,
+        }),
+        {
+          status: 429,
+          headers: {
+            'content-type': 'application/json',
+            'retry-after': String(rl.resetSeconds),
+          },
+        },
+      );
+    }
+    return redirect(`${home}?error=rate_limited`, 303);
+  }
+
+  const scanId = randomUUID();
+  const targetUrl = parsed.data.url;
+  const anonymousEmail = parsed.data.email ?? null;
+
+  // Insert the scan row first, then enqueue. If the queue is down the row
+  // still exists with status='queued' and a future re-drive can recover it.
+  await db()
+    .insert(scans)
+    .values({
+      id: scanId,
+      targetUrl,
+      scanType: 'homepage',
+      triggeredBy: 'anonymous',
+      status: 'queued',
+      anonymousEmail,
+    });
+
+  const payload = ScanJobPayload.parse({
+    scanId,
+    targetUrl,
+    scanType: 'homepage',
+    maxPages: 1,
+    triggeredBy: 'anonymous',
+  });
+
+  await getScanQueue().add('scan', payload, {
+    removeOnComplete: { count: 100 },
+    removeOnFail: { count: 1000 },
+    attempts: 2,
+    backoff: { type: 'exponential', delay: 5000 },
+  });
 
   if (wantsJson(request)) {
     return new Response(JSON.stringify({ scanId, status: 'queued' }), {
@@ -53,14 +112,5 @@ export const POST: APIRoute = async ({ request, locals, redirect }) => {
       headers: { 'content-type': 'application/json' },
     });
   }
-
-  // No-JS path: full page redirect to the scan results page, which itself
-  // will poll status server-side (or render "queued" and meta-refresh).
   return redirect(`/scan/${scanId}`, 303);
 };
-
-function stubScanId(url: string): string {
-  // Placeholder — replace with real UUID once the queue is wired.
-  const hash = Array.from(url).reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 0);
-  return `stub-${hash.toString(16).padStart(8, '0')}`;
-}
