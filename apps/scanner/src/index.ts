@@ -78,10 +78,17 @@ async function runScan(payload: typeof ScanJobPayload._type): Promise<void> {
     .where(eq(scans.id, scanId));
 
   const b = await getBrowser();
+  // Real Chrome UA. We're scanning at the site owner's request, so making
+  // the request look like a real visitor is the honest representation of
+  // what their real users see — not anti-bot evasion. WAVE, Lighthouse,
+  // and AccessibilityChecker all do the same. The custom-token UA we used
+  // before got marketing sites to serve us bot-detection placeholders
+  // (1 issue where WAVE found 76).
   const context = await b.newContext({
     userAgent:
-      'Mozilla/5.0 (compatible; AccessibleWebsiteScanner/0.1; +https://accessiblewebsite.net/methodology)',
+      'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
     viewport: { width: 1366, height: 900 },
+    locale: 'en-US',
     bypassCSP: true,
   });
   const page = await context.newPage();
@@ -92,6 +99,9 @@ async function runScan(payload: typeof ScanJobPayload._type): Promise<void> {
   // score against an empty violation set.
   let pagesAttempted = 0;
   let pagesLoaded = 0;
+  let passCount = 0;
+  let incompleteCount = 0;
+  let inapplicableCount = 0;
   const failedPages: Array<{ url: string; reason: string }> = [];
 
   try {
@@ -109,12 +119,15 @@ async function runScan(payload: typeof ScanJobPayload._type): Promise<void> {
           waitUntil: 'domcontentloaded',
           timeout: config.SCANNER_GOTO_TIMEOUT_MS,
         });
-        const pageViolations = await withTimeout(
+        const pageResult = await withTimeout(
           auditPage(page, url),
           config.SCANNER_AUDIT_TIMEOUT_MS,
           `audit ${url}`,
         );
-        allViolations.push(...pageViolations);
+        allViolations.push(...pageResult.violations);
+        passCount += pageResult.passCount;
+        incompleteCount += pageResult.incompleteCount;
+        inapplicableCount += pageResult.inapplicableCount;
         pagesLoaded++;
       } catch (err) {
         const reason = err instanceof Error ? err.message : String(err);
@@ -142,12 +155,15 @@ async function runScan(payload: typeof ScanJobPayload._type): Promise<void> {
             config.FIRECRAWL_TIMEOUT_MS,
             `firecrawl ${url}`,
           );
-          const violations = await withTimeout(
+          const fcResult = await withTimeout(
             auditStaticHtml(fc.html, fc.finalUrl),
             config.SCANNER_AUDIT_TIMEOUT_MS,
             `static-audit ${url}`,
           );
-          allViolations.push(...violations);
+          allViolations.push(...fcResult.violations);
+          passCount += fcResult.passCount;
+          incompleteCount += fcResult.incompleteCount;
+          inapplicableCount += fcResult.inapplicableCount;
           pagesLoaded++;
         } catch (err) {
           const reason = err instanceof Error ? err.message : String(err);
@@ -215,6 +231,9 @@ async function runScan(payload: typeof ScanJobPayload._type): Promise<void> {
             failedPages,
             firecrawlFailures,
             scanMode,
+            passCount,
+            incompleteCount,
+            inapplicableCount,
           })}::jsonb`,
         })
         .where(eq(scans.id, scanId));

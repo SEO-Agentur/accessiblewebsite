@@ -1,10 +1,10 @@
 import { JSDOM, VirtualConsole } from 'jsdom';
-import type { ScanViolation } from '@accessiblewebsite/shared';
 import {
   AXE_SOURCE_STRING,
-  severityFromImpact,
-  wcagCriterionFromTags,
+  AXE_RUN_TAGS,
+  toAuditResult,
   type AxeRunResult,
+  type AuditResult,
 } from './audit.js';
 
 // axe-core rules that require a real browser layout pass — computed styles,
@@ -32,7 +32,7 @@ const BROWSER_ONLY_RULES = [
 export async function auditStaticHtml(
   html: string,
   pageUrl: string,
-): Promise<ScanViolation[]> {
+): Promise<AuditResult> {
   // Silence JSDOM's noisy CSS parse errors and JS errors from external scripts —
   // we don't care, we only walk the DOM.
   const virtualConsole = new VirtualConsole();
@@ -70,27 +70,12 @@ export async function auditStaticHtml(
     for (const r of BROWSER_ONLY_RULES) rulesConfig[r] = { enabled: false };
 
     const result = await win.axe.run(win.document, {
-      runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag22aa'] },
-      resultTypes: ['violations'],
+      runOnly: { type: 'tag', values: [...AXE_RUN_TAGS] },
+      resultTypes: ['violations', 'passes', 'incomplete', 'inapplicable'],
       rules: rulesConfig,
     });
 
-    const violations: ScanViolation[] = [];
-    for (const v of result.violations) {
-      const wcagCriterion = wcagCriterionFromTags(v.tags);
-      const severity = severityFromImpact(v.impact);
-      for (const node of v.nodes) {
-        violations.push({
-          pageUrl,
-          wcagCriterion,
-          severity,
-          elementSelector: node.target.join(' '),
-          description: v.help,
-          remediationHint: node.failureSummary ?? v.helpUrl,
-        });
-      }
-    }
-    return violations;
+    return toAuditResult(result, pageUrl);
   } finally {
     dom.window.close();
   }

@@ -104,8 +104,17 @@ const isComplete = scan.status === 'completed';
 // Detect whether this scan completed via the Firecrawl failover (partial
 // audit — semantic rules only, no color contrast / focus / touch-target
 // verification).
-const rawResults = (scan.rawResults ?? null) as { scanMode?: string } | null;
+type RawResults = {
+  scanMode?: string;
+  passCount?: number;
+  incompleteCount?: number;
+  inapplicableCount?: number;
+};
+const rawResults = (scan.rawResults ?? null) as RawResults | null;
 const isPartialScan = rawResults?.scanMode === 'partial_firecrawl';
+const passCount = rawResults?.passCount ?? 0;
+const incompleteCount = rawResults?.incompleteCount ?? 0;
+const inapplicableCount = rawResults?.inapplicableCount ?? 0;
 
 // Belt + braces auto-refresh for the in-flight states:
 //   1. HTTP Refresh header — fires before any HTML is parsed, survives
@@ -273,6 +282,44 @@ const pageDescription = isComplete
               </dl>
             </div>
           </section>
+
+          {(passCount > 0 || incompleteCount > 0 || inapplicableCount > 0) && (
+            <section class="mt-6 grid gap-3 sm:grid-cols-3" aria-label={isDE ? 'WCAG-Regeln Übersicht' : 'WCAG rules overview'}>
+              <div class="rounded-lg border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-700 dark:bg-emerald-900/20">
+                <p class="text-xs uppercase tracking-wide text-emerald-700 dark:text-emerald-300">
+                  {isDE ? 'Bestandene Prüfungen' : 'Passed audits'}
+                </p>
+                <p class="mt-1 text-2xl font-bold text-emerald-800 dark:text-emerald-200">{passCount}</p>
+                <p class="mt-1 text-xs text-emerald-700/80 dark:text-emerald-200/80">
+                  {isDE
+                    ? 'WCAG-Regeln, die diese Seite besteht.'
+                    : 'WCAG rules this page passes.'}
+                </p>
+              </div>
+              <div class="rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-700 dark:bg-amber-900/20">
+                <p class="text-xs uppercase tracking-wide text-amber-700 dark:text-amber-300">
+                  {isDE ? 'Manuelle Prüfung empfohlen' : 'Manual review recommended'}
+                </p>
+                <p class="mt-1 text-2xl font-bold text-amber-800 dark:text-amber-200">{incompleteCount}</p>
+                <p class="mt-1 text-xs text-amber-700/80 dark:text-amber-200/80">
+                  {isDE
+                    ? 'Regeln, die automatisch nicht eindeutig prüfbar sind.'
+                    : 'Rules that automation can\'t conclusively verify.'}
+                </p>
+              </div>
+              <div class="rounded-lg border border-ink-200 bg-ink-50 p-4 dark:border-ink-600 dark:bg-ink-800">
+                <p class="text-xs uppercase tracking-wide text-ink-500 dark:text-ink-300">
+                  {isDE ? 'Nicht anwendbar' : 'Not applicable'}
+                </p>
+                <p class="mt-1 text-2xl font-bold text-ink-700 dark:text-ink-100">{inapplicableCount}</p>
+                <p class="mt-1 text-xs text-ink-500 dark:text-ink-300">
+                  {isDE
+                    ? 'Regeln ohne passende Elemente auf dieser Seite.'
+                    : 'Rules with no matching elements on this page.'}
+                </p>
+              </div>
+            </section>
+          )}
 
           {score < 80 && (scan.criticalIssues ?? 0) + (scan.seriousIssues ?? 0) > 0 && (
             <aside class="mt-8 rounded-xl border-2 border-accent-500 bg-accent-50 p-6 dark:bg-accent-700/10">

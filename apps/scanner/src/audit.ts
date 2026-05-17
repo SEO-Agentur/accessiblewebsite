@@ -30,6 +30,38 @@ export interface AxeRunResult {
 
 export const AXE_SOURCE_STRING = AXE_SOURCE;
 
+// Tag set we ask axe to run. This is the full audit:
+//   wcag2a / wcag2aa            — WCAG 2.0 Level A + AA
+//   wcag21a / wcag21aa          — WCAG 2.1 Level A + AA (delta vs 2.0)
+//   wcag22a / wcag22aa          — WCAG 2.2 Level A + AA (delta vs 2.1)
+//   best-practice               — additional axe-curated checks (landmarks,
+//                                 heading order, list semantics, etc.)
+//                                 Competitors (WAVE, AccessibilityChecker)
+//                                 include these — leaving them off was why
+//                                 our scanner found 1 issue where they found 76+.
+//   EN-301-549                  — European harmonised standard
+//   section508                  — US federal procurement
+//   ACT                         — W3C Accessibility Conformance Testing
+export const AXE_RUN_TAGS = [
+  'wcag2a',
+  'wcag2aa',
+  'wcag21a',
+  'wcag21aa',
+  'wcag22a',
+  'wcag22aa',
+  'best-practice',
+  'EN-301-549',
+  'section508',
+  'ACT',
+] as const;
+
+export interface AuditResult {
+  violations: ScanViolation[];
+  passCount: number;
+  incompleteCount: number;
+  inapplicableCount: number;
+}
+
 export function wcagCriterionFromTags(tags: string[]): string {
   // axe tags look like "wcag2aa", "wcag111", "wcag2.4.7" depending on version.
   // Prefer the most specific SC reference.
@@ -61,21 +93,29 @@ export function severityFromImpact(impact: AxeResult['impact']): WcagSeverity {
   }
 }
 
-export async function auditPage(
-  page: Page,
-  pageUrl: string,
-): Promise<ScanViolation[]> {
+export async function auditPage(page: Page, pageUrl: string): Promise<AuditResult> {
   await page.addScriptTag({ content: AXE_SOURCE });
 
-  const result = (await page.evaluate(async () => {
-    // axe is now on window
-    // @ts-expect-error injected at runtime
-    return await window.axe.run(document, {
-      runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag22aa'] },
-      resultTypes: ['violations'],
-    });
-  })) as AxeRunResult;
+  const result = (await page.evaluate(
+    async (tags: readonly string[]) => {
+      // axe is now on window
+      // @ts-expect-error injected at runtime
+      return await window.axe.run(document, {
+        runOnly: { type: 'tag', values: [...tags] },
+        // Ask for everything so the UI can show pass / incomplete /
+        // inapplicable counts (AC-style breakdown).
+        resultTypes: ['violations', 'passes', 'incomplete', 'inapplicable'],
+      });
+    },
+    AXE_RUN_TAGS,
+  )) as AxeRunResult;
 
+  return toAuditResult(result, pageUrl);
+}
+
+// Shared shape transformer — used by both auditPage (Playwright) and
+// auditStaticHtml (JSDOM failover).
+export function toAuditResult(result: AxeRunResult, pageUrl: string): AuditResult {
   const violations: ScanViolation[] = [];
   for (const v of result.violations) {
     const wcagCriterion = wcagCriterionFromTags(v.tags);
@@ -91,8 +131,12 @@ export async function auditPage(
       });
     }
   }
-
-  return violations;
+  return {
+    violations,
+    passCount: result.passes.length,
+    incompleteCount: result.incomplete.length,
+    inapplicableCount: result.inapplicable.length,
+  };
 }
 
 // Crude score: start at 100, subtract weighted issues. Tuned to match the
