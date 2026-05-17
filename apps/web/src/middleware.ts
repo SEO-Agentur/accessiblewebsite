@@ -1,6 +1,11 @@
 import { defineMiddleware } from 'astro:middleware';
 import type { Locale } from '@accessiblewebsite/shared';
 import { readSessionUser } from './lib/auth';
+import { env } from './env';
+
+const BYPASS_PARAM = 'unlimitedcy';
+const BYPASS_COOKIE = 'unlimitedcy';
+const BYPASS_COOKIE_TTL_SECONDS = 24 * 60 * 60;
 
 const EN_HOSTS = new Set([
   'accessiblewebsite.net',
@@ -31,6 +36,30 @@ export const onRequest = defineMiddleware(async (context, next) => {
   context.locals.locale = locale;
   context.locals.host = host ?? '';
   context.locals.user = await readSessionUser(context.cookies);
+
+  // Rate-limit bypass: matches ?unlimitedcy=<TOKEN> in the URL OR an
+  // existing unlimitedcy cookie carrying the same TOKEN. First match on
+  // the URL also stamps a 24h cookie so the operator doesn't have to keep
+  // appending the param across navigations. No effect when
+  // RATELIMIT_BYPASS_TOKEN is unset.
+  const bypassToken = env().RATELIMIT_BYPASS_TOKEN;
+  let bypass = false;
+  if (bypassToken) {
+    const paramValue = context.url.searchParams.get(BYPASS_PARAM);
+    if (paramValue === bypassToken) {
+      bypass = true;
+      context.cookies.set(BYPASS_COOKIE, paramValue, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'lax',
+        path: '/',
+        maxAge: BYPASS_COOKIE_TTL_SECONDS,
+      });
+    } else if (context.cookies.get(BYPASS_COOKIE)?.value === bypassToken) {
+      bypass = true;
+    }
+  }
+  context.locals.bypassRateLimit = bypass;
 
   return next();
 });

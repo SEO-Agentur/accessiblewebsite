@@ -47,31 +47,37 @@ export const POST: APIRoute = async ({ request, locals, redirect, clientAddress 
     return redirect(`${home}?error=invalid_url`, 303);
   }
 
-  // Anonymous rate limit. Once Lucia auth lands, switch to a per-user counter.
-  const ip = realClientIp(request, clientAddress);
-  const cfg = env();
-  const rl = await consumeRateLimit(
-    `ratelimit:scan:anon:${ip}`,
-    cfg.SCAN_RATE_ANONYMOUS_PER_HOUR,
-    3600,
-  );
-  if (!rl.allowed) {
-    if (wantsJson(request)) {
-      return new Response(
-        JSON.stringify({
-          error: 'rate_limited',
-          resetSeconds: rl.resetSeconds,
-        }),
-        {
-          status: 429,
-          headers: {
-            'content-type': 'application/json',
-            'retry-after': String(rl.resetSeconds),
+  // Anonymous rate limit. Operators carrying the bypass token (set via the
+  // ?unlimitedcy= URL param or its companion cookie) skip the limiter.
+  // Logged-in users also skip (a per-user daily counter belongs here once
+  // we wire it; for now an authenticated request implies a trusted
+  // session, which is fine — sessions are signup-gated).
+  if (!locals.bypassRateLimit && locals.user === null) {
+    const ip = realClientIp(request, clientAddress);
+    const cfg = env();
+    const rl = await consumeRateLimit(
+      `ratelimit:scan:anon:${ip}`,
+      cfg.SCAN_RATE_ANONYMOUS_PER_HOUR,
+      3600,
+    );
+    if (!rl.allowed) {
+      if (wantsJson(request)) {
+        return new Response(
+          JSON.stringify({
+            error: 'rate_limited',
+            resetSeconds: rl.resetSeconds,
+          }),
+          {
+            status: 429,
+            headers: {
+              'content-type': 'application/json',
+              'retry-after': String(rl.resetSeconds),
+            },
           },
-        },
-      );
+        );
+      }
+      return redirect(`${home}?error=rate_limited`, 303);
     }
-    return redirect(`${home}?error=rate_limited`, 303);
   }
 
   const scanId = randomUUID();

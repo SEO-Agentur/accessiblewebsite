@@ -10,6 +10,7 @@ declare global {
       locale: Locale;
       host: string;
       user: User | null;
+      bypassRateLimit: boolean;
     }
   }
 }

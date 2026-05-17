@@ -38,6 +38,14 @@ const EnvSchema = z.preprocess(
     SCAN_GOLD_MAX_PAGES: z.coerce.number().int().min(1).default(250),
     SCAN_GOLD_PRO_MAX_PAGES: z.coerce.number().int().min(1).default(2500),
 
+    // Rate-limit bypass token. When set, a request carrying
+    // ?unlimitedcy=<this exact value> (or an unlimitedcy cookie with the
+    // same value) skips the anonymous scan rate limiter. Leave UNSET in
+    // production-grade .env; only enable for development or for an
+    // operator who knows the consequences (someone with the token can
+    // spam the scanner).
+    RATELIMIT_BYPASS_TOKEN: z.string().min(1).optional(),
+
     // Operator imprint data. Until COMPANY_NAME is set, the imprint page
     // renders an admin warning instead of fake company details.
     COMPANY_NAME: z.string().optional(),
