@@ -5,20 +5,23 @@ import { monitoredSites, scans } from '@accessiblewebsite/db';
 import { ScanJobPayload } from '@accessiblewebsite/shared';
 import { db } from '../../../../../lib/db';
 import { getScanQueue } from '../../../../../lib/queue';
+import { getEffectiveTier } from '../../../../../lib/tier';
 import { routePath } from '../../../../../i18n/routes';
 
 export const prerender = false;
 
 /**
  * Full-site scan: discovers pages via the site's saved sitemap URL (if any),
- * otherwise auto-discovery, otherwise BFS. Gated to authenticated users.
+ * otherwise auto-discovery, otherwise BFS. Gated to authenticated subscribers.
  *
- * Page cap is sourced from env so we can tier it later (Gold 250, Gold Pro
- * 2,500) once subscription wiring lands.
+ * Tiering:
+ *   - free      → blocked, redirect to pricing
+ *   - gold      → up to 250 pages per scan
+ *   - gold_pro  → up to 2,500 pages per scan
  */
 
-// Conservative default until subscription tier check is wired.
-const DEFAULT_MAX_PAGES = 250;
+const GOLD_MAX_PAGES = 250;
+const GOLD_PRO_MAX_PAGES = 2_500;
 
 export const POST: APIRoute = async ({ params, locals, redirect }) => {
   if (!locals.user) return redirect(routePath('login', locals.locale), 303);
@@ -32,6 +35,14 @@ export const POST: APIRoute = async ({ params, locals, redirect }) => {
     .where(and(eq(monitoredSites.id, siteId), eq(monitoredSites.userId, locals.user.id)))
     .limit(1);
   if (!site) return new Response('Not found', { status: 404 });
+
+  // Subscription gate: full-site scans are Gold+. Free users get redirected
+  // to pricing with a contextual error so the page can highlight the upgrade.
+  const { tier } = await getEffectiveTier(locals.user.id);
+  if (tier !== 'gold' && tier !== 'gold_pro' && tier !== 'enterprise') {
+    return redirect(`${routePath('pricing', locals.locale)}?error=tier_required&need=gold`, 303);
+  }
+  const maxPages = tier === 'gold' ? GOLD_MAX_PAGES : GOLD_PRO_MAX_PAGES;
 
   const scanId = randomUUID();
   const targetUrl = `https://${site.domain}/`;
@@ -49,7 +60,7 @@ export const POST: APIRoute = async ({ params, locals, redirect }) => {
     scanId,
     targetUrl,
     scanType: 'full_site',
-    maxPages: DEFAULT_MAX_PAGES,
+    maxPages,
     triggeredBy: 'user',
     sitemapUrl: site.sitemapUrl ?? undefined,
   });

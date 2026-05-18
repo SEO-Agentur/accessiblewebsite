@@ -9,6 +9,49 @@ interface Props {
 const { locale } = Astro.props;
 const isDE = locale === 'de';
 
+// Surface errors bounced back from the checkout/billing endpoints so the user
+// understands why they landed back on /pricing instead of on Stripe.
+const url = new URL(Astro.request.url);
+const errorCode = url.searchParams.get('error');
+const cancelled = url.searchParams.get('cancelled') === '1';
+const errorBanner: { tone: 'warning' | 'info'; message: string } | null =
+  errorCode === 'tier_required'
+    ? {
+        tone: 'warning',
+        message: isDE
+          ? 'Vollständige Site-Scans sind in Gold oder Gold Pro enthalten. Wählen Sie unten einen Plan, um fortzufahren.'
+          : 'Full-site scans are part of Gold or Gold Pro. Pick a plan below to continue.',
+      }
+    : errorCode === 'billing_not_configured'
+      ? {
+          tone: 'warning',
+          message: isDE
+            ? 'Zahlungsabwicklung ist aktuell nicht aktiv. Bitte versuchen Sie es später erneut oder kontaktieren Sie uns.'
+            : 'Billing is not active right now. Please try again later or contact us.',
+        }
+      : errorCode === 'price_not_configured'
+        ? {
+            tone: 'warning',
+            message: isDE
+              ? 'Für diesen Tarif ist noch keine Preis-ID hinterlegt. Bitte kontaktieren Sie uns.'
+              : "This plan's price hasn't been configured yet. Please contact us.",
+          }
+        : errorCode === 'invalid_tier'
+          ? {
+              tone: 'warning',
+              message: isDE
+                ? 'Ungültige Auswahl. Bitte wählen Sie einen Tarif unten.'
+                : 'Invalid selection. Please pick a plan below.',
+            }
+          : cancelled
+            ? {
+                tone: 'info',
+                message: isDE
+                  ? 'Bezahlung abgebrochen. Sie können den Vorgang jederzeit erneut starten.'
+                  : 'Checkout cancelled. You can start again whenever you like.',
+              }
+            : null;
+
 const fmtPrice = (eur: number, period?: 'mo' | 'yr' | 'once'): string => {
   const num = isDE
     ? eur.toLocaleString('de-DE', { minimumFractionDigits: 0 })
@@ -55,6 +98,18 @@ const serviceSchema = {
 
 <section class="px-4 py-16">
   <div class="mx-auto max-w-6xl">
+    {errorBanner && (
+      <div
+        role={errorBanner.tone === 'warning' ? 'alert' : 'status'}
+        class={`mb-8 rounded-lg border p-4 text-sm ${
+          errorBanner.tone === 'warning'
+            ? 'border-amber-300 bg-amber-50 text-amber-900 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-100'
+            : 'border-brand-200 bg-brand-50 text-brand-900 dark:border-brand-500/40 dark:bg-brand-500/10 dark:text-brand-100'
+        }`}
+      >
+        {errorBanner.message}
+      </div>
+    )}
     <header class="mx-auto max-w-3xl text-center">
       <h1 class="text-4xl font-bold tracking-tight sm:text-5xl">
         {isDE ? 'Transparente Preise. Keine Aufschläge auf Token.' : 'Transparent pricing. No token markups.'}
@@ -107,9 +162,23 @@ const serviceSchema = {
           <li>✓ {isDE ? 'Priorisierte Verzeichnislistung' : 'Prioritised directory listing'}</li>
           <li>✓ {isDE ? 'Monatliche PDF-Berichte' : 'Monthly PDF reports'}</li>
         </ul>
-        <a href={routePath('signup', locale)} class="mt-6 block rounded-md bg-brand-700 px-4 py-2.5 text-center text-sm font-semibold text-white hover:bg-brand-800">
-          {isDE ? 'Gold testen' : 'Try Gold'}
-        </a>
+        <form method="POST" action="/api/v1/billing/checkout" class="mt-6">
+          <input type="hidden" name="tier" value="gold" />
+          <fieldset class="mb-3 flex gap-3 text-sm">
+            <legend class="sr-only">{isDE ? 'Abrechnung' : 'Billing cadence'}</legend>
+            <label class="inline-flex items-center gap-1.5">
+              <input type="radio" name="cadence" value="monthly" checked class="accent-brand-700" />
+              <span>{isDE ? 'Monatlich' : 'Monthly'}</span>
+            </label>
+            <label class="inline-flex items-center gap-1.5">
+              <input type="radio" name="cadence" value="yearly" class="accent-brand-700" />
+              <span>{isDE ? 'Jährlich' : 'Yearly'} <span class="text-accent-600">−17%</span></span>
+            </label>
+          </fieldset>
+          <button type="submit" class="block w-full rounded-md bg-brand-700 px-4 py-2.5 text-center text-sm font-semibold text-white hover:bg-brand-800">
+            {isDE ? 'Gold abonnieren' : 'Subscribe to Gold'}
+          </button>
+        </form>
       </article>
 
       <article class="rounded-xl border border-ink-200 bg-white p-6 dark:border-ink-600 dark:bg-ink-800">
@@ -125,9 +194,23 @@ const serviceSchema = {
           <li>✓ {isDE ? 'White-Label PDF-Berichte' : 'White-label PDF reports'}</li>
           <li>✓ {isDE ? 'Slack / Webhook Alerts' : 'Slack / webhook alerts'}</li>
         </ul>
-        <a href={routePath('signup', locale)} class="mt-6 block rounded-md border border-ink-200 px-4 py-2.5 text-center text-sm font-semibold hover:bg-ink-50 dark:border-ink-600 dark:hover:bg-ink-800">
-          {isDE ? 'Gold Pro starten' : 'Start Gold Pro'}
-        </a>
+        <form method="POST" action="/api/v1/billing/checkout" class="mt-6">
+          <input type="hidden" name="tier" value="gold_pro" />
+          <fieldset class="mb-3 flex gap-3 text-sm">
+            <legend class="sr-only">{isDE ? 'Abrechnung' : 'Billing cadence'}</legend>
+            <label class="inline-flex items-center gap-1.5">
+              <input type="radio" name="cadence" value="monthly" checked class="accent-brand-700" />
+              <span>{isDE ? 'Monatlich' : 'Monthly'}</span>
+            </label>
+            <label class="inline-flex items-center gap-1.5">
+              <input type="radio" name="cadence" value="yearly" class="accent-brand-700" />
+              <span>{isDE ? 'Jährlich' : 'Yearly'} <span class="text-accent-600">−17%</span></span>
+            </label>
+          </fieldset>
+          <button type="submit" class="block w-full rounded-md border border-ink-200 px-4 py-2.5 text-center text-sm font-semibold hover:bg-ink-50 dark:border-ink-600 dark:hover:bg-ink-800">
+            {isDE ? 'Gold Pro abonnieren' : 'Subscribe to Gold Pro'}
+          </button>
+        </form>
       </article>
     </div>
 

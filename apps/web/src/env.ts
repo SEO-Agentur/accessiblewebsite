@@ -30,6 +30,13 @@ const EnvSchema = z.preprocess(
 
     STRIPE_SECRET_KEY: z.string().optional(),
     STRIPE_WEBHOOK_SECRET: z.string().optional(),
+    // Stripe Price IDs. Each is a recurring subscription price in EUR.
+    // When unset, the matching tier's checkout button surfaces an error
+    // banner instead of attempting an invalid checkout.
+    STRIPE_PRICE_GOLD_MONTHLY: z.string().optional(),
+    STRIPE_PRICE_GOLD_YEARLY: z.string().optional(),
+    STRIPE_PRICE_GOLD_PRO_MONTHLY: z.string().optional(),
+    STRIPE_PRICE_GOLD_PRO_YEARLY: z.string().optional(),
 
     SENTRY_DSN: z.string().url().optional(),
 
