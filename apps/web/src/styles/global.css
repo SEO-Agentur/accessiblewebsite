@@ -71,4 +71,116 @@
      browsers (Chrome 119+, Firefox 128+, Safari 17+) automatically open it.
      For older agents we render the same details below in collapsed state;
      the user clicks the summary as they would anyway. */
+
+  /* =========================================================================
+     Header nav disclosure — mobile hamburger, desktop inline. No JS.
+     <details class="nav-disclosure"> on the header. <summary> is the
+     hamburger button. The <nav> inside is the link list.
+     ========================================================================= */
+  .nav-disclosure {
+    position: static;
+  }
+  .nav-disclosure summary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    list-style: none;
+    /* 44x44 tap target (iOS HIG / WCAG 2.5.5 target size) */
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0.5rem;
+    margin: -0.5rem;
+    border-radius: 0.5rem;
+    color: theme('colors.ink.900');
+  }
+  .nav-disclosure summary::-webkit-details-marker { display: none; }
+  .nav-disclosure summary::marker { content: ''; }
+  .nav-disclosure summary:hover { background: theme('colors.ink.100'); }
+  .nav-disclosure[open] summary { background: theme('colors.ink.100'); }
+  .nav-disclosure[open] .nav-icon-burger { display: none; }
+  .nav-disclosure:not([open]) .nav-icon-close { display: none; }
+
+  /* Mobile dropdown panel: full-width below the header, overlays content */
+  .nav-disclosure > nav { display: none; }
+  .nav-disclosure[open] > nav {
+    display: block;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    z-index: 50;
+    background: theme('colors.ink.50');
+    padding: 1rem 1rem 1.25rem;
+    border-bottom: 1px solid theme('colors.ink.200');
+    box-shadow: 0 8px 20px rgb(0 0 0 / 0.08);
+  }
+  .nav-disclosure[open] > nav ul {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.25rem;
+  }
+  .nav-disclosure[open] > nav ul li > a,
+  .nav-disclosure[open] > nav ul li > form > button {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 44px;
+    padding: 0.625rem 0.5rem;
+    border-radius: 0.5rem;
+    text-align: left;
+  }
+  .nav-disclosure[open] > nav ul li > a:hover,
+  .nav-disclosure[open] > nav ul li > form > button:hover {
+    background: theme('colors.ink.100');
+    text-decoration: none;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .nav-disclosure summary { color: theme('colors.ink.50'); }
+    .nav-disclosure summary:hover,
+    .nav-disclosure[open] summary { background: theme('colors.ink.800'); }
+    .nav-disclosure[open] > nav {
+      background: theme('colors.ink.900');
+      border-bottom-color: theme('colors.ink.800');
+    }
+    .nav-disclosure[open] > nav ul li > a:hover,
+    .nav-disclosure[open] > nav ul li > form > button:hover {
+      background: theme('colors.ink.800');
+    }
+  }
+
+  /* Desktop: hide the toggle, show the nav inline */
+  @media (min-width: 768px) {
+    .nav-disclosure summary { display: none; }
+    .nav-disclosure > nav,
+    .nav-disclosure[open] > nav {
+      display: block !important;
+      position: static !important;
+      background: transparent !important;
+      padding: 0 !important;
+      border: none !important;
+      box-shadow: none !important;
+    }
+    .nav-disclosure > nav ul,
+    .nav-disclosure[open] > nav ul {
+      flex-direction: row !important;
+      align-items: center !important;
+      gap: 1rem !important;
+    }
+    .nav-disclosure > nav ul li > a,
+    .nav-disclosure > nav ul li > form > button {
+      display: inline-flex;
+      width: auto;
+      min-height: 0;
+      padding: 0;
+      border-radius: 0;
+    }
+    .nav-disclosure > nav ul li > a:hover,
+    .nav-disclosure > nav ul li > form > button:hover {
+      background: transparent;
+      text-decoration: underline;
+    }
+  }
 }

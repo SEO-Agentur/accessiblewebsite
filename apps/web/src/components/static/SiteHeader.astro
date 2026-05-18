@@ -16,39 +16,71 @@ const isDE = locale === 'de';
 // Middleware sets Astro.locals.user (User | null). When present, the nav
 // flips: Login link disappears, Dashboard + Log-out appear.
 const user = Astro.locals.user;
+const menuLabel = isDE ? 'Menü' : 'Menu';
 ---
 
-<header class="border-b border-ink-200 bg-white/80 backdrop-blur dark:border-ink-800 dark:bg-ink-900/80">
-  <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
+<header class="relative border-b border-ink-200 bg-white/80 backdrop-blur dark:border-ink-800 dark:bg-ink-900/80">
+  <div class="relative mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-4">
     <a href={routePath('home', locale)} class="text-lg font-semibold tracking-tight">
       {strings.meta.siteName}
     </a>
-    <nav aria-label={strings.nav.home}>
-      <ul class="flex items-center gap-4 text-sm">
-        <li><a href={routePath('pricing', locale)} class="hover:underline">{strings.nav.pricing}</a></li>
-        <li><a href={routePath('methodology', locale)} class="hover:underline">{strings.nav.methodology}</a></li>
-        <li><a href={routePath('remediation', locale)} class="hover:underline">{strings.nav.remediation}</a></li>
-        <li><a href={routePath('verifiedIndex', locale)} class="hover:underline">{strings.nav.directory}</a></li>
-        {user ? (
-          <>
-            <li>
-              <a href={routePath('dashboard', locale)} class="hover:underline">
-                {isDE ? 'Dashboard' : 'Dashboard'}
-              </a>
-            </li>
-            <li>
-              <form method="POST" action="/api/v1/auth/logout" class="contents">
-                <button type="submit" class="cursor-pointer hover:underline">
-                  {isDE ? 'Abmelden' : 'Log out'}
-                </button>
-              </form>
-            </li>
-          </>
-        ) : (
-          <li><a href={routePath('login', locale)} class="hover:underline">{strings.nav.login}</a></li>
-        )}
-        <li><LanguageSwitcher locale={locale} currentPath={currentPath} /></li>
-      </ul>
-    </nav>
+
+    <details class="nav-disclosure">
+      <summary aria-label={menuLabel}>
+        <svg
+          class="nav-icon-burger h-6 w-6"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          aria-hidden="true"
+        >
+          <line x1="4" y1="6" x2="20" y2="6"></line>
+          <line x1="4" y1="12" x2="20" y2="12"></line>
+          <line x1="4" y1="18" x2="20" y2="18"></line>
+        </svg>
+        <svg
+          class="nav-icon-close h-6 w-6"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          aria-hidden="true"
+        >
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+        </svg>
+      </summary>
+
+      <nav aria-label={strings.nav.home}>
+        <ul class="text-sm">
+          <li><a href={routePath('pricing', locale)} class="hover:underline">{strings.nav.pricing}</a></li>
+          <li><a href={routePath('methodology', locale)} class="hover:underline">{strings.nav.methodology}</a></li>
+          <li><a href={routePath('remediation', locale)} class="hover:underline">{strings.nav.remediation}</a></li>
+          <li><a href={routePath('verifiedIndex', locale)} class="hover:underline">{strings.nav.directory}</a></li>
+          {user ? (
+            <>
+              <li>
+                <a href={routePath('dashboard', locale)} class="hover:underline">
+                  {isDE ? 'Dashboard' : 'Dashboard'}
+                </a>
+              </li>
+              <li>
+                <form method="POST" action="/api/v1/auth/logout" class="contents">
+                  <button type="submit" class="cursor-pointer hover:underline">
+                    {isDE ? 'Abmelden' : 'Log out'}
+                  </button>
+                </form>
+              </li>
+            </>
+          ) : (
+            <li><a href={routePath('login', locale)} class="hover:underline">{strings.nav.login}</a></li>
+          )}
+          <li><LanguageSwitcher locale={locale} currentPath={currentPath} /></li>
+        </ul>
+      </nav>
+    </details>
   </div>
 </header>
