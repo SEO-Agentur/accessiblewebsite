@@ -165,9 +165,13 @@
     }
     .nav-disclosure > nav ul,
     .nav-disclosure[open] > nav ul {
+      display: flex !important;
       flex-direction: row !important;
       align-items: center !important;
       gap: 1rem !important;
+      list-style: none;
+      margin: 0;
+      padding: 0;
     }
     .nav-disclosure > nav ul li > a,
     .nav-disclosure > nav ul li > form > button {
