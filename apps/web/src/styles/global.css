@@ -73,20 +73,27 @@
      the user clicks the summary as they would anyway. */
 
   /* =========================================================================
-     Header nav disclosure — mobile hamburger, desktop inline. No JS.
-     <details class="nav-disclosure"> on the header. <summary> is the
-     hamburger button. The <nav> inside is the link list.
+     Header navigation. No JS.
+     Two parallel structures in SiteHeader.astro:
+       <nav class="nav-desktop">     always visible inline at >=768px
+       <details class="nav-mobile">  hamburger disclosure at <768px
+     Each is hidden in the other viewport via a single display rule.
+     We render twice rather than reusing one <details> because Chromium's
+     ::details-content uses content-visibility:hidden when closed, which
+     can't be overridden reliably from author CSS — that pseudo-element
+     hides the entire subtree regardless of children's display.
      ========================================================================= */
-  .nav-disclosure {
-    position: static;
-  }
-  .nav-disclosure summary {
+
+  /* Defaults: mobile-first. Desktop nav hidden, hamburger visible. */
+  .nav-desktop { display: none; }
+  .nav-mobile { position: static; }
+  .nav-mobile summary {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     list-style: none;
-    /* 44x44 tap target (iOS HIG / WCAG 2.5.5 target size) */
+    /* 44x44 tap target (iOS HIG / WCAG 2.5.5) */
     min-width: 44px;
     min-height: 44px;
     padding: 0.5rem;
@@ -94,17 +101,15 @@
     border-radius: 0.5rem;
     color: theme('colors.ink.900');
   }
-  .nav-disclosure summary::-webkit-details-marker { display: none; }
-  .nav-disclosure summary::marker { content: ''; }
-  .nav-disclosure summary:hover { background: theme('colors.ink.100'); }
-  .nav-disclosure[open] summary { background: theme('colors.ink.100'); }
-  .nav-disclosure[open] .nav-icon-burger { display: none; }
-  .nav-disclosure:not([open]) .nav-icon-close { display: none; }
+  .nav-mobile summary::-webkit-details-marker { display: none; }
+  .nav-mobile summary::marker { content: ''; }
+  .nav-mobile summary:hover { background: theme('colors.ink.100'); }
+  .nav-mobile[open] summary { background: theme('colors.ink.100'); }
+  .nav-mobile[open] .nav-icon-burger { display: none; }
+  .nav-mobile:not([open]) .nav-icon-close { display: none; }
 
-  /* Mobile dropdown panel: full-width below the header, overlays content */
-  .nav-disclosure > nav { display: none; }
-  .nav-disclosure[open] > nav {
-    display: block;
+  /* Mobile dropdown panel: full-width below header, overlays content. */
+  .nav-mobile[open] > nav {
     position: absolute;
     left: 0;
     right: 0;
@@ -115,14 +120,17 @@
     border-bottom: 1px solid theme('colors.ink.200');
     box-shadow: 0 8px 20px rgb(0 0 0 / 0.08);
   }
-  .nav-disclosure[open] > nav ul {
+  .nav-mobile[open] > nav ul {
     display: flex;
     flex-direction: column;
     align-items: stretch;
     gap: 0.25rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
   }
-  .nav-disclosure[open] > nav ul li > a,
-  .nav-disclosure[open] > nav ul li > form > button {
+  .nav-mobile[open] > nav ul li > a,
+  .nav-mobile[open] > nav ul li > form > button {
     display: flex;
     align-items: center;
     width: 100%;
@@ -131,60 +139,29 @@
     border-radius: 0.5rem;
     text-align: left;
   }
-  .nav-disclosure[open] > nav ul li > a:hover,
-  .nav-disclosure[open] > nav ul li > form > button:hover {
+  .nav-mobile[open] > nav ul li > a:hover,
+  .nav-mobile[open] > nav ul li > form > button:hover {
     background: theme('colors.ink.100');
     text-decoration: none;
   }
 
   @media (prefers-color-scheme: dark) {
-    .nav-disclosure summary { color: theme('colors.ink.50'); }
-    .nav-disclosure summary:hover,
-    .nav-disclosure[open] summary { background: theme('colors.ink.800'); }
-    .nav-disclosure[open] > nav {
+    .nav-mobile summary { color: theme('colors.ink.50'); }
+    .nav-mobile summary:hover,
+    .nav-mobile[open] summary { background: theme('colors.ink.800'); }
+    .nav-mobile[open] > nav {
       background: theme('colors.ink.900');
       border-bottom-color: theme('colors.ink.800');
     }
-    .nav-disclosure[open] > nav ul li > a:hover,
-    .nav-disclosure[open] > nav ul li > form > button:hover {
+    .nav-mobile[open] > nav ul li > a:hover,
+    .nav-mobile[open] > nav ul li > form > button:hover {
       background: theme('colors.ink.800');
     }
   }
 
-  /* Desktop: hide the toggle, show the nav inline */
+  /* Desktop: swap which nav renders. */
   @media (min-width: 768px) {
-    .nav-disclosure summary { display: none; }
-    .nav-disclosure > nav,
-    .nav-disclosure[open] > nav {
-      display: block !important;
-      position: static !important;
-      background: transparent !important;
-      padding: 0 !important;
-      border: none !important;
-      box-shadow: none !important;
-    }
-    .nav-disclosure > nav ul,
-    .nav-disclosure[open] > nav ul {
-      display: flex !important;
-      flex-direction: row !important;
-      align-items: center !important;
-      gap: 1rem !important;
-      list-style: none;
-      margin: 0;
-      padding: 0;
-    }
-    .nav-disclosure > nav ul li > a,
-    .nav-disclosure > nav ul li > form > button {
-      display: inline-flex;
-      width: auto;
-      min-height: 0;
-      padding: 0;
-      border-radius: 0;
-    }
-    .nav-disclosure > nav ul li > a:hover,
-    .nav-disclosure > nav ul li > form > button:hover {
-      background: transparent;
-      text-decoration: underline;
-    }
+    .nav-desktop { display: block; }
+    .nav-mobile { display: none; }
   }
 }

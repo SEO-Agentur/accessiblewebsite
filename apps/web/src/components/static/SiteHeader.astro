@@ -25,7 +25,43 @@ const menuLabel = isDE ? 'Menü' : 'Menu';
       {strings.meta.siteName}
     </a>
 
-    <details class="nav-disclosure">
+    {/*
+      Two separate nav structures: one always-visible inline nav for desktop,
+      one <details>-driven hamburger for mobile. CSS toggles which is shown
+      at the 768px breakpoint. This avoids fighting the browser's UA rules
+      that hide closed-<details> content (Chromium 110+ uses ::details-content
+      with content-visibility, which can't be reliably overridden from author
+      CSS).
+    */}
+    <nav class="nav-desktop" aria-label={strings.nav.home}>
+      <ul class="flex items-center gap-4 text-sm">
+        <li><a href={routePath('pricing', locale)} class="hover:underline">{strings.nav.pricing}</a></li>
+        <li><a href={routePath('methodology', locale)} class="hover:underline">{strings.nav.methodology}</a></li>
+        <li><a href={routePath('remediation', locale)} class="hover:underline">{strings.nav.remediation}</a></li>
+        <li><a href={routePath('verifiedIndex', locale)} class="hover:underline">{strings.nav.directory}</a></li>
+        {user ? (
+          <>
+            <li>
+              <a href={routePath('dashboard', locale)} class="hover:underline">
+                {isDE ? 'Dashboard' : 'Dashboard'}
+              </a>
+            </li>
+            <li>
+              <form method="POST" action="/api/v1/auth/logout" class="contents">
+                <button type="submit" class="cursor-pointer hover:underline">
+                  {isDE ? 'Abmelden' : 'Log out'}
+                </button>
+              </form>
+            </li>
+          </>
+        ) : (
+          <li><a href={routePath('login', locale)} class="hover:underline">{strings.nav.login}</a></li>
+        )}
+        <li><LanguageSwitcher locale={locale} currentPath={currentPath} /></li>
+      </ul>
+    </nav>
+
+    <details class="nav-mobile">
       <summary aria-label={menuLabel}>
         <svg
           class="nav-icon-burger h-6 w-6"
