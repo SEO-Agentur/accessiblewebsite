@@ -1,8 +1,9 @@
 ---
 import type { Locale } from '@accessiblewebsite/shared';
-import { and, desc, eq, inArray, isNotNull, sql } from 'drizzle-orm';
+import { and, desc, eq, inArray, isNotNull, or, sql } from 'drizzle-orm';
 import { monitoredSites, subscriptions, users, scans } from '@accessiblewebsite/db';
 import { db } from '../lib/db';
+import { getOwnerEmailList } from '../lib/owner';
 import { routePath } from '../i18n/routes';
 
 interface Props {
@@ -14,25 +15,32 @@ const isDE = locale === 'de';
 
 // Gold + Gold-Pro subscribers' public sites — shown identically on the EN and
 // DE marketing sites because a Gold subscription is per-user, not per-locale.
-// We join monitored_sites → subscriptions on user_id and take the latest
-// non-canceled subscription per user. A site shows up if:
-//   - is_public_in_directory = true (user opted in)
-//   - subscription tier in (gold, gold_pro) and status in (active, trialing)
-//   - has a current_score and a latest completed scan we can deep-link to
+// Plus: any site whose owner is in OWNER_EMAILS (operator's own sites are
+// always listed, regardless of subscription state — we don't pay ourselves).
+//
+// A site appears if:
+//   - is_public_in_directory = true (user opted in; default)
+//   - current_score is set (a scan has actually completed at least once)
+//   - AND (latest subscription is gold/gold_pro+active/trialing  OR  user is operator)
+type DirectoryTier = 'gold' | 'gold_pro' | 'owner';
 type DirectoryRow = {
   domain: string;
   score: number;
-  tier: 'gold' | 'gold_pro';
+  tier: DirectoryTier;
   country: string | null;
   company: string | null;
   latestScanId: string | null;
 };
 
+const ownerEmails = getOwnerEmailList();
+
 const rows = await db()
   .select({
     domain: monitoredSites.domain,
     score: monitoredSites.currentScore,
-    tier: subscriptions.tier,
+    subscriptionTier: subscriptions.tier,
+    subscriptionStatus: subscriptions.status,
+    email: users.email,
     country: users.countryCode,
     company: users.companyName,
     latestScanId: sql<string | null>`(
@@ -45,25 +53,59 @@ const rows = await db()
     )`,
   })
   .from(monitoredSites)
-  .innerJoin(subscriptions, eq(subscriptions.userId, monitoredSites.userId))
   .innerJoin(users, eq(users.id, monitoredSites.userId))
+  .leftJoin(subscriptions, eq(subscriptions.userId, monitoredSites.userId))
   .where(
     and(
       eq(monitoredSites.isPublicInDirectory, true),
       isNotNull(monitoredSites.currentScore),
-      inArray(subscriptions.tier, ['gold', 'gold_pro']),
-      inArray(subscriptions.status, ['active', 'trialing']),
+      or(
+        and(
+          inArray(subscriptions.tier, ['gold', 'gold_pro']),
+          inArray(subscriptions.status, ['active', 'trialing']),
+        ),
+        ownerEmails.length > 0 ? inArray(users.email, ownerEmails) : sql`false`,
+      ),
     ),
   )
   .orderBy(desc(monitoredSites.currentScore));
 
-const sites: DirectoryRow[] = rows.filter(
-  (r): r is DirectoryRow =>
-    r.score !== null && (r.tier === 'gold' || r.tier === 'gold_pro'),
-);
+// Same user with multiple monitored_sites + multiple subscriptions can produce
+// duplicate rows from the join. Dedupe on domain, preferring the highest tier.
+const tierRank = (t: DirectoryTier): number =>
+  t === 'owner' ? 3 : t === 'gold_pro' ? 2 : 1;
 
-const tierLabel = (t: 'gold' | 'gold_pro'): string =>
-  t === 'gold_pro' ? 'Gold Pro' : 'Gold';
+const dedup = new Map<string, DirectoryRow>();
+for (const r of rows) {
+  if (r.score === null) continue;
+  const isOwner = ownerEmails.includes((r.email ?? '').toLowerCase());
+  const tier: DirectoryTier = isOwner
+    ? 'owner'
+    : r.subscriptionTier === 'gold_pro'
+      ? 'gold_pro'
+      : r.subscriptionTier === 'gold'
+        ? 'gold'
+        : 'gold'; // join matched, fall back to gold label
+  const existing = dedup.get(r.domain);
+  if (existing && tierRank(existing.tier) >= tierRank(tier)) continue;
+  dedup.set(r.domain, {
+    domain: r.domain,
+    score: r.score,
+    tier,
+    country: r.country,
+    company: r.company,
+    latestScanId: r.latestScanId,
+  });
+}
+
+const sites: DirectoryRow[] = [...dedup.values()].sort((a, b) => b.score - a.score);
+
+const tierLabel = (t: DirectoryTier): string =>
+  t === 'owner'
+    ? (isDE ? 'Betreiber' : 'Operator')
+    : t === 'gold_pro'
+      ? 'Gold Pro'
+      : 'Gold';
 ---
 
 <section class="px-4 py-16">

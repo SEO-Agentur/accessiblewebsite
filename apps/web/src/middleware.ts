@@ -1,6 +1,7 @@
 import { defineMiddleware } from 'astro:middleware';
 import type { Locale } from '@accessiblewebsite/shared';
 import { readSessionUser } from './lib/auth';
+import { isOwnerEmail } from './lib/owner';
 import { env } from './env';
 
 const BYPASS_PARAM = 'unlimitedcy';
@@ -58,6 +59,11 @@ export const onRequest = defineMiddleware(async (context, next) => {
     } else if (context.cookies.get(BYPASS_COOKIE)?.value === bypassToken) {
       bypass = true;
     }
+  }
+  // Logged-in operator emails (OWNER_EMAILS) get the bypass unconditionally
+  // so the operator never has to fish out the unlimitedcy token to test things.
+  if (!bypass && isOwnerEmail(context.locals.user?.email)) {
+    bypass = true;
   }
   context.locals.bypassRateLimit = bypass;
 

@@ -53,6 +53,15 @@ const EnvSchema = z.preprocess(
     // spam the scanner).
     RATELIMIT_BYPASS_TOKEN: z.string().min(1).optional(),
 
+    // Comma-separated list of operator emails who should always be treated
+    // as Enterprise-tier subscribers:
+    //   - skip Stripe gates on full-site scans
+    //   - skip anonymous scan rate limits while logged in
+    //   - their public monitored sites always show in /verified
+    // Compared case-insensitively. Example:
+    //   OWNER_EMAILS=cyrusbadde@gmail.com,co-founder@example.com
+    OWNER_EMAILS: z.string().optional(),
+
     // Operator imprint data. Until COMPANY_NAME is set, the imprint page
     // renders an admin warning instead of fake company details.
     COMPANY_NAME: z.string().optional(),

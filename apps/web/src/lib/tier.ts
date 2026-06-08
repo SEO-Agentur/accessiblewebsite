@@ -1,6 +1,7 @@
 import { eq, desc } from 'drizzle-orm';
-import { subscriptions } from '@accessiblewebsite/db';
+import { subscriptions, users } from '@accessiblewebsite/db';
 import { db } from './db';
+import { isOwnerEmail } from './owner';
 
 export type EffectiveTier = 'free' | 'gold' | 'gold_pro' | 'enterprise';
 
@@ -16,13 +17,34 @@ const TIER_ORDER: Record<EffectiveTier, number> = {
  * subscription row; if it's `active` or `trialing` the tier sticks,
  * otherwise we fall back to 'free'. `past_due` deliberately downgrades
  * to free — feature access pauses until payment recovers.
+ *
+ * Special case: users whose email is in OWNER_EMAILS short-circuit to
+ * `enterprise` regardless of whether they have a Stripe subscription —
+ * we don't want to bill ourselves.
  */
 export async function getEffectiveTier(userId: string): Promise<{
   tier: EffectiveTier;
   status: string;
   cancelAtPeriodEnd: boolean;
   currentPeriodEnd: Date | null;
+  isOwner: boolean;
 }> {
+  const [userRow] = await db()
+    .select({ email: users.email })
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1);
+
+  if (userRow && isOwnerEmail(userRow.email)) {
+    return {
+      tier: 'enterprise',
+      status: 'owner',
+      cancelAtPeriodEnd: false,
+      currentPeriodEnd: null,
+      isOwner: true,
+    };
+  }
+
   const [row] = await db()
     .select()
     .from(subscriptions)
@@ -31,7 +53,13 @@ export async function getEffectiveTier(userId: string): Promise<{
     .limit(1);
 
   if (!row) {
-    return { tier: 'free', status: 'none', cancelAtPeriodEnd: false, currentPeriodEnd: null };
+    return {
+      tier: 'free',
+      status: 'none',
+      cancelAtPeriodEnd: false,
+      currentPeriodEnd: null,
+      isOwner: false,
+    };
   }
   const isLive = row.status === 'active' || row.status === 'trialing';
   return {
@@ -39,6 +67,7 @@ export async function getEffectiveTier(userId: string): Promise<{
     status: row.status,
     cancelAtPeriodEnd: row.cancelAtPeriodEnd,
     currentPeriodEnd: row.currentPeriodEnd,
+    isOwner: false,
   };
 }
 
