@@ -1,5 +1,8 @@
 ---
 import type { Locale } from '@accessiblewebsite/shared';
+import { and, desc, eq, inArray, isNotNull, sql } from 'drizzle-orm';
+import { monitoredSites, subscriptions, users, scans } from '@accessiblewebsite/db';
+import { db } from '../lib/db';
 import { routePath } from '../i18n/routes';
 
 interface Props {
@@ -9,15 +12,58 @@ interface Props {
 const { locale } = Astro.props;
 const isDE = locale === 'de';
 
-// Placeholder data — once monitored_sites has rows with is_public_in_directory=true,
-// query Drizzle here. Stays SSR (export const prerender = false in [...slug]).
-const sites: Array<{
+// Gold + Gold-Pro subscribers' public sites — shown identically on the EN and
+// DE marketing sites because a Gold subscription is per-user, not per-locale.
+// We join monitored_sites → subscriptions on user_id and take the latest
+// non-canceled subscription per user. A site shows up if:
+//   - is_public_in_directory = true (user opted in)
+//   - subscription tier in (gold, gold_pro) and status in (active, trialing)
+//   - has a current_score and a latest completed scan we can deep-link to
+type DirectoryRow = {
   domain: string;
   score: number;
-  tier: 'silver' | 'gold';
-  industry: string;
-  country: string;
-}> = [];
+  tier: 'gold' | 'gold_pro';
+  country: string | null;
+  company: string | null;
+  latestScanId: string | null;
+};
+
+const rows = await db()
+  .select({
+    domain: monitoredSites.domain,
+    score: monitoredSites.currentScore,
+    tier: subscriptions.tier,
+    country: users.countryCode,
+    company: users.companyName,
+    latestScanId: sql<string | null>`(
+      SELECT s.id
+      FROM ${scans} s
+      WHERE s.monitored_site_id = ${monitoredSites.id}
+        AND s.status = 'completed'
+      ORDER BY s.created_at DESC
+      LIMIT 1
+    )`,
+  })
+  .from(monitoredSites)
+  .innerJoin(subscriptions, eq(subscriptions.userId, monitoredSites.userId))
+  .innerJoin(users, eq(users.id, monitoredSites.userId))
+  .where(
+    and(
+      eq(monitoredSites.isPublicInDirectory, true),
+      isNotNull(monitoredSites.currentScore),
+      inArray(subscriptions.tier, ['gold', 'gold_pro']),
+      inArray(subscriptions.status, ['active', 'trialing']),
+    ),
+  )
+  .orderBy(desc(monitoredSites.currentScore));
+
+const sites: DirectoryRow[] = rows.filter(
+  (r): r is DirectoryRow =>
+    r.score !== null && (r.tier === 'gold' || r.tier === 'gold_pro'),
+);
+
+const tierLabel = (t: 'gold' | 'gold_pro'): string =>
+  t === 'gold_pro' ? 'Gold Pro' : 'Gold';
 ---
 
 <section class="px-4 py-16">
@@ -47,16 +93,29 @@ const sites: Array<{
       </div>
     ) : (
       <ul class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {sites.map((site) => (
-          <li class="rounded-xl border border-ink-200 bg-white p-4 dark:border-ink-600 dark:bg-ink-800">
-            <a href={`${routePath('verifiedIndex', locale)}/${site.domain}`} class="block">
-              <p class="font-semibold">{site.domain}</p>
-              <p class="text-sm text-ink-500 dark:text-ink-400">{site.industry} · {site.country}</p>
-              <p class="mt-2 text-2xl font-bold text-accent-600 dark:text-accent-50">{site.score}/100</p>
-              <p class="text-xs uppercase tracking-wide text-ink-500 dark:text-ink-400">{site.tier === 'gold' ? 'Gold' : 'Silver'}</p>
-            </a>
-          </li>
-        ))}
+        {sites.map((site) => {
+          const href = site.latestScanId
+            ? `/scan/${site.latestScanId}`
+            : `${routePath('verifiedIndex', locale)}/${site.domain}`;
+          return (
+            <li class="rounded-xl border border-ink-200 bg-white p-4 dark:border-ink-600 dark:bg-ink-800">
+              <a href={href} class="block">
+                <p class="font-semibold">{site.domain}</p>
+                <p class="text-sm text-ink-500 dark:text-ink-400">
+                  {site.company ?? (isDE ? 'Eigentümer auf Wunsch' : 'Owner on request')}
+                  {site.country && (
+                    <>
+                      {' · '}
+                      {site.country}
+                    </>
+                  )}
+                </p>
+                <p class="mt-2 text-2xl font-bold text-accent-600 dark:text-accent-50">{site.score}/100</p>
+                <p class="text-xs uppercase tracking-wide text-ink-500 dark:text-ink-400">{tierLabel(site.tier)}</p>
+              </a>
+            </li>
+          );
+        })}
       </ul>
     )}
 

@@ -6,6 +6,7 @@ import { scans, scanIssues, type Scan, type ScanIssue } from '@accessiblewebsite
 import { MANUAL_PROCEDURES } from '@accessiblewebsite/shared';
 import { db } from '../../lib/db';
 import { getScanQueue } from '../../lib/queue';
+import { translateAxeHelp, translateAxeFailureSummary } from '../../lib/axeTranslations';
 import { t } from '../../i18n';
 import { routePath } from '../../i18n/routes';
 
@@ -91,6 +92,14 @@ const severityLabel = (s: string): string => {
   }
   return { critical: 'Critical', serious: 'Serious', moderate: 'Moderate', minor: 'Minor' }[s] ?? s;
 };
+
+// axe-core stores violation help text in English at scan time. On the DE
+// site we map it to German via the bundled axe-core de.json locale so
+// readers see issues in their language even for English-locale scans.
+const localizeHelp = (en: string | null | undefined): string =>
+  isDE ? translateAxeHelp(en ?? '') : (en ?? '');
+const localizeHint = (en: string | null | undefined): string =>
+  isDE ? translateAxeFailureSummary(en ?? '') : (en ?? '');
 
 const severityChipClass = (s: string): string => ({
   critical: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200',
@@ -503,14 +512,14 @@ const pageDescription = isComplete
                           <p class="text-xs uppercase tracking-wide text-ink-500 dark:text-ink-400">
                             WCAG {iss.wcagCriterion}
                           </p>
-                          <p class="mt-1 font-semibold">{iss.description}</p>
+                          <p class="mt-1 font-semibold">{localizeHelp(iss.description)}</p>
                           {iss.elementSelector && (
                             <p class="mt-2 break-all rounded bg-ink-50 px-2 py-1 font-mono text-xs text-ink-700 dark:bg-ink-900 dark:text-ink-200">
                               {iss.elementSelector}
                             </p>
                           )}
                           {iss.remediationHint && (
-                            <p class="mt-2 text-sm text-ink-600 dark:text-ink-200">{iss.remediationHint}</p>
+                            <p class="mt-2 whitespace-pre-line text-sm text-ink-600 dark:text-ink-200">{localizeHint(iss.remediationHint)}</p>
                           )}
                         </li>
                       ))}
@@ -547,7 +556,7 @@ const pageDescription = isComplete
                   {passList.map((r, i) => (
                     <li class="flex gap-2">
                       <span class="text-ink-500 dark:text-ink-400 tabular-nums">{i + 1}.</span>
-                      <span>{r.help}</span>
+                      <span>{localizeHelp(r.help)}</span>
                     </li>
                   ))}
                 </ol>
@@ -563,7 +572,7 @@ const pageDescription = isComplete
                   {incompleteList.map((r, i) => (
                     <li class="flex gap-2">
                       <span class="text-ink-500 dark:text-ink-400 tabular-nums">{i + 1}.</span>
-                      <span>{r.help}</span>
+                      <span>{localizeHelp(r.help)}</span>
                     </li>
                   ))}
                 </ol>
@@ -610,7 +619,7 @@ const pageDescription = isComplete
                   {inapplicableList.map((r, i) => (
                     <li class="flex gap-2">
                       <span class="text-ink-500 dark:text-ink-400 tabular-nums">{i + 1}.</span>
-                      <span>{r.help}</span>
+                      <span>{localizeHelp(r.help)}</span>
                     </li>
                   ))}
                 </ol>
