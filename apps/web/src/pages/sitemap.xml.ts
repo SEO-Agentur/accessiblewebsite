@@ -56,9 +56,14 @@ function esc(s: string): string {
     .replace(/'/g, '&apos;');
 }
 
-export const GET: APIRoute = async ({ url, locals }) => {
+export const GET: APIRoute = async ({ locals }) => {
   const locale: Locale = locals.locale;
-  const origin = url.origin;
+  // Astro sits behind Caddy → url.origin returns 127.0.0.1; pin to the real
+  // public origin based on the locale the middleware decided from Host.
+  const origin =
+    locale === 'de'
+      ? 'https://barrierefreiewebseite.net'
+      : 'https://accessiblewebsite.net';
 
   // 1. Static public pages.
   const staticUrls = PUBLIC_ROUTES.map((key) => ({

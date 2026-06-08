@@ -11,11 +11,16 @@ export const prerender = false;
  * Locale-aware via middleware: the operator gets the EN version on
  * accessiblewebsite.net and the DE version on barrierefreiewebseite.net.
  */
-export const GET: APIRoute = async ({ url, locals }) => {
+export const GET: APIRoute = async ({ locals }) => {
   const locale: Locale = locals.locale;
   const isDE = locale === 'de';
   const strings = t(locale);
-  const origin = url.origin;
+  // Astro sits behind Caddy → url.origin is 127.0.0.1; pin to the real
+  // public origin based on the locale the middleware decided from Host.
+  const origin =
+    locale === 'de'
+      ? 'https://barrierefreiewebseite.net'
+      : 'https://accessiblewebsite.net';
 
   const body = isDE
     ? `# Barrierefreiewebseite
