@@ -1,9 +1,10 @@
 ---
 import type { Locale } from '@accessiblewebsite/shared';
-import { and, desc, eq, inArray, isNotNull, or, sql } from 'drizzle-orm';
+import { and, desc, eq, gte, inArray, or, sql } from 'drizzle-orm';
 import { monitoredSites, subscriptions, users, scans } from '@accessiblewebsite/db';
 import { db } from '../lib/db';
 import { getOwnerEmailList } from '../lib/owner';
+import { MIN_DIRECTORY_SCORE, tierFromScore } from '../lib/seal';
 import { routePath } from '../i18n/routes';
 
 interface Props {
@@ -13,23 +14,26 @@ interface Props {
 const { locale } = Astro.props;
 const isDE = locale === 'de';
 
-// Gold + Gold-Pro subscribers' public sites — shown identically on the EN and
-// DE marketing sites because a Gold subscription is per-user, not per-locale.
-// Plus: any site whose owner is in OWNER_EMAILS (operator's own sites are
-// always listed, regardless of subscription state — we don't pay ourselves).
-//
-// A site appears if:
-//   - is_public_in_directory = true (user opted in; default)
-//   - current_score is set (a scan has actually completed at least once)
-//   - AND (latest subscription is gold/gold_pro+active/trialing  OR  user is operator)
-type DirectoryTier = 'gold' | 'gold_pro' | 'owner';
+// 1 hour shared cache on the directory itself — content turns over slowly
+// (new Gold members + monthly embed-check recalculations), so an hour of
+// staleness is fine and protects the DB from crawler bursts.
+Astro.response.headers.set('Cache-Control', 'public, max-age=3600, s-maxage=3600');
+
+// Listings: a public, opted-in monitored site whose owner is either an
+// active Gold/Gold-Pro subscriber or in OWNER_EMAILS, and whose latest
+// scan is at or above the Bronze threshold (70). Anything weaker doesn't
+// belong on a "Verified websites" page no matter who paid.
+type DirectoryRank = 'gold' | 'silver' | 'bronze';
+type DirectoryBadge = 'gold_pro' | 'gold' | 'owner';
 type DirectoryRow = {
   domain: string;
   score: number;
-  tier: DirectoryTier;
+  rank: DirectoryRank;
+  badge: DirectoryBadge;
   country: string | null;
   company: string | null;
   latestScanId: string | null;
+  lastScanAt: Date | null;
 };
 
 const ownerEmails = getOwnerEmailList();
@@ -38,6 +42,7 @@ const rows = await db()
   .select({
     domain: monitoredSites.domain,
     score: monitoredSites.currentScore,
+    lastScanAt: monitoredSites.lastScanAt,
     subscriptionTier: subscriptions.tier,
     subscriptionStatus: subscriptions.status,
     email: users.email,
@@ -58,7 +63,7 @@ const rows = await db()
   .where(
     and(
       eq(monitoredSites.isPublicInDirectory, true),
-      isNotNull(monitoredSites.currentScore),
+      gte(monitoredSites.currentScore, MIN_DIRECTORY_SCORE),
       or(
         and(
           inArray(subscriptions.tier, ['gold', 'gold_pro']),
@@ -67,45 +72,104 @@ const rows = await db()
         ownerEmails.length > 0 ? inArray(users.email, ownerEmails) : sql`false`,
       ),
     ),
-  )
-  .orderBy(desc(monitoredSites.currentScore));
+  );
 
-// Same user with multiple monitored_sites + multiple subscriptions can produce
-// duplicate rows from the join. Dedupe on domain, preferring the highest tier.
-const tierRank = (t: DirectoryTier): number =>
-  t === 'owner' ? 3 : t === 'gold_pro' ? 2 : 1;
+const badgeRank = (b: DirectoryBadge): number =>
+  b === 'owner' ? 3 : b === 'gold_pro' ? 2 : 1;
 
+// Same user × multiple subscriptions × multiple monitored_sites can produce
+// duplicate rows from the join. Dedupe on domain, preferring the strongest
+// badge (owner > gold_pro > gold) so a Pro+owner doesn't appear as Gold.
 const dedup = new Map<string, DirectoryRow>();
 for (const r of rows) {
   if (r.score === null) continue;
+  const rank = tierFromScore(r.score);
+  if (!rank) continue;
   const isOwner = ownerEmails.includes((r.email ?? '').toLowerCase());
-  const tier: DirectoryTier = isOwner
+  const badge: DirectoryBadge = isOwner
     ? 'owner'
     : r.subscriptionTier === 'gold_pro'
       ? 'gold_pro'
-      : r.subscriptionTier === 'gold'
-        ? 'gold'
-        : 'gold'; // join matched, fall back to gold label
+      : 'gold';
   const existing = dedup.get(r.domain);
-  if (existing && tierRank(existing.tier) >= tierRank(tier)) continue;
+  if (existing && badgeRank(existing.badge) >= badgeRank(badge)) continue;
   dedup.set(r.domain, {
     domain: r.domain,
     score: r.score,
-    tier,
+    rank,
+    badge,
     country: r.country,
     company: r.company,
     latestScanId: r.latestScanId,
+    lastScanAt: r.lastScanAt,
   });
 }
 
-const sites: DirectoryRow[] = [...dedup.values()].sort((a, b) => b.score - a.score);
+// Composite sort: rank class first (gold > silver > bronze), then exact
+// score, then scan recency. Treats all golds as a single tier rather than
+// rewarding 99/100 over 95/100 — both passed the same threshold.
+const rankWeight = (r: DirectoryRank): number =>
+  r === 'gold' ? 3 : r === 'silver' ? 2 : 1;
 
-const tierLabel = (t: DirectoryTier): string =>
-  t === 'owner'
+const sites: DirectoryRow[] = [...dedup.values()].sort((a, b) => {
+  const dr = rankWeight(b.rank) - rankWeight(a.rank);
+  if (dr !== 0) return dr;
+  if (b.score !== a.score) return b.score - a.score;
+  const ta = a.lastScanAt?.getTime() ?? 0;
+  const tb = b.lastScanAt?.getTime() ?? 0;
+  return tb - ta;
+});
+
+// "Recently scanned" widget — last 10 completed scans, irrespective of
+// owner / subscription. Every /scan/{id} URL is already crawlable; surfacing
+// the 10 freshest gives search engines a steady feed of new links and acts
+// as a low-key signal that the scanner is alive and humming.
+const recent = await db()
+  .select({
+    id: scans.id,
+    targetUrl: scans.targetUrl,
+    score: scans.score,
+    completedAt: scans.completedAt,
+  })
+  .from(scans)
+  .where(eq(scans.status, 'completed'))
+  .orderBy(desc(scans.completedAt))
+  .limit(10);
+
+const recentList = recent.map((r) => {
+  let host = r.targetUrl;
+  try {
+    host = new URL(r.targetUrl).host.replace(/^www\./, '');
+  } catch {
+    /* keep raw */
+  }
+  return { id: r.id, host, score: r.score, completedAt: r.completedAt };
+});
+
+const rankLabel = (r: DirectoryRank): string =>
+  r === 'gold' ? 'Gold' : r === 'silver' ? (isDE ? 'Silber' : 'Silver') : 'Bronze';
+
+const badgeLabel = (b: DirectoryBadge): string =>
+  b === 'owner'
     ? (isDE ? 'Betreiber' : 'Operator')
-    : t === 'gold_pro'
+    : b === 'gold_pro'
       ? 'Gold Pro'
       : 'Gold';
+
+const rankClasses = (r: DirectoryRank): string =>
+  r === 'gold'
+    ? 'text-amber-700 dark:text-amber-300'
+    : r === 'silver'
+      ? 'text-ink-600 dark:text-ink-200'
+      : 'text-orange-700 dark:text-orange-300';
+
+const fmtScanDate = (d: Date | null): string => {
+  if (!d) return '';
+  return d.toLocaleString(isDE ? 'de-DE' : 'en-GB', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  });
+};
 ---
 
 <section class="px-4 py-16">
@@ -152,8 +216,13 @@ const tierLabel = (t: DirectoryTier): string =>
                     </>
                   )}
                 </p>
-                <p class="mt-2 text-2xl font-bold text-accent-600 dark:text-accent-50">{site.score}/100</p>
-                <p class="text-xs uppercase tracking-wide text-ink-500 dark:text-ink-400">{tierLabel(site.tier)}</p>
+                <p class={`mt-2 text-2xl font-bold ${rankClasses(site.rank)}`}>{site.score}/100</p>
+                <p class="mt-1 flex flex-wrap items-center gap-1.5 text-xs uppercase tracking-wide">
+                  <span class={`font-bold ${rankClasses(site.rank)}`}>{rankLabel(site.rank)}</span>
+                  <span class="rounded-full bg-ink-100 px-2 py-0.5 text-[10px] font-semibold normal-case tracking-normal text-ink-700 dark:bg-ink-700 dark:text-ink-100">
+                    {badgeLabel(site.badge)}
+                  </span>
+                </p>
               </a>
             </li>
           );
@@ -161,13 +230,46 @@ const tierLabel = (t: DirectoryTier): string =>
       </ul>
     )}
 
+    {recentList.length > 0 && (
+      <section class="mt-16">
+        <h2 class="text-xl font-bold">
+          {isDE ? 'Zuletzt geprüfte URLs' : 'Recently scanned URLs'}
+        </h2>
+        <p class="mt-1 text-sm text-ink-500 dark:text-ink-400">
+          {isDE
+            ? 'Die letzten 10 abgeschlossenen Prüfungen — jeder Eintrag verlinkt auf den vollständigen Bericht. Wird stündlich aktualisiert.'
+            : 'The last 10 completed scans — each entry links to the full report. Refreshed hourly.'}
+        </p>
+        <ul class="mt-4 divide-y divide-ink-200 rounded-xl border border-ink-200 bg-white text-sm dark:divide-ink-700 dark:border-ink-600 dark:bg-ink-800">
+          {recentList.map((r) => (
+            <li>
+              <a
+                href={`/scan/${r.id}`}
+                class="flex flex-wrap items-center justify-between gap-2 px-4 py-3 hover:bg-ink-50 dark:hover:bg-ink-700"
+              >
+                <span class="break-all font-medium">{r.host}</span>
+                <span class="flex items-center gap-3 text-xs text-ink-500 dark:text-ink-400">
+                  {typeof r.score === 'number' && (
+                    <span class="font-semibold tabular-nums text-ink-700 dark:text-ink-100">
+                      {r.score}/100
+                    </span>
+                  )}
+                  <time datetime={r.completedAt?.toISOString() ?? ''}>{fmtScanDate(r.completedAt)}</time>
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+
     <div class="mt-16 rounded-xl bg-ink-50 p-6 dark:bg-ink-800/50">
       <h2 class="text-xl font-bold">{isDE ? 'Wie das Siegel funktioniert' : 'How the seal works'}</h2>
       <ol class="mt-4 space-y-3 text-sm text-ink-600 dark:text-ink-200">
         <li>1. {isDE ? 'Sie führen einen kostenlosen Scan durch.' : 'You run a free scan.'}</li>
-        <li>2. {isDE ? 'Wenn der Wert ≥ 80 ist, erhalten Sie das Silber-Siegel (90 Tage gültig).' : 'If the score is ≥ 80, you earn the Silver Seal (valid 90 days).'}</li>
+        <li>2. {isDE ? 'Bronze ab 70, Silber ab 80, Gold ab 95 — alle 90 Tage gültig.' : 'Bronze from 70, Silver from 80, Gold from 95 — each valid 90 days.'}</li>
         <li>3. {isDE ? 'Mit einem Gold-Abo wird das Siegel live: monatliche Scans, automatische Status-Updates, Alarme bei Regressionen.' : 'With a Gold subscription the seal goes live: monthly scans, automatic status updates, alerts on regression.'}</li>
-        <li>4. {isDE ? 'Klicker auf das Siegel landen auf Ihrer öffentlichen Verifizierungs-Seite. Vertrauenssignal, das Sie selbst nicht fälschen können.' : 'Clicks on the seal land on your public verification page. A trust signal you cannot fake yourself.'}</li>
+        <li>4. {isDE ? 'Klicks auf das Siegel landen auf Ihrer öffentlichen Verifizierungs-Seite. Vertrauenssignal, das Sie selbst nicht fälschen können.' : 'Clicks on the seal land on your public verification page. A trust signal you cannot fake yourself.'}</li>
       </ol>
     </div>
   </div>

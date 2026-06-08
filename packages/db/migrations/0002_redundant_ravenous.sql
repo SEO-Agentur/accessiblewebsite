@@ -1,0 +1,1 @@
+ALTER TYPE "public"."seal_tier" ADD VALUE 'bronze' BEFORE 'silver';

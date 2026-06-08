@@ -78,12 +78,14 @@ const score = scan.score ?? 0;
 const scoreColour =
   score >= 95 ? 'text-accent-600 dark:text-accent-50'
   : score >= 80 ? 'text-emerald-600 dark:text-emerald-300'
+  : score >= 70 ? 'text-amber-600 dark:text-amber-300'
   : score >= 50 ? 'text-amber-600 dark:text-amber-300'
   : 'text-red-600 dark:text-red-400';
 
-const sealTier =
+const sealTier: 'gold' | 'silver' | 'bronze' | null =
   score >= 95 ? 'gold'
   : score >= 80 ? 'silver'
+  : score >= 70 ? 'bronze'
   : null;
 
 const severityLabel = (s: string): string => {
@@ -278,11 +280,16 @@ const pageDescription = isComplete
                     🥈 {isDE ? 'Silber-Siegel-würdig (≥ 80)' : 'Silver Seal-eligible (≥ 80)'}
                   </>
                 )}
+                {sealTier === 'bronze' && (
+                  <>
+                    🥉 {isDE ? 'Bronze-Siegel-würdig (≥ 70)' : 'Bronze Seal-eligible (≥ 70)'}
+                  </>
+                )}
                 {sealTier === null && (
                   <>
                     {isDE
-                      ? 'Unter dem Silber-Schwellwert (80). Empfehlung: Umsetzung.'
-                      : 'Below the Silver threshold (80). Remediation recommended.'}
+                      ? 'Unter dem Bronze-Schwellwert (70). Empfehlung: Umsetzung.'
+                      : 'Below the Bronze threshold (70). Remediation recommended.'}
                   </>
                 )}
               </p>
@@ -390,7 +397,9 @@ const pageDescription = isComplete
             const altText =
               sealTier === 'gold'
                 ? (isDE ? `WCAG 2.2 AA Gold-Siegel — ${sealDomain}` : `WCAG 2.2 AA Gold Seal — ${sealDomain}`)
-                : (isDE ? `WCAG 2.2 AA Silber-Siegel — ${sealDomain}` : `WCAG 2.2 AA Silver Seal — ${sealDomain}`);
+                : sealTier === 'silver'
+                  ? (isDE ? `WCAG 2.2 AA Silber-Siegel — ${sealDomain}` : `WCAG 2.2 AA Silver Seal — ${sealDomain}`)
+                  : (isDE ? `WCAG 2.2 AA Bronze-Siegel — ${sealDomain}` : `WCAG 2.2 AA Bronze Seal — ${sealDomain}`);
             const embedHtml = `<a href="${verifyUrl}" target="_blank" rel="noopener">\n  <img src="${sealUrl}" alt="${altText}" width="200" height="64" loading="lazy" />\n</a>`;
             return (
               <section class="mt-8 rounded-xl border-2 border-accent-500 bg-accent-50 p-6 dark:border-accent-600 dark:bg-emerald-900/20">
@@ -399,7 +408,9 @@ const pageDescription = isComplete
                     <h2 class="text-xl font-bold">
                       {sealTier === 'gold'
                         ? (isDE ? '🥇 Sie haben das Gold-Siegel verdient' : '🥇 You earned the Gold Seal')
-                        : (isDE ? '🥈 Sie haben das Silber-Siegel verdient' : '🥈 You earned the Silver Seal')}
+                        : sealTier === 'silver'
+                          ? (isDE ? '🥈 Sie haben das Silber-Siegel verdient' : '🥈 You earned the Silver Seal')
+                          : (isDE ? '🥉 Sie haben das Bronze-Siegel verdient' : '🥉 You earned the Bronze Seal')}
                     </h2>
                     <p class="mt-1 text-sm text-ink-600 dark:text-ink-200">
                       {isDE
@@ -464,7 +475,7 @@ const pageDescription = isComplete
                     </a>
                   </div>
 
-                  {sealTier === 'silver' && (
+                  {(sealTier === 'silver' || sealTier === 'bronze') && (
                     <div class="rounded-lg bg-white p-4 dark:bg-ink-800">
                       <h3 class="text-sm font-bold">
                         {isDE ? 'Gold-Siegel: bleibt automatisch aktuell' : 'Gold Seal: stays current automatically'}

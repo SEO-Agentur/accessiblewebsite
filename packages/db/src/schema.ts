@@ -40,7 +40,7 @@ export const verificationStatusEnum = pgEnum('verification_status', [
   'failed',
 ]);
 
-export const sealTierEnum = pgEnum('seal_tier', ['none', 'silver', 'gold']);
+export const sealTierEnum = pgEnum('seal_tier', ['none', 'bronze', 'silver', 'gold']);
 
 export const scanTypeEnum = pgEnum('scan_type', ['homepage', 'full_site']);
 

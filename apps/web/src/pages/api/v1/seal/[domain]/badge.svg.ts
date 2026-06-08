@@ -67,7 +67,7 @@ export const GET: APIRoute = async ({ params, locals }) => {
   const latest = rows[0];
   const tier: SealTier = latest ? (tierFromScore(latest.score) ?? 'expired') : 'expired';
 
-  return new Response(renderSealSvg(tier, domain, locale), {
+  return new Response(renderSealSvg(tier, domain, locale, latest?.completedAt ?? null), {
     status: 200,
     headers: SVG_HEADERS,
   });
