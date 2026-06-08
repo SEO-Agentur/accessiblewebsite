@@ -3,7 +3,7 @@ import IORedis from 'ioredis';
 import { chromium, type Browser } from 'playwright';
 import { and, eq, inArray, lt, sql } from 'drizzle-orm';
 import { ScanJobPayload, QUEUE_NAMES, type ScanViolation } from '@accessiblewebsite/shared';
-import { getDb, scans, scanIssues } from '@accessiblewebsite/db';
+import { getDb, scans, scanIssues, monitoredSites } from '@accessiblewebsite/db';
 import { env } from './env.js';
 import { auditPage, computeScore, type RuleMeta } from './audit.js';
 import { auditStaticHtml } from './audit-static.js';
@@ -99,6 +99,10 @@ async function runScan(payload: typeof ScanJobPayload._type): Promise<void> {
   // score against an empty violation set.
   let pagesAttempted = 0;
   let pagesLoaded = 0;
+  // Every URL we actually audited. Recorded so the scan-result view can
+  // render the list as clickable links and so the sitemap.xml endpoint
+  // can advertise them to crawlers.
+  const loadedPages: string[] = [];
   // Deduped across pages: a rule that passed on every page should appear
   // once in the report, not 250 times.
   const passes = new Map<string, RuleMeta>();
@@ -149,6 +153,7 @@ async function runScan(payload: typeof ScanJobPayload._type): Promise<void> {
         mergeRules(passes, pageResult.passes);
         mergeRules(incomplete, pageResult.incomplete);
         mergeRules(inapplicable, pageResult.inapplicable);
+        loadedPages.push(url);
         pagesLoaded++;
       } catch (err) {
         const reason = err instanceof Error ? err.message : String(err);
@@ -185,6 +190,7 @@ async function runScan(payload: typeof ScanJobPayload._type): Promise<void> {
           mergeRules(passes, fcResult.passes);
           mergeRules(incomplete, fcResult.incomplete);
           mergeRules(inapplicable, fcResult.inapplicable);
+          loadedPages.push(fc.finalUrl);
           pagesLoaded++;
         } catch (err) {
           const reason = err instanceof Error ? err.message : String(err);
@@ -234,12 +240,18 @@ async function runScan(payload: typeof ScanJobPayload._type): Promise<void> {
       minor: allViolations.filter((v) => v.severity === 'minor').length,
     };
 
+    const completedAt = new Date();
+    // Seal tier mirrors apps/web/src/lib/seal.ts tierFromScore. Inlined so
+    // the scanner doesn't need to import from the web app's lib.
+    const sealTier: 'gold' | 'silver' | 'bronze' | 'none' =
+      score >= 95 ? 'gold' : score >= 80 ? 'silver' : score >= 70 ? 'bronze' : 'none';
+
     await db.transaction(async (tx) => {
       await tx
         .update(scans)
         .set({
           status: 'completed',
-          completedAt: new Date(),
+          completedAt,
           score,
           totalIssues: allViolations.length,
           criticalIssues: bySeverity.critical,
@@ -249,6 +261,7 @@ async function runScan(payload: typeof ScanJobPayload._type): Promise<void> {
           rawResults: sql`${JSON.stringify({
             pagesAttempted,
             pagesLoaded,
+            loadedPages,
             failedPages,
             firecrawlFailures,
             scanMode,
@@ -289,6 +302,26 @@ async function runScan(payload: typeof ScanJobPayload._type): Promise<void> {
           })),
         );
       }
+
+      // Snapshot the scan result back onto the monitored_sites row so the
+      // dashboard, directory query, and seal endpoint can read current
+      // status without reaching into the scans table. Updates only when the
+      // scan was triggered against a monitored site (not anonymous one-shots).
+      // Uses a SQL subselect so we don't need a second SELECT round-trip.
+      await tx
+        .update(monitoredSites)
+        .set({
+          currentScore: score,
+          lastScanAt: completedAt,
+          pagesDiscovered: pagesLoaded,
+          sealTier,
+        })
+        .where(
+          eq(
+            monitoredSites.id,
+            sql`(SELECT monitored_site_id FROM ${scans} WHERE id = ${scanId})`,
+          ),
+        );
     });
 
     console.log(

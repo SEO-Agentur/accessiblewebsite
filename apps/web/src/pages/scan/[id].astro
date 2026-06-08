@@ -1,7 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
 import RuleCard from '../../components/static/RuleCard.astro';
-import { eq, asc } from 'drizzle-orm';
+import { eq, asc, desc } from 'drizzle-orm';
 import { scans, scanIssues, type Scan, type ScanIssue } from '@accessiblewebsite/db';
 import { MANUAL_PROCEDURES } from '@accessiblewebsite/shared';
 import { db } from '../../lib/db';
@@ -123,6 +123,8 @@ type RawResults = {
   passCount?: number;
   incompleteCount?: number;
   inapplicableCount?: number;
+  loadedPages?: string[];
+  failedPages?: Array<{ url: string; reason: string }>;
   passes?: RuleSummary[];
   incomplete?: RuleSummary[];
   inapplicable?: RuleSummary[];
@@ -135,6 +137,36 @@ const inapplicableList = rawResults?.inapplicable ?? [];
 const passCount = rawResults?.passCount ?? passList.length;
 const incompleteCount = rawResults?.incompleteCount ?? incompleteList.length;
 const inapplicableCount = rawResults?.inapplicableCount ?? inapplicableList.length;
+
+// All URLs actually audited. Falls back to [scan.targetUrl] when the scan
+// predates the loadedPages tracking we added later.
+const scannedUrls: string[] =
+  rawResults?.loadedPages && rawResults.loadedPages.length > 0
+    ? rawResults.loadedPages
+    : [scan.targetUrl];
+
+// Search-engine policy: only the 10 most-recent completed scans stay
+// indexable. Anything older drops to noindex so the SERP keeps a clean,
+// current view of the directory. We rely on /sitemap.xml + the directory
+// "Recently scanned" widget to keep crawlers on the fresh ones.
+let isIndexable = false;
+if (isComplete) {
+  const top10 = await db()
+    .select({ id: scans.id })
+    .from(scans)
+    .where(eq(scans.status, 'completed'))
+    .orderBy(desc(scans.completedAt))
+    .limit(10);
+  isIndexable = top10.some((r) => r.id === scan.id);
+}
+
+const fmtScanDateTime = (d: Date | null): string => {
+  if (!d) return '';
+  return d.toLocaleString(isDE ? 'de-DE' : 'en-GB', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  });
+};
 
 // Belt + braces auto-refresh for the in-flight states:
 //   1. HTTP Refresh header — fires before any HTML is parsed, survives
@@ -161,11 +193,10 @@ const pageDescription = isComplete
 ---
 
 <Base title={pageTitle} description={pageDescription}>
-  {isRunning && (
-    <Fragment slot="head">
-      <meta http-equiv="refresh" content="3" />
-    </Fragment>
-  )}
+  <Fragment slot="head">
+    {isRunning && <meta http-equiv="refresh" content="3" />}
+    {!isIndexable && <meta name="robots" content="noindex,nofollow" />}
+  </Fragment>
 
   <section class="px-4 py-12">
     <div class="mx-auto max-w-4xl">
@@ -182,9 +213,44 @@ const pageDescription = isComplete
           {targetHost}
         </h1>
         <p class="mt-1 break-all text-sm text-ink-500 dark:text-ink-400">
-          {scan.targetUrl}
+          <a href={scan.targetUrl} target="_blank" rel="noopener nofollow" class="hover:underline">
+            {scan.targetUrl}
+          </a>
         </p>
+        {isComplete && scan.completedAt && (
+          <p class="mt-2 text-xs text-ink-500 dark:text-ink-400">
+            {isDE ? 'Gescannt am ' : 'Scanned on '}
+            <time datetime={scan.completedAt.toISOString()}>
+              {fmtScanDateTime(scan.completedAt)}
+            </time>
+          </p>
+        )}
       </header>
+
+      {isComplete && scannedUrls.length > 1 && (
+        <details class="mt-6 rounded-xl border border-ink-200 bg-white dark:border-ink-600 dark:bg-ink-800">
+          <summary class="cursor-pointer rounded-xl px-4 py-3 text-sm font-semibold hover:bg-ink-50 dark:hover:bg-ink-700">
+            {isDE
+              ? `Geprüfte Seiten (${scannedUrls.length})`
+              : `Scanned pages (${scannedUrls.length})`}
+          </summary>
+          <ol class="space-y-1 px-6 pb-4 text-sm">
+            {scannedUrls.map((u, i) => (
+              <li class="flex gap-2">
+                <span class="text-ink-500 dark:text-ink-400 tabular-nums">{i + 1}.</span>
+                <a
+                  href={u}
+                  target="_blank"
+                  rel="noopener nofollow"
+                  class="break-all text-brand-700 hover:underline dark:text-brand-200"
+                >
+                  {u}
+                </a>
+              </li>
+            ))}
+          </ol>
+        </details>
+      )}
 
       {isRunning && (
         <div class="mt-10 rounded-xl border border-ink-200 bg-white p-8 text-center dark:border-ink-600 dark:bg-ink-800" aria-live="polite" aria-busy="true">
