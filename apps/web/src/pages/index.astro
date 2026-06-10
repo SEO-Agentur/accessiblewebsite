@@ -8,6 +8,7 @@ export const prerender = false;
 
 const locale = Astro.locals.locale;
 const strings = t(locale);
+const isDE = locale === 'de';
 
 // If the form was submitted without JS, the POST handler at /api/v1/scan/initiate
 // redirects back here with ?error=... on validation failure. Surface it inline.
@@ -18,9 +19,19 @@ const errorMessage =
     : error === 'rate_limited'
       ? strings.errors.rateLimited
       : null;
+
+// SEO title + description: the DE marketing page targets keyword-rich phrasing
+// for the German accessibility search market; the EN page uses the tagline.
+const pageTitle = isDE
+  ? 'Barrierefreie Webseite WCAG 2.2 AA: Jetzt Siegel erhalten!'
+  : `${strings.meta.siteName} — ${strings.meta.tagline}`;
+
+const pageDescription = isDE
+  ? 'Barrierefreie Webseite Test gemäß WCAG 2.2 AA Konformität. Erhalten Sie das Barrierefreiheits-Siegel. Jetzt kostenfrei auf Barrierefreiheit testen lassen!'
+  : strings.meta.defaultDescription;
 ---
 
-<Base title={`${strings.meta.siteName} — ${strings.meta.tagline}`}>
+<Base title={pageTitle} description={pageDescription}>
   <section class="px-4 py-16 sm:py-24">
     <div class="mx-auto max-w-3xl text-center">
       <h1 class="text-4xl font-bold tracking-tight sm:text-5xl">
@@ -101,4 +112,213 @@ const errorMessage =
       )}
     </div>
   </section>
+
+  {isDE && (
+    <article class="px-4 pb-20">
+      {/*
+        The article-style longform follows the hero. We render the user-supplied
+        H1 as an H2 so the page keeps a single H1 (the hero scan form), and we
+        lift the inline "Lesen Sie auch" links into a clean callout instead of
+        a stray H4 that would break heading hierarchy. Tables wrap in
+        overflow-x-auto so they stay readable on phones without horizontal
+        layout shift on the parent.
+      */}
+      <div class="mx-auto max-w-3xl prose-styles">
+        <h2 class="text-3xl font-bold tracking-tight sm:text-4xl">
+          Barrierefreie Webseite &amp; Barrierefreiheit Webseiten Test
+        </h2>
+
+        <p class="mt-6 text-base leading-relaxed text-ink-700 dark:text-ink-100">
+          <strong>Eine Barriere Webseite im Internet ist Voraussetzung, damit alle Menschen digitale Angebote nutzen können</strong>. Eine barrierefreie Website reduziert Barrieren, unterstützt Menschen mit Behinderung und erfüllt rechtliche Vorgaben zur Barrierefreiheit. Dieser Einstieg erklärt, was digitale Barrierefreiheit bedeutet, warum eine barrierefreie Gestaltung wichtig ist und welche Richtlinie sowie Gesetze wie das <strong>Barrierefreiheitsstärkungsgesetz ab Juni 2025</strong> relevant werden.
+        </p>
+
+        <aside class="mt-8 rounded-xl border border-ink-200 bg-ink-50 p-5 dark:border-ink-600 dark:bg-ink-800/60">
+          <p class="text-sm font-semibold text-ink-700 dark:text-ink-100">
+            Lesen Sie auch:
+          </p>
+          <ul class="mt-3 space-y-2 text-sm">
+            <li>
+              <a href="/methodik" class="font-semibold text-brand-700 hover:underline dark:text-brand-200">
+                Barrierefreiheit Prüfmethoden
+              </a>
+            </li>
+            <li>
+              <a href="/webseite-barrierefrei-machen#how-it-works" class="font-semibold text-brand-700 hover:underline dark:text-brand-200">
+                Webseite Barrierefrei machen
+              </a>
+            </li>
+            <li>
+              <a href="/verifiziert" class="font-semibold text-brand-700 hover:underline dark:text-brand-200">
+                Barrierefreiheit Siegel erhalten
+              </a>
+            </li>
+            <li>
+              <a href="https://seooptimierung.de" target="_blank" rel="noopener" title="SEO Optimierung" class="font-semibold text-brand-700 hover:underline dark:text-brand-200">
+                Unsere Partnerseite SEOoptimierung.de
+              </a>
+            </li>
+          </ul>
+        </aside>
+
+        <h3 class="mt-12 text-2xl font-bold tracking-tight">Einführung in die Barrierefreiheit</h3>
+        <p class="mt-4 text-base leading-relaxed text-ink-700 dark:text-ink-100">
+          Barrierefreiheit im Internet bezeichnet die digitale Zugänglichkeit von Produkten und Dienstleistungen für Verbraucher, öffentliche Stellen und Unternehmen. <strong>Barrierefreie Websites sind bedienbar, verständlich und robust</strong>. Sie berücksichtigen Screenreader, Tastatur-Nutzung, Kontrast und Schriftgröße. Die barrierefreie Gestaltung folgt Vorgaben zur Barrierefreiheit wie <strong>WCAG, BITV und EN 301 549</strong> und dient blinden Menschen sowie allen Nutzerinnen und Nutzern.
+        </p>
+
+        <h4 class="mt-8 text-xl font-bold tracking-tight">Was ist Barrierefreiheit?</h4>
+        <p class="mt-3 text-base leading-relaxed text-ink-700 dark:text-ink-100">
+          Barrierefreiheit bedeutet, eine Anwendung, Website oder Dienstleistung im elektronischen Geschäftsverkehr so barrierefrei zu gestalten, dass keine Barriere die Nutzung verhindert. Dazu zählen verständliche Inhalte in Leichter Sprache, anpassbare Schriftgröße, ausreichender Kontrast, Tastaturbedienbarkeit und semantische Struktur für Screenreader. <strong>Eine barrierefreie Webseite verbessert die digitale Teilhabe und erfüllt Anforderungen an die Barrierefreiheit</strong>.
+        </p>
+
+        <h4 class="mt-8 text-xl font-bold tracking-tight">Die Bedeutung einer barrierefreien Website</h4>
+        <p class="mt-3 text-base leading-relaxed text-ink-700 dark:text-ink-100">
+          <strong>Barrierefreie Websites erhöhen Nutzerfreundlichkeit, Reichweite und Konversion</strong>. Sie helfen Menschen mit Behinderung, etwa blinden Menschen, Inhalte mit Screenreader zu erfassen, per Tastatur zu navigieren und Kontraste zu erkennen. Zudem profitieren alle Verbraucher durch klare Struktur und verständliche Sprache. <strong>Barrierefreiheit reduziert Abbrüche, stärkt Vertrauen und unterstützt WCAG/BITV-Compliance</strong>.
+        </p>
+
+        <h4 class="mt-8 text-xl font-bold tracking-tight">Gesetzliche Grundlagen zur Barrierefreiheit</h4>
+        <p class="mt-3 text-base leading-relaxed text-ink-700 dark:text-ink-100">
+          Die rechtlichen Grundlagen umfassen WCAG, BITV für öffentliche Stellen, die Norm EN 301 549 sowie das <strong>Barrierefreiheitsstärkungsgesetz (BFSG)</strong>. <strong>Ab Juni 2025 gelten verbindliche Barrierefreiheitsanforderungen für viele digitale Produkte und Dienstleistungen</strong>. Die Erklärung zur Barrierefreiheit dokumentiert den Status. Die Bundesfachstelle Barrierefreiheit und Aktion Mensch bieten Orientierung. Unternehmen müssen Anforderungen an die Barrierefreiheit umsetzen und ihre barrierefreie Webseiten laufend prüfen.
+        </p>
+
+        <h3 class="mt-12 text-2xl font-bold tracking-tight">Wichtige Richtlinien für barrierefreie Webseiten</h3>
+        <p class="mt-4 text-base leading-relaxed text-ink-700 dark:text-ink-100">
+          Wichtige Richtlinien definieren, wie eine barrierefreie Website digital bedienbar wird und Barrierefreiheit im Internet sicherstellt. Sie umfassen <strong>WCAG, BITV, EN 301 549 und das BFSG</strong>. Diese Vorgaben zur Barrierefreiheit betreffen öffentliche Stellen, Unternehmen und Verbraucher gleichermaßen. Wer eine Website barrierefrei zu gestalten plant, sollte die <strong>Erklärung zur Barrierefreiheit</strong> veröffentlichen, regelmäßige Tests mit Screenreader durchführen und Kontrast, Tastatur sowie Schriftgröße berücksichtigen.
+        </p>
+
+        <h4 class="mt-8 text-xl font-bold tracking-tight">WCAG und ihre Anforderungen</h4>
+        <p class="mt-3 text-base leading-relaxed text-ink-700 dark:text-ink-100">
+          Die Web Content Accessibility Guidelines definieren Prinzipien wie <strong>wahrnehmbar, bedienbar, verständlich und robust</strong>. Konkrete Anforderungen an die Barrierefreiheit betreffen Alternativtexte, semantische Struktur, ausreichenden Kontrast, Tastaturbedienbarkeit, Fokusreihenfolge und Fehlermeldungen. <strong>Eine barrierefreie Webseite setzt diese Kriterien testbar um</strong>, validiert über Norm EN 301 549 und orientiert sich an BITV.
+        </p>
+
+        <h4 class="mt-8 text-xl font-bold tracking-tight">Das Barrierefreiheitsstärkungsgesetz (BFSG)</h4>
+        <p class="mt-3 text-base leading-relaxed text-ink-700 dark:text-ink-100">
+          Das BFSG regelt Barrierefreiheitsanforderungen für Produkte und Dienstleistungen, insbesondere Dienstleistung im elektronischen Geschäftsverkehr. <strong>Ab Juni 2025 müssen viele digitale Angebote barrierefrei gestaltet werden</strong>. Unternehmen erstellen eine Erklärung zur Barrierefreiheit, prüfen Prozesse und reagieren auf Rückmeldungen von Verbraucher. Wer eine barrierefreien Website betreibt, sollte WCAG und Norm EN 301 549 integrieren, um <strong>rechtssichere digitale Barrierefreiheit</strong> sicherzustellen.
+        </p>
+
+        <h4 class="mt-8 text-xl font-bold tracking-tight">Richtlinien des Bundesministeriums für Arbeit und Soziales</h4>
+        <p class="mt-3 text-base leading-relaxed text-ink-700 dark:text-ink-100">
+          Das BMAS verweist auf <strong>BITV, WCAG und EN 301 549 als verbindliche Grundlage</strong> für barrierefreie Websites öffentlicher Stellen und digitale Produkte. Es empfiehlt, Barrierefreiheit von Websites systematisch zu planen, Barrieren früh zu vermeiden und regelmäßige Nutzertests mit blinden Menschen einzubinden. Vorgaben zur Barrierefreiheit umfassen Kontrast, Schriftgröße, klare Navigation und Tastaturbedienung. Ergänzend fördern Leitfäden zur Erklärung zur Barrierefreiheit transparente Kommunikation und Verbesserungsprozesse gemäß BFSG ab Juni 2025.
+        </p>
+
+        <h3 class="mt-12 text-2xl font-bold tracking-tight">Barrierefreiheit umsetzen</h3>
+        <p class="mt-4 text-base leading-relaxed text-ink-700 dark:text-ink-100">
+          Barrierefreiheit umsetzen bedeutet, eine barrierefreie Webseite methodisch zu planen, zu entwickeln und zu prüfen. Starten Sie mit einer Bestandsaufnahme und definieren Sie Anforderungen an die Barrierefreiheit entlang WCAG und BITV. Barrierefrei gestalten umfasst Kontrast, Schriftgröße, Tastatur, semantische HTML-Struktur und Screenreader-Kompatibilität. <strong>Dokumentieren Sie Ergebnisse in der Erklärung zur Barrierefreiheit und integrieren Sie Tests mit Menschen mit Behinderung</strong>, damit die Website barrierefrei und digital robust bleibt.
+        </p>
+
+        <h4 class="mt-8 text-xl font-bold tracking-tight">Barrierefrei gestalten: Tipps und Best Practices</h4>
+        <p class="mt-3 text-base leading-relaxed text-ink-700 dark:text-ink-100">
+          Setzen Sie klare Hierarchien, ausreichenden Kontrast und skalierbare Schriftgröße ein. Stellen Sie sicher, dass die Anwendung vollständig per <strong>Tastatur bedienbar</strong> ist und <strong>Fokus sichtbar</strong> bleibt. Nutzen Sie sprechende Links, konsistente Navigation und Fehlermeldungen in leichter Sprache. Prüfen Sie WCAG-Kriterien, Norm EN 301 549 und BITV-Tests regelmäßig. Eine barrierefreie Website profitiert von Nutzerfeedback, insbesondere von blinde Menschen, und veröffentlicht transparente Erklärung zur Barrierefreiheit für Verbraucher und öffentliche Stellen.
+        </p>
+
+        <h4 class="mt-8 text-xl font-bold tracking-tight">Integration von Screenreadern in die Webseite</h4>
+        <p class="mt-3 text-base leading-relaxed text-ink-700 dark:text-ink-100">
+          Damit barrierefreie Websites mit Screenreader funktionieren, braucht es <strong>semantische Struktur, korrekte Überschriften, Alternativtexte und sinnvolle ARIA-Rollen</strong>. Prüfen Sie die Lesereihenfolge, Tastaturfokus und dynamische Inhalte. Testen Sie mit gängigen Screenreadern und beheben Sie Barriere, die Navigation oder Formulare betreffen. So bleibt die Website barrierefrei bedienbar, erfüllt WCAG und Norm EN 301 549, und stärkt digitale Barrierefreiheit für Menschen mit Behinderung im elektronischen Geschäftsverkehr ab Juni 2025.
+        </p>
+
+        <h4 class="mt-8 text-xl font-bold tracking-tight">Verwendung von leichter Sprache</h4>
+        <p class="mt-3 text-base leading-relaxed text-ink-700 dark:text-ink-100">
+          <strong>Leichte Sprache erleichtert Verständnis</strong> für Verbraucher, blinde und andere Menschen mit Behinderung. Schreiben Sie kurze Sätze, vermeiden Sie Fachjargon, erklären Sie komplexe Begriffe und strukturieren Sie Inhalte klar. Eine barrierefreie Gestaltung kombiniert leichte Sprache mit ausreichend Kontrast, großer Schriftgröße und logisch bedienbarer Tastatur-Navigation. Verweisen Sie in der Erklärung zur Barrierefreiheit auf Textversionen in leichter Sprache, um Richtlinie, WCAG und BFSG zu erfüllen und die barrierefreien Website inklusiv digital bereitzustellen.
+        </p>
+
+        <h3 class="mt-12 text-2xl font-bold tracking-tight">Überprüfung und Erstellung einer barrierefreien Website</h3>
+        <p class="mt-4 text-base leading-relaxed text-ink-700 dark:text-ink-100">
+          Die Überprüfung einer barrierefreien Website beginnt mit einer Bestandsaufnahme entlang WCAG und BITV, ergänzt durch Norm EN 301 549. Ziel ist <strong>digitale Barrierefreiheit, die bedienbar, verständlich und robust bleibt</strong>. Prüfen Sie Kontrast, Schriftgröße, Tastatur-Navigation, semantische Struktur und Screenreader-Kompatibilität. <strong>Dokumentieren Sie Ergebnisse in der Erklärung zur Barrierefreiheit</strong>. So wird die Website barrierefrei gestaltet, erfüllt Vorgaben zur Barrierefreiheit des BFSG ab Juni 2025 und reduziert Barriere für Menschen mit Behinderung.
+        </p>
+
+        <h4 class="mt-8 text-xl font-bold tracking-tight">Tools zur Überprüfung der Barrierefreiheit</h4>
+        <p class="mt-3 text-base leading-relaxed text-ink-700 dark:text-ink-100">
+          Für die Barrierefreiheit von Websites eignen sich automatisierte Prüfungen und manuelle Tests. Nutzen Sie unser Tool zum
+          <a href="/" class="text-brand-700 hover:underline dark:text-brand-200">Barrierefreiheit Test</a>, um Richtlinie-konforme Ergebnisse gemäß den Web Content Accessibility Guidelines zu erzielen. Dokumentieren Sie Abweichungen in der Erklärung zur Barrierefreiheit.
+        </p>
+
+        <h4 class="mt-8 text-xl font-bold tracking-tight">Erstellen lassen einer barrierefreien Webseite</h4>
+        <p class="mt-3 text-base leading-relaxed text-ink-700 dark:text-ink-100">
+          Wer eine barrierefreie Webseite professionell erstellen lässt, sollte Anforderungen an die Barrierefreiheit vertraglich festhalten: <strong>WCAG-Konformität, BITV-Tests, EN 301 549 und BFSG</strong>. Beziehen Sie Nutzer, darunter blinde Menschen, früh ein und planen Sie Tests mit Screenreader und Tastatur. Die Erklärung zur Barrierefreiheit und ein Verbesserungsprozess sichern nachhaltige digitale Barrierefreiheit.
+        </p>
+
+        <h4 class="mt-8 text-xl font-bold tracking-tight">Bestimmte Produkte zur Unterstützung der Barrierefreiheit</h4>
+        <p class="mt-3 text-base leading-relaxed text-ink-700 dark:text-ink-100">
+          Zur Unterstützung der Barrierefreiheit im Internet helfen <strong>Screenreader, Vorlesesoftware, Braillezeilen, Spracherkennung</strong> und Tools zur Kontrast- sowie Schriftgrößenanpassung. Für Entwicklerinnen und Entwickler bieten Linters, Accessibility-Checker, Farbsimulatoren und Fokus-Visualisierer praxisnahe Hilfe, um eine Anwendung barrierefrei zu gestalten. Ergänzend unterstützen Leitfäden der Bundesfachstelle Barrierefreiheit und Aktion Mensch.
+        </p>
+
+        <div class="mt-6 overflow-x-auto">
+          <table class="w-full border-collapse text-sm">
+            <caption class="sr-only">Hilfsmittel und Werkzeuge für die Barrierefreiheit</caption>
+            <thead class="bg-ink-100 dark:bg-ink-700">
+              <tr>
+                <th scope="col" class="border border-ink-200 px-3 py-2 text-left font-semibold dark:border-ink-600">Kategorie</th>
+                <th scope="col" class="border border-ink-200 px-3 py-2 text-left font-semibold dark:border-ink-600">Beispiele</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row" class="border border-ink-200 px-3 py-2 text-left font-medium align-top dark:border-ink-600">Nutzerseitige Hilfsmittel</th>
+                <td class="border border-ink-200 px-3 py-2 align-top dark:border-ink-600">Screenreader, Vorlesesoftware, Braillezeilen, Spracherkennung; Kontrast- und Schriftgrößenanpassung</td>
+              </tr>
+              <tr class="bg-ink-50 dark:bg-ink-800/40">
+                <th scope="row" class="border border-ink-200 px-3 py-2 text-left font-medium align-top dark:border-ink-600">Entwicklungswerkzeuge</th>
+                <td class="border border-ink-200 px-3 py-2 align-top dark:border-ink-600">Linters, Accessibility-Checker, Farbsimulatoren, Fokus-Visualisierer</td>
+              </tr>
+              <tr>
+                <th scope="row" class="border border-ink-200 px-3 py-2 text-left font-medium align-top dark:border-ink-600">Leitfäden</th>
+                <td class="border border-ink-200 px-3 py-2 align-top dark:border-ink-600">Bundesfachstelle Barrierefreiheit, Aktion Mensch</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class="mt-12 text-2xl font-bold tracking-tight">Zukunft der Barrierefreiheit im digitalen Raum</h3>
+        <p class="mt-4 text-base leading-relaxed text-ink-700 dark:text-ink-100">
+          Die Zukunft der Barrierefreiheit im Internet verbindet klare Richtlinie wie WCAG, BITV und Norm EN 301 549 mit innovativen Technologien. Das <strong>BFSG schärfte seit Juni 2025 Anforderungen</strong>, besonders für Dienstleistung im elektronischen Geschäftsverkehr. Unternehmen entwickeln barrierefreie Websites von Beginn an, messen Kontrast, optimieren Tastatur-Bedienbarkeit und integrieren Leichte Sprache. So wird digitale Barrierefreiheit skalierbar, die Website barrierefrei und die Erklärung zur Barrierefreiheit zum lebendigen Steuerungsinstrument.
+        </p>
+
+        <h4 class="mt-8 text-xl font-bold tracking-tight">Trends in der barrierefreien Webentwicklung</h4>
+        <p class="mt-3 text-base leading-relaxed text-ink-700 dark:text-ink-100">
+          Aktuelle Trends fokussieren Designsysteme mit <strong>barrierefreien Komponenten</strong>, automatisierte Prüfstrecken im CI/CD, semantische Muster und robuste ARIA-Nutzung. Variable Fonts verbessern Schriftgröße und Lesbarkeit, während Farb-Token konsistenten Kontrast sichern. Progressive Enhancement ermöglicht eine bedienbar bleibende Anwendung ohne Abhängigkeit von Scripts. Nutzerzentrierte Tests mit blinden Menschen werden Standard.
+        </p>
+
+        <div class="mt-6 overflow-x-auto">
+          <table class="w-full border-collapse text-sm">
+            <caption class="sr-only">Trends in der barrierefreien Webentwicklung</caption>
+            <thead class="bg-ink-100 dark:bg-ink-700">
+              <tr>
+                <th scope="col" class="border border-ink-200 px-3 py-2 text-left font-semibold dark:border-ink-600">Thema</th>
+                <th scope="col" class="border border-ink-200 px-3 py-2 text-left font-semibold dark:border-ink-600">Kernaspekt</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row" class="border border-ink-200 px-3 py-2 text-left font-medium align-top dark:border-ink-600">Typografie</th>
+                <td class="border border-ink-200 px-3 py-2 align-top dark:border-ink-600">Variable Fonts verbessern Schriftgröße und Lesbarkeit</td>
+              </tr>
+              <tr class="bg-ink-50 dark:bg-ink-800/40">
+                <th scope="row" class="border border-ink-200 px-3 py-2 text-left font-medium align-top dark:border-ink-600">Farben</th>
+                <td class="border border-ink-200 px-3 py-2 align-top dark:border-ink-600">Farb-Token sichern konsistenten Kontrast</td>
+              </tr>
+              <tr>
+                <th scope="row" class="border border-ink-200 px-3 py-2 text-left font-medium align-top dark:border-ink-600">Robustheit</th>
+                <td class="border border-ink-200 px-3 py-2 align-top dark:border-ink-600">Progressive Enhancement hält die Anwendung ohne Scripts bedienbar</td>
+              </tr>
+              <tr class="bg-ink-50 dark:bg-ink-800/40">
+                <th scope="row" class="border border-ink-200 px-3 py-2 text-left font-medium align-top dark:border-ink-600">Tests</th>
+                <td class="border border-ink-200 px-3 py-2 align-top dark:border-ink-600">Nutzerzentrierte Tests mit blinden Menschen werden Standard</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h4 class="mt-8 text-xl font-bold tracking-tight">Die Rolle von Technologie in der Barrierefreiheit</h4>
+        <p class="mt-3 text-base leading-relaxed text-ink-700 dark:text-ink-100">
+          Technologie treibt digitale Barrierefreiheit: <strong>KI-gestützte Alternativtexte, Transkripte, Untertitel und adaptives UI</strong> erhöhen Zugänglichkeit. APIs verbessern Screenreader-Kommunikation, während Browser- und Betriebssystemfunktionen Kontrast, Tastatur und Skalierung stabilisieren. Komponentenbibliotheken implementieren Web Content Accessibility Guidelines out of the box.
+        </p>
+
+        <h4 class="mt-8 text-xl font-bold tracking-tight">Wie Unternehmen von barrierefreien Webseiten profitieren können</h4>
+        <p class="mt-3 text-base leading-relaxed text-ink-700 dark:text-ink-100">
+          <strong>Größere Reichweite, bessere Nutzbarkeit, geringere Abbrüche und reduzierte rechtliche Risiken</strong> entstehen, wenn Unternehmen eine Website barrierefrei betreiben. Barrierefreiheit stärkt Markenvertrauen und verbessert
+          <a href="https://seooptimierung.de" target="_blank" rel="noopener" class="text-brand-700 hover:underline dark:text-brand-200">SEO</a>
+          sowie Performance. Mit <strong>Erklärung zur Barrierefreiheit</strong> wird Fortschritt messbar. Investitionen in barrierefrei gestalten zahlen sich durch mehr Konversion aus, weil Kontrast, Schriftgröße, Tastatur-Bedienbarkeit und Screenreader-Support die Anwendung für alle verbessern.
+        </p>
+      </div>
+    </article>
+  )}
 </Base>
