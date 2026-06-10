@@ -80,11 +80,18 @@ const responsibleParty = cfg.COMPANY_MANAGING_DIRECTOR ?? cfg.COMPANY_NAME ?? ''
           <h2 class="font-semibold text-ink-900 dark:text-ink-50">
             {isDE ? 'Kontakt' : 'Contact'}
           </h2>
+          {/*
+            Cloudflare's "Email Address Obfuscation" rewrites mailto: links
+            to a [email protected] placeholder decoded by JS. § 5 TMG
+            ("schnelle elektronische Kontaktaufnahme") requires the address
+            to be plainly readable — including without JS for screen-reader
+            users. Wrap the email in <!--email_off-->...<!--/email_off-->
+            to opt this specific element out of obfuscation site-wide
+            while keeping CF's scrape-shield active everywhere else.
+          */}
           <p class="mt-1">
             {isDE ? 'E-Mail: ' : 'Email: '}
-            <a class="underline" href={`mailto:${cfg.COMPANY_CONTACT_EMAIL}`}>
-              {cfg.COMPANY_CONTACT_EMAIL}
-            </a>
+            <Fragment set:html={`<!--email_off--><a class="underline" href="mailto:${cfg.COMPANY_CONTACT_EMAIL}">${cfg.COMPANY_CONTACT_EMAIL}</a><!--/email_off-->`} />
           </p>
         </div>
 
