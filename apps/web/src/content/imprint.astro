@@ -10,13 +10,16 @@ const { locale } = Astro.props;
 const isDE = locale === 'de';
 
 const cfg = env();
+// § 5 TMG only requires Name, Address, fast direct contact (email or phone).
+// "Geschäftsführer" (managing director) and registry entries only apply to
+// GmbHs/UGs/AGs — for a natural-person operator they are not required.
 const hasOperatorData = Boolean(
   cfg.COMPANY_NAME &&
     cfg.COMPANY_ADDRESS_LINE_1 &&
     cfg.COMPANY_POSTAL_CITY &&
-    cfg.COMPANY_MANAGING_DIRECTOR &&
     cfg.COMPANY_CONTACT_EMAIL,
 );
+const responsibleParty = cfg.COMPANY_MANAGING_DIRECTOR ?? cfg.COMPANY_NAME ?? '';
 ---
 
 <section class="px-4 py-16">
@@ -62,14 +65,16 @@ const hasOperatorData = Boolean(
           </p>
         </div>
 
-        <div>
-          <h2 class="font-semibold text-ink-900 dark:text-ink-50">
-            {isDE ? 'Vertreten durch' : 'Represented by'}
-          </h2>
-          <p class="mt-1">
-            {cfg.COMPANY_MANAGING_DIRECTOR}, {isDE ? 'Geschäftsführer' : 'Managing Director'}
-          </p>
-        </div>
+        {cfg.COMPANY_MANAGING_DIRECTOR && (
+          <div>
+            <h2 class="font-semibold text-ink-900 dark:text-ink-50">
+              {isDE ? 'Vertreten durch' : 'Represented by'}
+            </h2>
+            <p class="mt-1">
+              {cfg.COMPANY_MANAGING_DIRECTOR}, {isDE ? 'Geschäftsführer' : 'Managing Director'}
+            </p>
+          </div>
+        )}
 
         <div>
           <h2 class="font-semibold text-ink-900 dark:text-ink-50">
@@ -119,7 +124,18 @@ const hasOperatorData = Boolean(
               ? 'Verantwortlich für den Inhalt (§ 18 Abs. 2 MStV)'
               : 'Responsible for content per § 18(2) MStV'}
           </h2>
-          <p class="mt-1">{cfg.COMPANY_MANAGING_DIRECTOR}, {isDE ? 'Anschrift wie oben' : 'address as above'}</p>
+          <p class="mt-1">{responsibleParty}, {isDE ? 'Anschrift wie oben' : 'address as above'}</p>
+        </div>
+
+        <div>
+          <h2 class="font-semibold text-ink-900 dark:text-ink-50">
+            {isDE ? 'Haftungsausschluss' : 'Disclaimer'}
+          </h2>
+          <p class="mt-1">
+            {isDE
+              ? 'Für die Inhalte externer Links übernimmt der Betreiber keine Haftung; für den Inhalt verlinkter Seiten sind ausschließlich deren Betreiber verantwortlich.'
+              : 'The operator assumes no liability for external link content; only the operators of those linked pages are responsible for their content.'}
+          </p>
         </div>
 
         <div>
