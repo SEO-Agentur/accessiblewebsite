@@ -36,6 +36,24 @@ function host(url: string): string {
   }
 }
 
+// axe-core tags look like "wcag222", "wcag2aa", "cat.keyboard",
+// "best-practice", "EN-301-549". The scanner stored the first match it
+// could parse: a proper SC number for WCAG-tagged rules, or the bare
+// category tag for best-practice rules. Render that fallback as something
+// the customer can act on rather than the literal "cat.keyboard".
+function wcagLabel(stored: string, locale: 'en' | 'de'): string {
+  const isDE = locale === 'de';
+  if (/^\d+\.\d+\.\d+$/.test(stored)) return `WCAG ${stored}`;
+  if (stored.startsWith('cat.')) {
+    const cat = stored.slice(4).replace(/-/g, ' ');
+    return isDE ? `Best Practice (${cat})` : `Best practice (${cat})`;
+  }
+  if (stored === 'best-practice') {
+    return isDE ? 'Best Practice' : 'Best practice';
+  }
+  return stored;
+}
+
 function renderReport(
   scan: Scan,
   issues: ScanIssue[],
@@ -155,7 +173,8 @@ function renderReport(
       out.push(`--- ${sevLabel} (${group.length}) ---`);
       out.push('');
       for (const iss of group) {
-        out.push(`  [${issueIndex++}] WCAG ${iss.wcagCriterion} — ${iss.description}`);
+        out.push(`  [${issueIndex++}] ${wcagLabel(iss.wcagCriterion, locale)} — ${iss.description}`);
+        out.push(`      ${isDE ? 'Seite' : 'Page'}:   ${iss.pageUrl}`);
         if (iss.elementSelector) {
           out.push(`      ${isDE ? 'Element' : 'Element'}: ${iss.elementSelector}`);
         }
